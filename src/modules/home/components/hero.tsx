@@ -8,6 +8,7 @@ import React, {
   TouchEvent,
 } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { CldImage } from "next-cloudinary";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -88,17 +89,30 @@ export default function HeroBanner({ slides }: HeroBannerProps) {
           const isActive = index === currentIndex;
 
           const hasText = slide.title || slide.subtitle;
+          const isLocalOrExternal =
+            slide.image.startsWith("/") || slide.image.startsWith("http");
 
           const SlideContent = (
             <>
-              <CldImage
-                src={slide.image}
-                alt={slide.title || "Banner Image"}
-                fill
-                priority={index === 0}
-                className="object-cover object-center"
-                sizes="(max-width: 768px) 100vw, 1440px"
-              />
+              {isLocalOrExternal ? (
+                <Image
+                  src={slide.image}
+                  alt={slide.title || "Banner Image"}
+                  fill
+                  priority={index === 0}
+                  className="object-cover object-center"
+                  sizes="(max-width: 768px) 100vw, 1440px"
+                />
+              ) : (
+                <CldImage
+                  src={slide.image}
+                  alt={slide.title || "Banner Image"}
+                  fill
+                  priority={index === 0}
+                  className="object-cover object-center"
+                  sizes="(max-width: 768px) 100vw, 1440px"
+                />
+              )}
 
               {/* Overlay and text */}
               {hasText && (

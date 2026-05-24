@@ -101,6 +101,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
         toast.success(res.message);
         setSelectedIds([]);
         setIsDeleteModalOpen(false);
+        router.refresh();
       } else {
         toast.error(res.message);
       }

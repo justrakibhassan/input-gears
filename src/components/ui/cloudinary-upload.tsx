@@ -33,9 +33,13 @@ export default function CloudinaryUpload({
     }
   };
 
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME?.replace(/['"]/g, "");
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET?.replace(/['"]/g, "");
+  const isCloudinaryConfigured = !!cloudName && !!uploadPreset;
+
   if (!isMounted) return null;
 
-  const isFullUrl = value.startsWith("http");
+  const isLocalOrExternal = value.startsWith("/") || value.startsWith("http");
 
   return (
     <div className="w-full">
@@ -58,7 +62,7 @@ export default function CloudinaryUpload({
               </button>
             </div>
             
-            {isFullUrl ? (
+            {isLocalOrExternal ? (
               <Image
                 fill
                 src={value}
@@ -83,54 +87,62 @@ export default function CloudinaryUpload({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
+            className="w-full"
           >
-            <CldUploadWidget
-              onSuccess={onSuccess}
-              uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-              options={{
-                maxFiles: 1,
-                resourceType: "image",
-                clientAllowedFormats: ["png", "jpeg", "jpg", "webp", "svg"],
-                styles: {
-                  palette: {
-                    window: "#FFFFFF",
-                    windowBorder: "#F3F4F6",
-                    tabIcon: "#4F46E5",
-                    menuIcons: "#1F2937",
-                    textDark: "#111827",
-                    textLight: "#FFFFFF",
-                    link: "#4F46E5",
-                    action: "#4F46E5",
-                    inactiveTabIcon: "#9CA3AF",
-                    error: "#EF4444",
-                    inProgress: "#4F46E5",
-                    complete: "#10B981",
-                    sourceBg: "#F9FAFB",
+            {isCloudinaryConfigured ? (
+              <CldUploadWidget
+                onSuccess={onSuccess}
+                uploadPreset={uploadPreset}
+                options={{
+                  maxFiles: 1,
+                  resourceType: "image",
+                  clientAllowedFormats: ["png", "jpeg", "jpg", "webp", "svg"],
+                  styles: {
+                    palette: {
+                      window: "#FFFFFF",
+                      windowBorder: "#F3F4F6",
+                      tabIcon: "#4F46E5",
+                      menuIcons: "#1F2937",
+                      textDark: "#111827",
+                      textLight: "#FFFFFF",
+                      link: "#4F46E5",
+                      action: "#4F46E5",
+                      inactiveTabIcon: "#9CA3AF",
+                      error: "#EF4444",
+                      inProgress: "#4F46E5",
+                      complete: "#10B981",
+                      sourceBg: "#F9FAFB",
+                    },
                   },
-                },
-              }}
-            >
-              {({ open }) => (
-                <button
-                  type="button"
-                  disabled={disabled}
-                  onClick={() => open()}
-                  className={cn(
-                    "w-full aspect-video md:aspect-21/9 flex flex-col items-center justify-center gap-4 rounded-[32px] border-2 border-dashed border-gray-100 bg-gray-50/50 hover:bg-gray-50 hover:border-indigo-300 hover:text-indigo-600 transition-all group relative overflow-hidden",
-                    disabled && "opacity-50 cursor-not-allowed"
-                  )}
-                >
-                  <div className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="p-5 bg-white rounded-3xl shadow-sm text-gray-400 group-hover:text-indigo-600 group-hover:shadow-indigo-100 transition-all">
-                    <UploadCloud size={32} />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-[11px] font-black uppercase tracking-widest text-gray-900">Deploy Visual Asset</p>
-                    <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase">Recommended: 21:9 ratio</p>
-                  </div>
-                </button>
-              )}
-            </CldUploadWidget>
+                }}
+              >
+                {({ open }) => (
+                  <button
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => open()}
+                    className={cn(
+                      "w-full aspect-video md:aspect-21/9 flex flex-col items-center justify-center gap-4 rounded-[32px] border-2 border-dashed border-gray-100 bg-gray-50/50 hover:bg-gray-50 hover:border-indigo-300 hover:text-indigo-600 transition-all group relative overflow-hidden",
+                      disabled && "opacity-50 cursor-not-allowed"
+                    )}
+                  >
+                    <div className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="p-5 bg-white rounded-3xl shadow-sm text-gray-400 group-hover:text-indigo-600 group-hover:shadow-indigo-100 transition-all">
+                      <UploadCloud size={32} />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[11px] font-black uppercase tracking-widest text-gray-900">Deploy Visual Asset</p>
+                      <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase">Recommended: 21:9 ratio</p>
+                    </div>
+                  </button>
+                )}
+              </CldUploadWidget>
+            ) : (
+              <div className="w-full aspect-video md:aspect-21/9 flex flex-col items-center justify-center gap-4 rounded-[32px] border-2 border-dashed border-red-200 bg-red-50/20 text-red-600 p-6">
+                <p className="text-xs font-black uppercase tracking-widest text-center">Cloudinary is not configured</p>
+                <p className="text-[10px] font-medium text-gray-500 text-center">Please configure NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME and NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET in your .env and restart the server.</p>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

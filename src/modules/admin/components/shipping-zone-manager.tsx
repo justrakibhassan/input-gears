@@ -11,7 +11,7 @@ interface ShippingZoneManagerProps {
 }
 
 export default function ShippingZoneManager({ initialZones }: ShippingZoneManagerProps) {
-  const [zones, setZones] = useState<ShippingZone[]>(initialZones);
+  const zones = initialZones;
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: "", charge: 0 });

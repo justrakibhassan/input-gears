@@ -116,6 +116,7 @@ export default function ProductsTable({
         toast.success(res.message);
         setSelectedIds([]);
         setIsDeleteModalOpen(false);
+        router.refresh();
       } else {
         toast.error(res.message);
       }

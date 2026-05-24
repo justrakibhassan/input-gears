@@ -25,16 +25,18 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 });
 
 export async function POST(req: Request) {
-  let session: any = null;
+  let userId: string | undefined;
   try {
     // ✅ SECURITY FIX: Verify user authentication
-    session = await auth.api.getSession({
+    const session = await auth.api.getSession({
       headers: await headers(),
     });
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    userId = session.user.id;
 
     if (!process.env.STRIPE_SECRET_KEY) {
       return NextResponse.json(
@@ -109,7 +111,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
     logger.error("Failed to create payment intent", error, {
-      userId: session?.user?.id,
+      userId,
     });
     return NextResponse.json(
       { error: "Internal Server Error" },

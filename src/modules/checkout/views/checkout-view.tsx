@@ -188,7 +188,7 @@ function CheckoutContent({
       } else {
         toast.error(res.message || "Invalid coupon");
       }
-    } catch (_error) {
+    } catch {
       toast.error("Failed to validate coupon");
     } finally {
       setIsValidating(false);

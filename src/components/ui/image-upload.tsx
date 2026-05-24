@@ -30,6 +30,10 @@ export default function ImageUpload({
     () => true,
     () => false
   );
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME?.replace(/['"]/g, "");
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET?.replace(/['"]/g, "");
+  const isCloudinaryConfigured = !!cloudName && !!uploadPreset;
+
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
 
   // Type Safe Upload Handler
@@ -85,39 +89,46 @@ export default function ImageUpload({
       {/* Upload Controls Group */}
       <div className="flex flex-col sm:flex-row gap-4">
         {/* Cloudinary Widget */}
-        <CldUploadWidget
-          onSuccess={onUpload}
-          uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-          options={{
-            maxFiles: 1,
-            sources: ["local", "url", "camera"],
-            clientAllowedFormats: ["image"],
-          }}
-        >
-          {({ open }) => {
-            const onClick = () => {
-              if (disabled) return;
-              if (open) open();
-            };
+        {isCloudinaryConfigured ? (
+          <CldUploadWidget
+            onSuccess={onUpload}
+            uploadPreset={uploadPreset}
+            options={{
+              maxFiles: 1,
+              sources: ["local", "url", "camera"],
+              clientAllowedFormats: ["image"],
+            }}
+          >
+            {({ open }) => {
+              const onClick = () => {
+                if (disabled) return;
+                if (open) open();
+              };
 
-            return (
-              <div
-                onClick={onClick}
-                className={`flex-1 border-2 border-dashed border-gray-200 rounded-3xl p-8 transition flex flex-col items-center justify-center gap-4 cursor-pointer group bg-white ${
-                  disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50/50 hover:border-indigo-200"
-                }`}
-              >
-                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl group-hover:scale-110 transition-transform">
-                  <CloudLightning size={24} />
+              return (
+                <div
+                  onClick={onClick}
+                  className={`flex-1 border-2 border-dashed border-gray-200 rounded-3xl p-8 transition flex flex-col items-center justify-center gap-4 cursor-pointer group bg-white ${
+                    disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50/50 hover:border-indigo-200"
+                  }`}
+                >
+                  <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl group-hover:scale-110 transition-transform">
+                    <CloudLightning size={24} />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-bold text-gray-700 text-sm">Upload New</p>
+                    <p className="text-[10px] text-gray-400 mt-1">Images, Graphics, etc.</p>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <p className="font-bold text-gray-700 text-sm">Upload New</p>
-                  <p className="text-[10px] text-gray-400 mt-1">Images, Graphics, etc.</p>
-                </div>
-              </div>
-            );
-          }}
-        </CldUploadWidget>
+              );
+            }}
+          </CldUploadWidget>
+        ) : (
+          <div className="flex-1 border-2 border-dashed border-red-100 bg-red-50/10 rounded-3xl p-8 flex flex-col items-center justify-center gap-2 text-red-600">
+            <p className="font-black text-xs uppercase tracking-widest text-center">Cloudinary Unconfigured</p>
+            <p className="text-[9px] text-gray-500 text-center font-medium">Please restart `npm run dev` to load environment variables.</p>
+          </div>
+        )}
 
         {/* Media Library Trigger */}
         <div

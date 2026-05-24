@@ -19,6 +19,11 @@ export async function PATCH(
     const { productId } = await params;
     const { quantity } = await req.json();
 
+    const parsedQuantity = parseInt(quantity, 10);
+    if (isNaN(parsedQuantity)) {
+      return NextResponse.json({ error: "Invalid quantity" }, { status: 400 });
+    }
+
     const result = await prisma.$transaction(async (tx) => {
       // 1. Get current cart item
       const existingCartItem = await tx.cartItem.findUnique({
@@ -32,10 +37,10 @@ export async function PATCH(
 
       if (!existingCartItem) throw new Error("Item not in cart");
 
-      const delta = quantity - existingCartItem.quantity;
+      const delta = parsedQuantity - existingCartItem.quantity;
 
       // 2. If quantity is 0 or less, delete
-      if (quantity < 1) {
+      if (parsedQuantity < 1) {
         await tx.cartItem.delete({
           where: { id: existingCartItem.id },
         });
@@ -59,7 +64,7 @@ export async function PATCH(
 
         await tx.cartItem.update({
           where: { id: existingCartItem.id },
-          data: { quantity },
+          data: { quantity: parsedQuantity },
         });
 
         await tx.product.update({
@@ -72,11 +77,11 @@ export async function PATCH(
           create: {
             productId,
             userId: session.user.id,
-            quantity,
+            quantity: parsedQuantity,
             expiresAt: new Date(Date.now() + 15 * 60 * 1000),
           },
           update: {
-            quantity,
+            quantity: parsedQuantity,
             expiresAt: new Date(Date.now() + 15 * 60 * 1000),
           },
         });

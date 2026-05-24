@@ -54,6 +54,10 @@ function GeneralInfoForm({ user }: ProfileFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME?.replace(/['"]/g, "");
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET?.replace(/['"]/g, "");
+  const isCloudinaryConfigured = !!cloudName && !!uploadPreset;
+
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -98,76 +102,98 @@ function GeneralInfoForm({ user }: ProfileFormProps) {
         >
           {/* --- Avatar Section --- */}
           <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-gray-100 border-dashed">
-            <CldUploadWidget
-              uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-              onSuccess={(result: unknown) => {
-                if (
-                  result &&
-                  typeof result === "object" &&
-                  "info" in result &&
-                  typeof result.info === "object" &&
-                  result.info !== null &&
-                  "secure_url" in result.info
-                ) {
-                  const info = result.info as CloudinaryResult["info"];
-                  form.setValue("image", info.secure_url, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  });
-                  toast.success("Image uploaded!");
-                }
-              }}
-              options={{
-                maxFiles: 1,
-                resourceType: "image",
-                clientAllowedFormats: ["png", "jpeg", "jpg", "webp"],
-                sources: ["local", "camera", "url"],
-              }}
-            >
-              {({ open }) => {
-                function handleOnClick(e: React.MouseEvent) {
-                  e.preventDefault();
-                  open();
-                }
+            {isCloudinaryConfigured ? (
+              <CldUploadWidget
+                uploadPreset={uploadPreset}
+                onSuccess={(result: unknown) => {
+                  if (
+                    result &&
+                    typeof result === "object" &&
+                    "info" in result &&
+                    typeof result.info === "object" &&
+                    result.info !== null &&
+                    "secure_url" in result.info
+                  ) {
+                    const info = result.info as CloudinaryResult["info"];
+                    form.setValue("image", info.secure_url, {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    });
+                    toast.success("Image uploaded!");
+                  }
+                }}
+                options={{
+                  maxFiles: 1,
+                  resourceType: "image",
+                  clientAllowedFormats: ["png", "jpeg", "jpg", "webp"],
+                  sources: ["local", "camera", "url"],
+                }}
+              >
+                {({ open }) => {
+                  function handleOnClick(e: React.MouseEvent) {
+                    e.preventDefault();
+                    open();
+                  }
 
-                return (
-                  <div
-                    onClick={handleOnClick}
-                    className="relative group cursor-pointer shrink-0"
-                  >
-                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border-4 border-white shadow-xl overflow-hidden bg-gray-100 relative z-0 ring-1 ring-gray-100">
-                      {form.watch("image") ? (
-                        <Image
-                          src={form.watch("image") || ""}
-                          alt="Profile"
-                          fill
-                          sizes="112px"
-                          className="object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
-                          <User size={40} className="sm:size-[48px]" />
-                        </div>
-                      )}
-                    </div>
+                  return (
+                    <div
+                      onClick={handleOnClick}
+                      className="relative group cursor-pointer shrink-0"
+                    >
+                      <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border-4 border-white shadow-xl overflow-hidden bg-gray-100 relative z-0 ring-1 ring-gray-100">
+                        {form.watch("image") ? (
+                          <Image
+                            src={form.watch("image") || ""}
+                            alt="Profile"
+                            fill
+                            sizes="112px"
+                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
+                            <User size={40} className="sm:size-[48px]" />
+                          </div>
+                        )}
+                      </div>
 
-                    <div className="absolute inset-0 bg-black/60 rounded-2xl flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-                      <Camera className="text-white w-6 h-6 sm:w-8 sm:h-8 mb-1" />
-                      <span className="text-white text-[10px] font-black uppercase tracking-wider">
-                        Update
-                      </span>
+                      <div className="absolute inset-0 bg-black/60 rounded-2xl flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                        <Camera className="text-white w-6 h-6 sm:w-8 sm:h-8 mb-1" />
+                        <span className="text-white text-[10px] font-black uppercase tracking-wider">
+                          Update
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                );
-              }}
-            </CldUploadWidget>
+                  );
+                }}
+              </CldUploadWidget>
+            ) : (
+              <div className="relative group shrink-0">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border-4 border-white shadow-xl overflow-hidden bg-gray-100 relative z-0 ring-1 ring-gray-100">
+                  {form.watch("image") ? (
+                    <Image
+                      src={form.watch("image") || ""}
+                      alt="Profile"
+                      fill
+                      sizes="112px"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
+                      <User size={40} className="sm:size-[48px]" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="text-center sm:text-left space-y-2">
               <h4 className="text-base font-black text-gray-900 tracking-tight">
                 Profile Photo
               </h4>
               <p className="text-xs text-gray-500 font-medium max-w-[200px]">
-                Tap the image to change your profile picture.
+                {isCloudinaryConfigured
+                  ? "Tap the image to change your profile picture."
+                  : "Cloudinary upload is unconfigured."}
               </p>
             </div>
           </div>

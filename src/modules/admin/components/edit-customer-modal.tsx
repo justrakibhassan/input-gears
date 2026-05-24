@@ -48,7 +48,7 @@ export default function EditCustomerModal({
     defaultValues: {
       name: user.name || "",
       email: user.email || "",
-      role: user.role as any,
+      role: (user.role as "USER" | "MANAGER" | "CONTENT_EDITOR" | "SUPER_ADMIN") || "USER",
       phone: user.phone || "",
     },
   });

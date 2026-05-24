@@ -216,14 +216,20 @@ async function main() {
       {
         title: "Ultimate Mechanical Experience",
         subtitle: "Premium Keyboards for Enthusiasts",
-        image: "https://images.unsplash.com/photo-1595044426077-d36d93375ea4?w=1200&auto=format&fit=crop&q=80",
+        image: "/hero-keyboard.png",
         order: 1,
       },
       {
         title: "Wireless Precision",
         subtitle: "Ultra-Lightweight Gaming Mice",
-        image: "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=1200&auto=format&fit=crop&q=80",
+        image: "/hero-mouse.png",
         order: 2,
+      },
+      {
+        title: "Elite Workspaces",
+        subtitle: "High-Performance Productivity Setups",
+        image: "/hero-setup.png",
+        order: 3,
       },
     ],
   });

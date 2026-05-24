@@ -3,7 +3,6 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { UserRole } from "@prisma/client";
 import { logger } from "@/lib/logger";
 
 export async function createAuditLog({

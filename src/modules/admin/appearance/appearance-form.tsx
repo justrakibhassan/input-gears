@@ -129,7 +129,7 @@ export default function AppearancePage({
           image: slide.image,
           link: slide.link || "",
         }))
-      : [{ title: "", subtitle: "", image: "", link: "" }];
+      : [];
 
   const slidesForm = useForm<SlidesFormValues>({
     resolver: zodResolver(slidesFormSchema),
@@ -196,7 +196,7 @@ export default function AppearancePage({
     try {
       await updateHeroSlides(data.slides);
       toast.success("Hero slider updated!");
-    } catch (error) {
+    } catch {
       toast.error("Failed to update slides");
     } finally {
       setSavingSlides(false);
@@ -435,15 +435,13 @@ export default function AppearancePage({
                     <span className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
                       <GripVertical size={14} /> Slide {index + 1}
                     </span>
-                    {index > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => remove(index)}
-                        className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => remove(index)}
+                      className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -578,63 +576,69 @@ export default function AppearancePage({
                 <div className="p-4 md:p-6 bg-white">
                   <div className="relative w-full aspect-16/8 md:aspect-21/8 rounded-2xl md:rounded-3xl overflow-hidden shadow-sm bg-gray-50 group isolate border border-gray-100">
                     <AnimatePresence mode="wait">
-                      {watchedSlides.slides.map((slide, index) => {
-                        if (index !== currentPreviewIndex) return null;
-                        const hasText = slide.title || slide.subtitle;
-                        
-                        return (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.8 }}
-                            className="absolute inset-0 w-full h-full"
-                          >
-                            {slide.image ? (
-                              <>
-                                {slide.image.startsWith("http") ? (
-                                  <img
-                                    src={slide.image}
-                                    className="w-full h-full object-cover"
-                                    alt="Preview"
-                                  />
-                                ) : (
-                                  <img
-                                    src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/q_auto,f_auto/${slide.image}`}
-                                    className="w-full h-full object-cover"
-                                    alt="Preview"
-                                  />
-                                )}
-                                {hasText && (
-                                  <>
-                                    <div className="absolute inset-0 bg-black/20" />
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-4">
-                                      {slide.subtitle && (
-                                        <p className="text-[10px] md:text-xs font-bold tracking-widest uppercase mb-2 opacity-90">
-                                          {slide.subtitle}
-                                        </p>
-                                      )}
-                                      {slide.title && (
-                                        <h2 className="text-2xl md:text-4xl font-black italic uppercase tracking-tighter leading-none">
-                                          {slide.title}
-                                        </h2>
-                                      )}
-                                      <div className="mt-4 px-6 py-2 bg-white text-black rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform">
-                                         Explore Now
+                      {watchedSlides.slides.length > 0 ? (
+                        watchedSlides.slides.map((slide, index) => {
+                          if (index !== currentPreviewIndex) return null;
+                          const hasText = slide.title || slide.subtitle;
+                          
+                          return (
+                            <motion.div
+                              key={index}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 0.8 }}
+                              className="absolute inset-0 w-full h-full"
+                            >
+                              {slide.image ? (
+                                <>
+                                  {slide.image.startsWith("http") ? (
+                                    <img
+                                      src={slide.image}
+                                      className="w-full h-full object-cover"
+                                      alt="Preview"
+                                    />
+                                  ) : (
+                                    <img
+                                      src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/q_auto,f_auto/${slide.image}`}
+                                      className="w-full h-full object-cover"
+                                      alt="Preview"
+                                    />
+                                  )}
+                                  {hasText && (
+                                    <>
+                                      <div className="absolute inset-0 bg-black/20" />
+                                      <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-4">
+                                        {slide.subtitle && (
+                                          <p className="text-[10px] md:text-xs font-bold tracking-widest uppercase mb-2 opacity-90">
+                                            {slide.subtitle}
+                                          </p>
+                                        )}
+                                        {slide.title && (
+                                          <h2 className="text-2xl md:text-4xl font-black italic uppercase tracking-tighter leading-none">
+                                            {slide.title}
+                                          </h2>
+                                        )}
+                                        <div className="mt-4 px-6 py-2 bg-white text-black rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform">
+                                           Explore Now
+                                        </div>
                                       </div>
-                                    </div>
-                                  </>
-                                )}
-                              </>
-                            ) : (
-                              <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-50">
-                                <span className="text-[10px] font-black uppercase tracking-widest">Awaiting Visual Asset</span>
-                              </div>
-                            )}
-                          </motion.div>
-                        );
-                      })}
+                                    </>
+                                  )}
+                                </>
+                              ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-50">
+                                  <span className="text-[10px] font-black uppercase tracking-widest">Awaiting Visual Asset</span>
+                                </div>
+                              )}
+                            </motion.div>
+                          );
+                        })
+                      ) : (
+                        <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-50 animate-pulse">
+                          <span className="text-[10px] font-black uppercase tracking-widest">No Slides Configured</span>
+                        </div>
+                      )}
                     </AnimatePresence>
 
                     {/* Progress Indicators */}

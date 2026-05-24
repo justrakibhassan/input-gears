@@ -49,7 +49,7 @@ export async function updateProfile(data: ProfileFormValues) {
 
     revalidatePath("/account");
     return { success: true };
-  } catch (error) {
+  } catch {
     throw new Error("Failed to update profile");
   }
 }

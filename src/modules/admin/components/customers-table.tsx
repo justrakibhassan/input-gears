@@ -95,6 +95,7 @@ export default function CustomersTable({ customers }: CustomersTableProps) {
         toast.success(res.message);
         setSelectedIds([]);
         setIsDeleteModalOpen(false);
+        router.refresh();
       } else {
         toast.error(res.message);
       }

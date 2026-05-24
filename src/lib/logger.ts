@@ -3,7 +3,7 @@
  * Prevents sensitive information disclosure in production
  */
 
-type LogLevel = "debug" | "info" | "warn" | "error";
+export type LogLevel = "debug" | "info" | "warn" | "error";
 
 interface LogContext {
   userId?: string;
