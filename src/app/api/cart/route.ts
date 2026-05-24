@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 import { headers } from "next/headers";
 
 export async function GET() {
@@ -44,7 +45,7 @@ export async function GET() {
       })),
     );
   } catch (error) {
-    console.error("Cart GET Error:", error);
+    logger.error("Failed to fetch cart", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },
@@ -144,7 +145,10 @@ export async function POST(req: Request) {
       });
 
       if (!result) {
-        return NextResponse.json({ error: "Failed to update cart" }, { status: 400 });
+        return NextResponse.json(
+          { error: "Failed to update cart" },
+          { status: 400 },
+        );
       }
     }
 
@@ -244,7 +248,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Cart POST Error:", error);
+    logger.error("Cart POST Error", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },

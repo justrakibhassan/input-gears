@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -13,7 +14,10 @@ export async function GET() {
       taxRate: settings?.taxRate ?? 0,
     });
   } catch (error) {
-    console.error("Fetch Checkout Settings Error:", error);
-    return NextResponse.json({ error: "Failed to fetch settings" }, { status: 500 });
+    logger.error("Failed to fetch checkout settings", error);
+    return NextResponse.json(
+      { error: "Failed to fetch settings" },
+      { status: 500 },
+    );
   }
 }

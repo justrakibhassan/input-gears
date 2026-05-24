@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { logger } from "@/lib/logger";
 
 const reviewSchema = z.object({
   productId: z.string().min(1),
@@ -17,7 +18,10 @@ async function requireAdmin() {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-  if (!session?.user?.role || !["SUPER_ADMIN", "MANAGER", "CONTENT_EDITOR"].includes(session.user.role)) {
+  if (
+    !session?.user?.role ||
+    !["SUPER_ADMIN", "MANAGER", "CONTENT_EDITOR"].includes(session.user.role)
+  ) {
     throw new Error("Unauthorized: Admin access required");
   }
   return session;
@@ -61,8 +65,11 @@ export async function submitReview(data: z.infer<typeof reviewSchema>) {
     revalidatePath(`/products/${productId}`);
     return { success: true, data: review };
   } catch (error) {
-    console.error("Submit Review Error:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Failed to submit review" };
+    logger.error("Failed to submit review", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to submit review",
+    };
   }
 }
 
@@ -88,7 +95,7 @@ export async function getProductReviews(productId: string) {
 
     return { success: true, data: reviews };
   } catch (error) {
-    console.error("Get Reviews Error:", error);
+    logger.error("Failed to fetch reviews", error);
     return { success: false, error: "Failed to fetch reviews" };
   }
 }
@@ -116,14 +123,16 @@ export async function getReviewStats(productId: string) {
       },
     };
   } catch (error) {
-    console.error("Get Review Stats Error:", error);
+    logger.error("Get Review Stats Error", error);
     return { success: false, error: "Failed to fetch stats" };
   }
 }
 
 // --- Admin Actions ---
 
-export async function adminGetReviews(status?: "PENDING" | "APPROVED" | "REJECTED") {
+export async function adminGetReviews(
+  status?: "PENDING" | "APPROVED" | "REJECTED",
+) {
   try {
     await requireAdmin();
 
@@ -150,12 +159,15 @@ export async function adminGetReviews(status?: "PENDING" | "APPROVED" | "REJECTE
 
     return { success: true, data: reviews };
   } catch (error) {
-    console.error("Admin Get Reviews Error:", error);
+    logger.error("Admin Get Reviews Error", error);
     return { success: false, error: "Failed to fetch reviews" };
   }
 }
 
-export async function updateReviewStatus(reviewId: string, status: "APPROVED" | "REJECTED") {
+export async function updateReviewStatus(
+  reviewId: string,
+  status: "APPROVED" | "REJECTED",
+) {
   try {
     await requireAdmin();
 
@@ -168,7 +180,7 @@ export async function updateReviewStatus(reviewId: string, status: "APPROVED" | 
     revalidatePath(`/products/${review.productId}`);
     return { success: true, data: review };
   } catch (error) {
-    console.error("Update Review Status Error:", error);
+    logger.error("Update Review Status Error", error);
     return { success: false, error: "Failed to update review status" };
   }
 }
@@ -185,7 +197,7 @@ export async function deleteReview(reviewId: string) {
     revalidatePath(`/products/${review.productId}`);
     return { success: true };
   } catch (error) {
-    console.error("Delete Review Error:", error);
+    logger.error("Delete Review Error", error);
     return { success: false, error: "Failed to delete review" };
   }
 }

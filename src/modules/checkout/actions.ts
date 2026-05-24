@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import Stripe from "stripe";
 import { z } from "zod";
 import { randomBytes } from "crypto";
+import { logger } from "@/lib/logger";
 
 interface CartItemInput {
   id: string;
@@ -93,7 +94,7 @@ export async function validateCoupon(code: string) {
       },
     };
   } catch (error) {
-    console.error("Coupon Validation Error:", error);
+    logger.error("Coupon Validation Error", error);
     return { success: false, message: "Failed to validate coupon" };
   }
 }
@@ -230,7 +231,7 @@ export async function placeOrder(
       const reservationMap = new Map(reservations.map(r => [r.productId, r]));
 
       // 2. Verified Stock Check (Accounting for reservations)
-      for (const item of validatedCartItems) {
+      for (const item of mergedCartItems) {
         const product = productById.get(item.id);
         const reservation = reservationMap.get(item.id);
         if (!product) throw new Error("Invalid cart items");
@@ -301,7 +302,7 @@ export async function placeOrder(
             });
           }
         } catch (updateError) {
-          console.error(`Failed to consume reservation/update stock for product ${item.id}:`, updateError);
+          logger.error(`Failed to consume reservation/update stock for product ${item.id}`, updateError);
           throw updateError; // Rethrow to rollback transaction
         }
       }
@@ -328,7 +329,7 @@ export async function placeOrder(
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Failed to place order";
-    console.error("Order Error:", errorMessage);
+    logger.error("Order Error", error);
     return { success: false, error: errorMessage };
   }
 }

@@ -8,6 +8,7 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import { UserRole } from "@prisma/client";
 import { createAuditLog } from "./actions/audit-actions";
+import { logger } from "@/lib/logger";
 
 async function requireRole(allowedRoles: UserRole[]) {
   const session = await auth.api.getSession({
@@ -115,7 +116,7 @@ export async function createProduct(data: ProductFormValues) {
       productId: product.id,
     };
   } catch (error) {
-    console.error("Create Product Error:", error);
+    logger.error("Create Product Error:", error);
     return { success: false, message: "Failed to create product" };
   }
 }
@@ -197,7 +198,7 @@ export async function updateProduct(id: string, data: ProductFormValues) {
 
     return { success: true, message: "Product updated successfully!" };
   } catch (error) {
-    console.error("Update Product Error:", error);
+    logger.error("Update Product Error:", error);
     return { success: false, message: "Failed to update product" };
   }
 }
@@ -240,7 +241,7 @@ export async function createCategory(data: z.infer<typeof categorySchema>) {
 
     return { success: true, message: "Category created successfully!" };
   } catch (error) {
-    console.error(error);
+    logger.error("Failed to create category", error);
     return { success: false, message: "Failed to create category" };
   }
 }
@@ -277,7 +278,7 @@ export async function updateOrderStatus(orderId: string, newStatus: string) {
 
     return { success: true, message: "Order status updated successfully!" };
   } catch (error) {
-    console.error("Status Update Error:", error);
+    logger.error("Status Update Error:", error);
     return { success: false, message: "Failed to update status." };
   }
 }
@@ -411,7 +412,7 @@ export async function deleteOrders(orderIds: string[]) {
       message: `${orderIds.length} orders deleted successfully`,
     };
   } catch (error) {
-    console.error("Bulk Delete Error:", error);
+    logger.error("Bulk Delete Error:", error);
     return { success: false, message: "Failed to delete orders" };
   }
 }
@@ -442,7 +443,7 @@ export async function deleteProducts(productIds: string[]) {
       message: `${productIds.length} products deleted successfully`,
     };
   } catch (error) {
-    console.error("Bulk Delete Products Error:", error);
+    logger.error("Bulk Delete Products Error:", error);
     return { success: false, message: "Failed to delete products" };
   }
 }
@@ -472,7 +473,7 @@ export async function deleteUsers(userIds: string[]) {
       message: `${userIds.length} customers deleted successfully`,
     };
   } catch (error) {
-    console.error("Bulk Delete Users Error:", error);
+    logger.error("Bulk Delete Users Error:", error);
     return { success: false, message: "Failed to delete users" };
   }
 }
@@ -516,7 +517,7 @@ export async function updateUser(
 
     return { success: true, message: "User updated successfully!" };
   } catch (error) {
-    console.error("Update User Error:", error);
+    logger.error("Update User Error:", error);
     return { success: false, message: "Failed to update user" };
   }
 }
@@ -533,7 +534,7 @@ export async function getMaintenanceMode() {
     });
     return (settings as unknown as SiteSettingsWithMaintenance)?.maintenanceMode ?? false;
   } catch (error) {
-    console.error("Get Maintenance Error:", error);
+    logger.error("Get Maintenance Error:", error);
     return false;
   }
 }
@@ -566,7 +567,7 @@ export async function updateMaintenanceMode(enabled: boolean) {
     });
     return { success: true };
   } catch (error) {
-    console.error("Update Maintenance Error:", error);
+    logger.error("Update Maintenance Error:", error);
     return { success: false, message: "Failed to update maintenance mode" };
   }
 }
@@ -579,7 +580,7 @@ export async function getCoupons() {
       orderBy: { createdAt: "desc" },
     });
   } catch (error) {
-    console.error("Get Coupons Error:", error);
+    logger.error("Get Coupons Error:", error);
     return [];
   }
 }
@@ -610,7 +611,7 @@ export async function createCoupon(data: {
 
     return { success: true };
   } catch (error) {
-    console.error("Create Coupon Error:", error);
+    logger.error("Create Coupon Error:", error);
     return { success: false, message: "Failed to create coupon. Maybe the code already exists?" };
   }
 }
@@ -623,7 +624,7 @@ export async function deleteCoupon(id: string) {
     });
     return { success: true };
   } catch (error) {
-    console.error("Delete Coupon Error:", error);
+    logger.error("Delete Coupon Error:", error);
     return { success: false, message: "Failed to delete coupon" };
   }
 }
@@ -637,7 +638,7 @@ export async function toggleCouponStatus(id: string, isActive: boolean) {
     });
     return { success: true };
   } catch (error) {
-    console.error("Toggle Coupon Error:", error);
+    logger.error("Toggle Coupon Error:", error);
     return { success: false, message: "Failed to update coupon status" };
   }
 }
@@ -687,7 +688,7 @@ export async function getRevenueAnalytics() {
 
     return chartData;
   } catch (error) {
-    console.error("Get Revenue Analytics Error:", error);
+    logger.error("Get Revenue Analytics Error:", error);
     return [];
   }
 }
@@ -718,7 +719,7 @@ export async function getLowStockProducts(threshold: number = 5) {
       },
     });
   } catch (error) {
-    console.error("Get Low Stock Error:", error);
+    logger.error("Get Low Stock Error:", error);
     return [];
   }
 }
@@ -777,7 +778,7 @@ export async function updateStockBulk(
 
     return { success: true, message: `Successfully updated ${updates.length} products.` };
   } catch (error) {
-    console.error("Bulk Stock Update Error:", error);
+    logger.error("Bulk Stock Update Error:", error);
     return { success: false, message: "Failed to update stock levels." };
   }
 }
@@ -804,7 +805,7 @@ export async function getStockLogs(limit: number = 50) {
       },
     });
   } catch (error) {
-    console.error("Get Stock Logs Error:", error);
+    logger.error("Get Stock Logs Error:", error);
     return [];
   }
 }
@@ -851,7 +852,7 @@ export async function upsertShippingZone(data: { id?: string; name: string; char
     revalidatePath("/admin/settings");
     return { success: true };
   } catch (error) {
-    console.error("Upsert Shipping Zone Error:", error);
+    logger.error("Upsert Shipping Zone Error:", error);
     return { success: false, message: "Failed to save shipping zone" };
   }
 }
@@ -878,7 +879,7 @@ export async function deleteShippingZone(id: string) {
     revalidatePath("/admin/settings");
     return { success: true };
   } catch (error) {
-    console.error("Delete Shipping Zone Error:", error);
+    logger.error("Delete Shipping Zone Error:", error);
     return { success: false, message: "Failed to delete shipping zone" };
   }
 }
@@ -904,7 +905,7 @@ export async function updateTaxRate(rate: number) {
     revalidatePath("/admin/settings");
     return { success: true };
   } catch (error) {
-    console.error("Update Tax Rate Error:", error);
+    logger.error("Update Tax Rate Error:", error);
     return { success: false, message: "Failed to update tax rate" };
   }
 }

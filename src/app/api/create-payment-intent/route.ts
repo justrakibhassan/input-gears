@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { logger } from "@/lib/logger";
 
 const requestSchema = z.object({
   items: z
@@ -11,7 +14,7 @@ const requestSchema = z.object({
           id: z.string().min(1),
           quantity: z.number().int().positive().max(99),
         })
-        .passthrough(),
+        .strict(), // Reject unknown fields for security
     )
     .min(1),
 });
@@ -22,7 +25,17 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 });
 
 export async function POST(req: Request) {
+  let session: any = null;
   try {
+    // ✅ SECURITY FIX: Verify user authentication
+    session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     if (!process.env.STRIPE_SECRET_KEY) {
       return NextResponse.json(
         { error: "Stripe is not configured" },
@@ -95,7 +108,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
-    console.error("Create Payment Intent Error:", error);
+    logger.error("Failed to create payment intent", error, {
+      userId: session?.user?.id,
+    });
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },

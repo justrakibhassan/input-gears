@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 import { headers } from "next/headers";
 
 export async function GET() {
@@ -39,7 +40,7 @@ export async function GET() {
 
     return NextResponse.json(wishlistItems.map((item) => item.product));
   } catch (error) {
-    console.error("Wishlist GET Error:", error);
+    logger.error("Failed to fetch wishlist", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },
@@ -116,7 +117,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Wishlist POST Error:", error);
+    logger.error("Wishlist POST Error", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },

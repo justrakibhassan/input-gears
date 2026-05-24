@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -35,7 +36,10 @@ export async function GET(request: Request) {
 
     return NextResponse.json(products);
   } catch (error) {
-    console.error("Search Error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    logger.error("Product search failed", error, { query });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }

@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ratelimit } from "@/lib/ratelimit";
+import { logger } from "@/lib/logger";
 import { NextResponse, type NextRequest } from "next/server";
 
 /**
@@ -10,6 +11,36 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // ✅ Security Headers
+  const response = NextResponse.next();
+
+  // CORS Configuration (customize to your domain)
+  const allowedOrigins = [
+    process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000",
+  ];
+  const origin = request.headers.get("origin");
+
+  if (origin && allowedOrigins.includes(origin)) {
+    response.headers.set("Access-Control-Allow-Origin", origin);
+  }
+
+  // Security Headers
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-XSS-Protection", "1; mode=block");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set(
+    "Permissions-Policy",
+    "geolocation=(), microphone=(), camera=()",
+  );
+
+  const withHeaders = (res: NextResponse) => {
+    response.headers.forEach((value, key) => {
+      res.headers.set(key, value);
+    });
+    return res;
+  };
+
   // ✅ Rate Limiting (API routes only)
   if (pathname.startsWith("/api") && !pathname.startsWith("/api/auth")) {
     const identifier =
@@ -18,14 +49,16 @@ export async function proxy(request: NextRequest) {
       await ratelimit.limit(identifier);
 
     if (!success) {
-      return new NextResponse("Too many requests", {
-        status: 429,
-        headers: {
-          "X-RateLimit-Limit": limit.toString(),
-          "X-RateLimit-Remaining": remaining.toString(),
-          "X-RateLimit-Reset": reset.toString(),
-        },
-      });
+      return withHeaders(
+        new NextResponse("Too many requests", {
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": limit.toString(),
+            "X-RateLimit-Remaining": remaining.toString(),
+            "X-RateLimit-Reset": reset.toString(),
+          },
+        })
+      );
     }
   }
 
@@ -61,10 +94,10 @@ export async function proxy(request: NextRequest) {
       })) as unknown as SiteSettingsWithMaintenance | null;
 
       if (settings?.maintenanceMode) {
-        return NextResponse.rewrite(new URL("/maintenance", request.url));
+        return withHeaders(NextResponse.rewrite(new URL("/maintenance", request.url)));
       }
     } catch (error) {
-      console.error("Middleware Maintenance Check Error:", error);
+      logger.error("Maintenance mode check failed", error);
     }
   }
 
@@ -77,23 +110,25 @@ export async function proxy(request: NextRequest) {
 
   // If user is logged in & trying to access auth routes -> redirect to account
   if (session?.user && isAuthRoute) {
-    return NextResponse.redirect(new URL("/account", request.url));
+    return withHeaders(NextResponse.redirect(new URL("/account", request.url)));
   }
 
   // If user is NOT logged in & trying to access protected routes -> redirect to sign-in with callbackURL
   if (!session?.user && isProtectedRoute) {
     const callbackURL = encodeURIComponent(pathname);
-    return NextResponse.redirect(
-      new URL(`/sign-in?callbackURL=${callbackURL}`, request.url),
+    return withHeaders(
+      NextResponse.redirect(
+        new URL(`/sign-in?callbackURL=${callbackURL}`, request.url),
+      )
     );
   }
 
   // ✅ Admin Role Enforcement
   if (pathname.startsWith("/admin") && !isAdminLike) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return withHeaders(NextResponse.redirect(new URL("/", request.url)));
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {
