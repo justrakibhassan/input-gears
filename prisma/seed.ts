@@ -13,6 +13,7 @@ async function main() {
   await prisma.wishlistItem.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
+  await prisma.heroSlide.deleteMany();
 
   // 1. Create Categories
   const categories = await Promise.all([
@@ -70,7 +71,7 @@ async function main() {
         description: "Premium mechanical keyboard with RGB backlighting.",
         price: 120.0,
         stock: 50,
-        image: "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?w=800&auto=format&fit=crop&q=60",
+        image: "/product-keyboard.png",
         colors: ["#000000", "#FFFFFF", "#FF3366"],
         switchType: "Linear",
         brand: "GearsPro",
@@ -104,7 +105,7 @@ async function main() {
         description: "Ultra-fast response time with 25k DPI sensor.",
         price: 85.5,
         stock: 30,
-        image: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=800&auto=format&fit=crop&q=60",
+        image: "/product-mouse.png",
         colors: ["#000000", "#808080", "#FFD700"],
         brand: "SwiftMove",
         sku: "SM-MSE-W1",
@@ -137,7 +138,7 @@ async function main() {
         description: "Immersive sound experience with active noise cancellation.",
         price: 250.0,
         stock: 15,
-        image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=60",
+        image: "/product-headphones.png",
         colors: ["#000000", "#000080"],
         brand: "AudioPure",
         sku: "AP-HDP-ANC",
