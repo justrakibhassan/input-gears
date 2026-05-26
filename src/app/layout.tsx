@@ -70,12 +70,31 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Input Gears",
+    url: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000"}/products?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <Toaster position="top-center" richColors />
         <AuthSync />
         {children}
@@ -83,3 +102,4 @@ export default function RootLayout({
     </html>
   );
 }
+

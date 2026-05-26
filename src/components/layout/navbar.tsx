@@ -67,7 +67,7 @@ interface SearchResult {
   category: { name: string } | null;
 }
 
-export default function Navbar() {
+export default function Navbar({ initialCategories = [] }: { initialCategories?: CategoryWithBrands[] }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -75,7 +75,7 @@ export default function Navbar() {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
-  const [categories, setCategories] = useState<CategoryWithBrands[]>([]);
+  const [categories, setCategories] = useState<CategoryWithBrands[]>(initialCategories);
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
@@ -95,10 +95,6 @@ export default function Navbar() {
 
   useEffect(() => {
     setIsMounted(true);
-    fetch("/api/categories/brands")
-      .then((res) => res.json())
-      .then((data) => setCategories(data))
-      .catch((err) => console.error("Error fetching categories:", err));
   }, []);
 
   useEffect(() => {
@@ -181,10 +177,10 @@ export default function Navbar() {
       <header className="sticky top-0 z-50 w-full group/nav">
         {/* PRIMARY NAVBAR */}
         <nav
-          className={`w-full transition-all duration-500 border-b border-gray-200/50 ${
+          className={`w-full transition-all duration-500 border-b ${
             isScrolled
-              ? "bg-white/90 backdrop-blur-xl py-3 shadow-[0_2px_20px_-10px_rgba(0,0,0,0.05)]"
-              : "bg-white py-4"
+              ? "bg-white/60 backdrop-blur-2xl py-3 shadow-md border-white/40 ring-1 ring-black/5"
+              : "bg-white py-4 border-gray-200/50"
           }`}
         >
           <div className="max-w-[1440px] mx-auto px-4 sm:px-8 flex items-center justify-between gap-4 md:gap-8">

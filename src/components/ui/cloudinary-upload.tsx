@@ -20,12 +20,7 @@ export default function CloudinaryUpload({
   onRemove,
   disabled,
 }: CloudinaryUploadProps) {
-  const [isMounted, setIsMounted] = useState(false);
 
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => setIsMounted(true));
-    return () => cancelAnimationFrame(frame);
-  }, []);
 
   const onSuccess = (result: CloudinaryUploadWidgetResults) => {
     if (result.info && typeof result.info !== "string" && result.info.secure_url) {
@@ -37,7 +32,7 @@ export default function CloudinaryUpload({
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET?.replace(/['"]/g, "");
   const isCloudinaryConfigured = !!cloudName && !!uploadPreset;
 
-  if (!isMounted) return null;
+
 
   const isLocalOrExternal = value.startsWith("/") || value.startsWith("http");
 

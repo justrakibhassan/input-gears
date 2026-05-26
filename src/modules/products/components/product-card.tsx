@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCart, Check, Heart, Search, ArrowLeftRight } from "lucide-react";
 import { useCart, CartItem } from "@/modules/cart/hooks/use-cart";
+import { motion } from "framer-motion";
 import { MouseEventHandler, useState, useEffect, memo, useMemo } from "react";
 import { useWishlist } from "@/modules/products/hooks/use-wishlist";
 import { useCompare } from "@/modules/products/hooks/use-compare";
@@ -117,7 +118,11 @@ const ProductCard = memo(({ data }: ProductCardProps) => {
   };
 
   return (
-    <div className="group relative bg-white rounded-3xl border border-gray-100 shadow-sm transition-all duration-500 md:hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] md:hover:border-indigo-100/50 overflow-hidden flex flex-col h-full active:scale-[0.98]">
+    <motion.div 
+      whileHover={{ y: -5, scale: 1.01 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      className="group relative bg-white rounded-3xl border border-gray-100 shadow-sm transition-all duration-500 md:hover:shadow-[0_20px_50px_rgba(79,70,229,0.12)] md:hover:border-indigo-200/50 overflow-hidden flex flex-col h-full active:scale-[0.98]"
+    >
       <QuickViewModal 
         isOpen={isQuickViewOpen} 
         onClose={() => setIsQuickViewOpen(false)} 
@@ -273,7 +278,7 @@ const ProductCard = memo(({ data }: ProductCardProps) => {
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 });
 

@@ -138,10 +138,13 @@ export default function AppearancePage({
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     control: slidesForm.control,
     name: "slides",
   });
+
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [draggedOverIndex, setDraggedOverIndex] = useState<number | null>(null);
 
   // Watchers
   const watchedBar = barForm.watch();
@@ -429,10 +432,38 @@ export default function AppearancePage({
               {fields.map((field, index) => (
                 <div
                   key={field.id}
-                  className="bg-gray-50 p-5 rounded-2xl border border-gray-200 relative group transition-all hover:shadow-sm"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDragEnter={() => setDraggedOverIndex(index)}
+                  onDrop={(e) => {
+                    const dragIndexStr = e.dataTransfer.getData("drag-index");
+                    if (dragIndexStr) {
+                      const dragIndex = parseInt(dragIndexStr, 10);
+                      if (dragIndex !== index) {
+                        move(dragIndex, index);
+                      }
+                    }
+                    setDraggedOverIndex(null);
+                    setDraggedIndex(null);
+                  }}
+                  className={`bg-gray-50 p-5 rounded-2xl border transition-all relative group ${
+                    draggedOverIndex === index
+                      ? "border-indigo-500 bg-indigo-50/50 scale-[1.01] shadow-md shadow-indigo-100/50"
+                      : "border-gray-200 hover:shadow-sm"
+                  } ${draggedIndex === index ? "opacity-40 scale-95 border-dashed border-gray-300" : ""}`}
                 >
                   <div className="flex justify-between items-center mb-4">
-                    <span className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                    <span
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData("drag-index", index.toString());
+                        setDraggedIndex(index);
+                      }}
+                      onDragEnd={() => {
+                        setDraggedIndex(null);
+                        setDraggedOverIndex(null);
+                      }}
+                      className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider cursor-grab active:cursor-grabbing hover:text-indigo-600 transition-colors select-none"
+                    >
                       <GripVertical size={14} /> Slide {index + 1}
                     </span>
                     <button

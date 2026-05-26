@@ -11,6 +11,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { CldImage } from "next-cloudinary";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // --- Types ---
 interface HeroSlide {
@@ -31,6 +32,7 @@ const MIN_SWIPE_DISTANCE = 50;
 
 export default function HeroBanner({ slides }: HeroBannerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // --- Touch States ---
@@ -38,17 +40,18 @@ export default function HeroBanner({ slides }: HeroBannerProps) {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   // --- Navigation Logic ---
-  const goToSlide = useCallback((index: number) => {
+  const goToSlide = useCallback((index: number, newDirection: number) => {
     if (timerRef.current) clearTimeout(timerRef.current);
+    setDirection(newDirection);
     setCurrentIndex(index);
   }, []);
 
   const nextSlide = useCallback(() => {
-    goToSlide(currentIndex === slides.length - 1 ? 0 : currentIndex + 1);
+    goToSlide(currentIndex === slides.length - 1 ? 0 : currentIndex + 1, 1);
   }, [currentIndex, slides.length, goToSlide]);
 
   const prevSlide = useCallback(() => {
-    goToSlide(currentIndex === 0 ? slides.length - 1 : currentIndex - 1);
+    goToSlide(currentIndex === 0 ? slides.length - 1 : currentIndex - 1, -1);
   }, [currentIndex, slides.length, goToSlide]);
 
   // --- Autoplay ---
@@ -85,6 +88,7 @@ export default function HeroBanner({ slides }: HeroBannerProps) {
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
+        <AnimatePresence initial={false} custom={direction}>
         {slides.map((slide, index) => {
           const isActive = index === currentIndex;
 
@@ -137,25 +141,36 @@ export default function HeroBanner({ slides }: HeroBannerProps) {
           );
 
           return (
-            <div
-              key={slide.id}
-              className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
-                isActive ? "opacity-100 z-10" : "opacity-0 z-0"
-              }`}
-            >
-              {slide.link ? (
-                <Link
-                  href={slide.link}
-                  className="block w-full h-full relative cursor-pointer"
-                >
-                  {SlideContent}
-                </Link>
-              ) : (
-                <div className="w-full h-full relative">{SlideContent}</div>
-              )}
-            </div>
+            isActive && (
+              <motion.div
+                key={slide.id}
+                custom={direction}
+                initial={{ opacity: 0, x: direction > 0 ? 100 : -100, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: direction > 0 ? -100 : 100, scale: 1.05 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 30,
+                  opacity: { duration: 0.4 },
+                }}
+                className="absolute inset-0 w-full h-full z-10"
+              >
+                {slide.link ? (
+                  <Link
+                    href={slide.link}
+                    className="block w-full h-full relative cursor-pointer"
+                  >
+                    {SlideContent}
+                  </Link>
+                ) : (
+                  <div className="w-full h-full relative">{SlideContent}</div>
+                )}
+              </motion.div>
+            )
           );
         })}
+        </AnimatePresence>
 
         {/* Controls */}
         {slides.length > 1 && (
@@ -185,7 +200,7 @@ export default function HeroBanner({ slides }: HeroBannerProps) {
                   key={i}
                   onClick={(e) => {
                     e.stopPropagation();
-                    goToSlide(i);
+                    goToSlide(i, i > currentIndex ? 1 : -1);
                   }}
                   className={`h-1.5 rounded-full transition-all ${
                     i === currentIndex ? "w-6 bg-white" : "w-1.5 bg-white/50"

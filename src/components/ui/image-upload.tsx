@@ -25,11 +25,7 @@ export default function ImageUpload({
   onRemove,
   value,
 }: ImageUploadProps) {
-  const isMounted = useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false
-  );
+
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME?.replace(/['"]/g, "");
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET?.replace(/['"]/g, "");
   const isCloudinaryConfigured = !!cloudName && !!uploadPreset;
@@ -55,10 +51,7 @@ export default function ImageUpload({
     setIsLibraryOpen(false);
   };
 
-  // Prevent hydration error
-  if (!isMounted) {
-    return null;
-  }
+
 
   return (
     <div className="space-y-4 w-full">
