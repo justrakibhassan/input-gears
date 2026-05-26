@@ -33,7 +33,7 @@ export default async function RootLayout({
     name: cat.name,
     slug: cat.slug,
     brands: Array.from(
-      new Set(cat.products.map((p) => p.brand).filter(Boolean)),
+      new Set(cat.products.map((p) => p.brand).filter((b): b is string => typeof b === "string")),
     ),
   }));
 

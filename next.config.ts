@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: false,
+  experimental: {
+    workerThreads: false,
+    cpus: 2,
+  },
   images: {
     qualities: [75, 80, 90],
     remotePatterns: [
