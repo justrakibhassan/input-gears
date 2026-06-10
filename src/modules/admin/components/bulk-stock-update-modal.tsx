@@ -96,7 +96,7 @@ export default function BulkStockUpdateModal({
                   </div>
                   <button
                     onClick={onClose}
-                    className="p-2 text-white/50 hover:text-white hover:bg-white dark:bg-gray-900/10 rounded-xl transition-all"
+                    className="p-2 text-white/50 hover:text-white hover:bg-white dark:hover:bg-gray-900/10 rounded-xl transition-all"
                   >
                     <X size={20} />
                   </button>
@@ -134,7 +134,7 @@ export default function BulkStockUpdateModal({
                             Current: <span className="text-gray-900 dark:text-white">{product.stock}</span>
                           </span>
                           {product.stock < 5 && (
-                            <span className="flex items-center gap-0.5 text-[8px] font-black text-red-500 uppercase bg-red-50 px-1.5 py-0.5 rounded-full border border-red-100">
+                            <span className="flex items-center gap-0.5 text-[8px] font-black text-red-500 dark:text-red-400 uppercase bg-red-50 dark:bg-red-500/10 px-1.5 py-0.5 rounded-full border border-red-100 dark:border-red-500/20">
                               <AlertCircle size={8} /> Low Stock
                             </span>
                           )}
@@ -146,7 +146,7 @@ export default function BulkStockUpdateModal({
                           min="0"
                           value={stockUpdates[product.id] ?? product.stock}
                           onChange={(e) => handleStockChange(product.id, e.target.value)}
-                          className="w-full h-11 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-center font-black text-sm focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all"
+                          className="w-full h-11 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-center font-black text-sm focus:ring-4 focus:ring-indigo-50 dark:focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
                         />
                       </div>
                     </div>
@@ -161,7 +161,7 @@ export default function BulkStockUpdateModal({
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                     placeholder="e.g., Monthly Inventory Sync, Damage Audit"
-                    className="w-full h-12 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl px-4 font-bold text-sm focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full h-12 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl px-4 font-bold text-sm focus:ring-4 focus:ring-indigo-50 dark:focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
                   />
                 </div>
               </div>
@@ -171,7 +171,7 @@ export default function BulkStockUpdateModal({
                 <button
                   disabled={isPending}
                   onClick={onClose}
-                  className="flex-1 h-14 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-400 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:bg-gray-800 hover:text-gray-900 dark:text-white transition-all active:scale-95 disabled:opacity-50 shadow-sm dark:shadow-none"
+                  className="flex-1 h-14 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-400 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-all active:scale-95 disabled:opacity-50 shadow-sm dark:shadow-none"
                 >
                   Cancel
                 </button>

@@ -88,7 +88,7 @@ export default async function OrdersPage({
           </p>
         </div>
         <div className="flex gap-2">
-          <button className="inline-flex items-center gap-2 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 dark:bg-gray-800/50 transition-all shadow-sm dark:shadow-none active:scale-95">
+          <button className="inline-flex items-center gap-2 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all shadow-sm dark:shadow-none active:scale-95">
             <Download size={16} /> Export CSV
           </button>
         </div>
@@ -226,7 +226,7 @@ export default async function OrdersPage({
               >
                 Prev
               </button>
-              <button className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:bg-gray-800/50 active:scale-95 transition-all">
+              <button className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 active:scale-95 transition-all">
                 Next
               </button>
             </div>

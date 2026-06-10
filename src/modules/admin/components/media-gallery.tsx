@@ -63,7 +63,7 @@ export function MediaGallery({ initialMedia }: MediaGalleryProps) {
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
             <button
               onClick={() => handleCopy(item.url, item.id)}
-              className="p-2 bg-white dark:bg-gray-900/20 hover:bg-white dark:bg-gray-900/40 rounded-lg text-white transition-colors backdrop-blur-md"
+              className="p-2 bg-white dark:bg-gray-900/20 hover:bg-white dark:hover:bg-gray-900/40 rounded-lg text-white transition-colors backdrop-blur-md"
               title="Copy URL"
             >
               {copiedId === item.id ? <Check size={18} /> : <Copy size={18} />}
@@ -72,7 +72,7 @@ export function MediaGallery({ initialMedia }: MediaGalleryProps) {
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 bg-white dark:bg-gray-900/20 hover:bg-white dark:bg-gray-900/40 rounded-lg text-white transition-colors backdrop-blur-md"
+              className="p-2 bg-white dark:bg-gray-900/20 hover:bg-white dark:hover:bg-gray-900/40 rounded-lg text-white transition-colors backdrop-blur-md"
               title="View Large"
             >
               <ExternalLink size={18} />

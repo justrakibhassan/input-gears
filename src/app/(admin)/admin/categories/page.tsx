@@ -108,7 +108,7 @@ export default async function CategoriesPage() {
                 {categories.map((category) => (
                   <tr
                     key={category.id}
-                    className="hover:bg-gray-50 dark:bg-gray-800/50/80 transition-colors group"
+                    className="hover:bg-gray-50 dark:hover:bg-gray-800/50/80 transition-colors group"
                   >
                     {/* Icon / Image */}
                     <td className="px-6 py-4">

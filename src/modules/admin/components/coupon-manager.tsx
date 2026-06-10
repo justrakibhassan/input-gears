@@ -154,7 +154,7 @@ export default function CouponManager({ initialCoupons }: CouponManagerProps) {
                     value={newCoupon.code}
                     onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value.toUpperCase() })}
                     placeholder="E.g. SUMMER10"
-                    className="w-full pl-4 pr-12 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none transition-all font-mono"
+                    className="w-full pl-4 pr-12 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none transition-all font-mono"
                   />
                   <button
                     type="button"
@@ -175,7 +175,7 @@ export default function CouponManager({ initialCoupons }: CouponManagerProps) {
                 <select
                   value={newCoupon.type}
                   onChange={(e) => setNewCoupon({ ...newCoupon, type: e.target.value as "PERCENTAGE" | "FIXED" })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none transition-all"
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none transition-all"
                 >
                   <option value="PERCENTAGE">Percentage (%)</option>
                   <option value="FIXED">Fixed Amount ($)</option>
@@ -195,7 +195,7 @@ export default function CouponManager({ initialCoupons }: CouponManagerProps) {
                     type="number"
                     value={newCoupon.value}
                     onChange={(e) => setNewCoupon({ ...newCoupon, value: Number(e.target.value) })}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none transition-all"
                     placeholder="0"
                   />
                 </div>
@@ -212,7 +212,7 @@ export default function CouponManager({ initialCoupons }: CouponManagerProps) {
                     type="date"
                     value={newCoupon.expiresAt}
                     onChange={(e) => setNewCoupon({ ...newCoupon, expiresAt: e.target.value })}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none transition-all"
                   />
                 </div>
               </div>
@@ -227,7 +227,7 @@ export default function CouponManager({ initialCoupons }: CouponManagerProps) {
                   value={newCoupon.usageLimit}
                   onChange={(e) => setNewCoupon({ ...newCoupon, usageLimit: e.target.value })}
                   placeholder="Unlimited"
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none transition-all"
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none transition-all"
                 />
               </div>
 
@@ -271,7 +271,7 @@ export default function CouponManager({ initialCoupons }: CouponManagerProps) {
                   </tr>
                 ) : (
                   coupons.map((coupon) => (
-                    <tr key={coupon.id} className="hover:bg-gray-50 dark:bg-gray-800/50/50 transition-colors group">
+                    <tr key={coupon.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50/50 transition-colors group">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600 font-mono font-bold text-xs border border-indigo-100">

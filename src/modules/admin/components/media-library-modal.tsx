@@ -48,7 +48,7 @@ export function MediaLibraryModal({ onSelect, onClose }: MediaLibraryModalProps)
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:bg-gray-800 rounded-xl transition-colors text-gray-400"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors text-gray-400"
           >
             <X size={20} />
           </button>
@@ -119,7 +119,7 @@ export function MediaLibraryModal({ onSelect, onClose }: MediaLibraryModalProps)
         <div className="p-6 border-t bg-gray-50 dark:bg-gray-800/50/50 flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-6 py-2.5 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-white dark:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all"
+            className="px-6 py-2.5 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all"
           >
             Cancel
           </button>

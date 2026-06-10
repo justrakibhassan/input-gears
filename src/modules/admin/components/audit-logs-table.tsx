@@ -34,7 +34,7 @@ export function AuditLogsTable({ data }: AuditLogsTableProps) {
     if (action.includes("DELETE")) return "bg-red-100 text-red-600 hover:bg-red-100";
     if (action.includes("CREATE")) return "bg-green-100 text-green-600 hover:bg-green-100";
     if (action.includes("UPDATE")) return "bg-blue-100 text-blue-600 hover:bg-blue-100";
-    return "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800";
+    return "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800";
   };
 
   if (data.length === 0) {

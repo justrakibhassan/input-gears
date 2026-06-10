@@ -97,7 +97,7 @@ export default function EditCustomerModal({
                   </div>
                   <button
                     onClick={onClose}
-                    className="p-2 text-gray-400 hover:text-gray-900 dark:text-white hover:bg-gray-50 dark:bg-gray-800/50 rounded-2xl transition-all"
+                    className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-2xl transition-all"
                   >
                     <X size={24} />
                   </button>
@@ -199,7 +199,7 @@ export default function EditCustomerModal({
                     <button
                       type="button"
                       onClick={onClose}
-                      className="flex-1 h-14 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:bg-gray-800 hover:text-gray-900 dark:text-white transition-all active:scale-95"
+                      className="flex-1 h-14 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-all active:scale-95"
                     >
                       Discard Changes
                     </button>

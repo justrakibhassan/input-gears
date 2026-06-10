@@ -56,7 +56,7 @@ export default async function OrderDetailsPage({
         <div className="flex items-center gap-4">
           <Link
             href="/admin/orders"
-            className="p-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl text-gray-400 hover:text-gray-900 dark:text-white transition-all shadow-sm dark:shadow-none active:scale-95"
+            className="p-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all shadow-sm dark:shadow-none active:scale-95"
           >
             <ArrowLeft size={18} />
           </Link>

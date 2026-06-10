@@ -107,7 +107,7 @@ export default function ReviewsTable() {
               "px-4 py-2 text-xs font-bold rounded-lg transition-all",
               filter === f 
                 ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm dark:shadow-none" 
-                : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:text-white"
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             )}
           >
             {f}
@@ -140,7 +140,7 @@ export default function ReviewsTable() {
               </tr>
             ) : (
               reviews.map((review) => (
-                <tr key={review.id} className="group hover:bg-gray-50 dark:bg-gray-800/50/30 transition-colors">
+                <tr key={review.id} className="group hover:bg-gray-50 dark:hover:bg-gray-800/50/30 transition-colors">
                   <td className="py-4 px-6">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 font-bold text-gray-900 dark:text-white">

@@ -429,7 +429,7 @@ export default async function AdminDashboardPage() {
                     </div>
                   </td>
                   <td className="px-8 py-5 text-right">
-                    <button className="h-9 w-9 inline-flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:bg-white dark:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all">
+                    <button className="h-9 w-9 inline-flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all">
                       <MoreHorizontal size={18} />
                     </button>
                   </td>

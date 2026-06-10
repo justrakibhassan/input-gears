@@ -211,7 +211,7 @@ export default function CreateProductPage() {
           <div className="flex items-center gap-4">
             <Link
               href="/admin/products"
-              className="p-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-100 dark:bg-gray-800 transition-colors shadow-sm dark:shadow-none"
+              className="p-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shadow-sm dark:shadow-none"
             >
               <ArrowLeft size={20} className="text-gray-600 dark:text-gray-400" />
             </Link>
@@ -230,7 +230,7 @@ export default function CreateProductPage() {
                 "ml-auto flex items-center gap-2 px-4 py-2 rounded-xl border transition-all shadow-sm dark:shadow-none",
                 showPreview 
                   ? "bg-indigo-50 border-indigo-200 text-indigo-600" 
-                  : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-800/50"
+                  : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
               )}
             >
               {showPreview ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -264,7 +264,7 @@ export default function CreateProductPage() {
                     <input
                       {...form.register("name")}
                       onChange={handleNameChange}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none transition-all"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none transition-all"
                       placeholder="e.g. Wireless Noise Cancelling Headphones"
                     />
                     {form.formState.errors.name && (
@@ -286,7 +286,7 @@ export default function CreateProductPage() {
                         </span>
                         <input
                           {...form.register("slug")}
-                          className={`w-full pl-24 pr-10 py-3 rounded-xl border bg-gray-50 focus:bg-white dark:bg-gray-900 outline-none font-mono text-sm text-indigo-600 transition-all ${
+                          className={`w-full pl-24 pr-10 py-3 rounded-xl border bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 outline-none font-mono text-sm text-indigo-600 transition-all ${
                             form.formState.errors.slug
                               ? "border-red-300 focus:border-red-500"
                               : "border-gray-200 dark:border-gray-700 focus:border-indigo-500"
@@ -317,7 +317,7 @@ export default function CreateProductPage() {
                         <Link
                           href={`/products/${watchedValues.slug}`}
                           target="_blank"
-                          className="p-3 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl hover:bg-gray-50 dark:bg-gray-800/50 text-indigo-600 transition-colors"
+                          className="p-3 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 text-indigo-600 transition-colors"
                           title="Preview URL in new tab"
                         >
                           <ExternalLink size={18} />
@@ -346,7 +346,7 @@ export default function CreateProductPage() {
                         />
                         <select
                           {...form.register("categoryId")}
-                          className={`w-full pl-10 pr-4 py-3 rounded-xl border bg-gray-50 focus:bg-white dark:bg-gray-900 outline-none appearance-none transition-all cursor-pointer ${
+                          className={`w-full pl-10 pr-4 py-3 rounded-xl border bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 outline-none appearance-none transition-all cursor-pointer ${
                             form.formState.errors.categoryId
                               ? "border-red-300 focus:border-red-500"
                               : "border-gray-200 dark:border-gray-700 focus:border-indigo-500"
@@ -376,7 +376,7 @@ export default function CreateProductPage() {
                       <button
                         type="button"
                         onClick={fetchCategories}
-                        className="p-3 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl hover:bg-gray-50 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 transition-colors"
+                        className="p-3 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-500 dark:text-gray-400 transition-colors"
                         title="Refresh Categories"
                       >
                         <RefreshCw size={18} />
@@ -397,7 +397,7 @@ export default function CreateProductPage() {
                     <textarea
                       {...form.register("description")}
                       rows={5}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none resize-none"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none resize-none"
                       placeholder="Detailed description of the product..."
                     />
                     {form.formState.errors.description && (
@@ -446,7 +446,7 @@ export default function CreateProductPage() {
                       <input 
                         {...form.register("switchType")}
                         placeholder="Other switch type..."
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                       />
                     </div>
 
@@ -487,7 +487,7 @@ export default function CreateProductPage() {
                         <input 
                           id="color-input"
                           placeholder="Add color (e.g. Red, #FF0000)"
-                          className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                          className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
                               e.preventDefault();
@@ -516,7 +516,7 @@ export default function CreateProductPage() {
                               input.value = "";
                             }
                           }}
-                          className="p-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-100 dark:bg-gray-800 text-indigo-600 transition-all"
+                          className="p-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-indigo-600 transition-all"
                         >
                           <Plus size={18} />
                         </button>
@@ -633,7 +633,7 @@ export default function CreateProductPage() {
                     <input 
                       {...form.register("brand")}
                       placeholder="e.g. Logitech, Razer"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -643,7 +643,7 @@ export default function CreateProductPage() {
                     <input 
                       {...form.register("sku")}
                       placeholder="e.g. G-PRO-WL-01"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -652,7 +652,7 @@ export default function CreateProductPage() {
                     <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Availability Status</label>
                     <select
                       {...form.register("availability")}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold appearance-none cursor-pointer"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold appearance-none cursor-pointer"
                     >
                       <option value="In Stock">In Stock</option>
                       <option value="Out of Stock">Out of Stock</option>
@@ -667,7 +667,7 @@ export default function CreateProductPage() {
                     <input 
                       {...form.register("sensor")}
                       placeholder="e.g. HERO 25K, Focus Pro"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -677,7 +677,7 @@ export default function CreateProductPage() {
                     <input 
                       {...form.register("dpi")}
                       placeholder="e.g. 25,600 DPI"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -687,7 +687,7 @@ export default function CreateProductPage() {
                     <input 
                       {...form.register("weight")}
                       placeholder="e.g. 63g (Ultra-light)"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -697,7 +697,7 @@ export default function CreateProductPage() {
                     <input 
                       {...form.register("connectionType")}
                       placeholder="e.g. LIGHTSPEED, Bluetooth"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -707,7 +707,7 @@ export default function CreateProductPage() {
                     <input 
                       {...form.register("pollingRate")}
                       placeholder="e.g. 1000Hz, 8000Hz"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -717,7 +717,7 @@ export default function CreateProductPage() {
                     <input 
                       {...form.register("warranty")}
                       placeholder="e.g. 2 Year Limited"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
                 </div>
@@ -759,7 +759,7 @@ export default function CreateProductPage() {
                       type="number"
                       step="0.01"
                       {...form.register("price")}
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none font-bold text-lg"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none font-bold text-lg"
                       placeholder="0.00"
                     />
                   </div>
@@ -781,7 +781,7 @@ export default function CreateProductPage() {
                     <input
                       type="number"
                       {...form.register("stock")}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none"
                       placeholder="0"
                     />
                     {form.formState.errors.stock && (
@@ -835,7 +835,7 @@ export default function CreateProductPage() {
                     <input
                       type="datetime-local"
                       {...form.register("scheduledAt")}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       Product will go live automatically at this time.
@@ -866,7 +866,7 @@ export default function CreateProductPage() {
                     </div>
                     <button 
                       onClick={() => setShowPreview(false)}
-                      className="p-2 hover:bg-gray-100 dark:bg-gray-800 rounded-lg transition-colors text-gray-400"
+                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-400"
                     >
                       <X size={20} />
                     </button>
@@ -984,7 +984,7 @@ export default function CreateProductPage() {
                 "flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all",
                 showPreview 
                   ? "bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm dark:shadow-none" 
-                  : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-800/50"
+                  : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
               )}
             >
               {showPreview ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -995,7 +995,7 @@ export default function CreateProductPage() {
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:bg-gray-800/50 transition-colors shadow-sm dark:shadow-none"
+              className="px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors shadow-sm dark:shadow-none"
             >
               Cancel
             </button>

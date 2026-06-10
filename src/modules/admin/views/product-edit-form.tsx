@@ -165,7 +165,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
               <div className="flex items-center gap-5">
                 <Link
                   href="/admin/products"
-                  className="p-3 bg-white border border-neutral-200 rounded-2xl hover:bg-neutral-50 transition-all shadow-sm hover:shadow-md active:scale-95 group"
+                  className="p-3 bg-white dark:bg-gray-900 border border-neutral-200 rounded-2xl hover:bg-neutral-50 transition-all shadow-sm hover:shadow-md active:scale-95 group"
                 >
                   <ArrowLeft size={22} className="text-neutral-600 group-hover:text-indigo-600 transition-colors" />
                 </Link>
@@ -185,7 +185,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                     "flex items-center gap-2 px-5 py-2.5 text-sm font-bold border rounded-xl transition-all shadow-sm group",
                     isPreviewOpen 
                       ? "bg-indigo-600 border-indigo-600 text-white" 
-                      : "bg-white border-neutral-200 text-neutral-700 hover:bg-neutral-50"
+                      : "bg-white dark:bg-gray-900 border-neutral-200 text-neutral-700 hover:bg-neutral-50"
                   )}
                 >
                   {isPreviewOpen ? <EyeOff size={18} /> : <Eye size={18} className="text-neutral-400 group-hover:text-indigo-600" />}
@@ -194,7 +194,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                 <Link
                   href={`/products/${watchedValues.slug}`}
                   target="_blank"
-                  className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-neutral-700 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-all shadow-sm group"
+                  className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-neutral-700 bg-white dark:bg-gray-900 border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-all shadow-sm group"
                 >
                   <ExternalLink size={18} className="text-neutral-400 group-hover:text-indigo-600" />
                   View on Store
@@ -207,21 +207,21 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
         <div className="px-6 grid grid-cols-1 gap-8">
           <div className="space-y-8">
             <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
-              <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 shadow-sm">
-                <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                   <Info size={20} className="text-indigo-600" /> General
                   Information
                 </h2>
                 <div className="space-y-6">
                   {/* Name */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Product Name
                     </label>
                     <input
                       {...form.register("name")}
                       onChange={handleNameChange}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none transition-all"
                     />
                     {form.formState.errors.name && (
                       <p className="text-red-500 text-xs">
@@ -231,7 +231,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
                       Slug <span className="text-red-500">*</span>
                     </label>
                     <div className="relative group flex items-center gap-2">
@@ -241,7 +241,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                         </span>
                         <input
                           {...form.register("slug")}
-                          className="w-full pl-24 pr-10 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none font-mono text-sm text-indigo-600"
+                          className="w-full pl-24 pr-10 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none font-mono text-sm text-indigo-600"
                         />
                         <button
                           type="button"
@@ -267,7 +267,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                         <Link
                           href={`/products/${watchedValues.slug}`}
                           target="_blank"
-                          className="p-3 border border-gray-200 bg-white rounded-xl hover:bg-gray-50 text-indigo-600 transition-colors"
+                          className="p-3 border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 text-indigo-600 transition-colors"
                         >
                           <ExternalLink size={18} />
                         </Link>
@@ -276,7 +276,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Category <span className="text-red-500">*</span>
                     </label>
                     <div className="flex gap-3">
@@ -287,7 +287,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                         />
                         <select
                           {...form.register("categoryId")}
-                          className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none appearance-none transition-all cursor-pointer"
+                          className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none appearance-none transition-all cursor-pointer"
                         >
                           <option value="">Select a category...</option>
                           {categories.map((cat) => (
@@ -313,7 +313,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                       <button
                         type="button"
                         onClick={fetchCategories}
-                        className="p-3 border border-gray-200 bg-white rounded-xl hover:bg-gray-50 text-gray-500 transition-colors"
+                        className="p-3 border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-500 dark:text-gray-400 transition-colors"
                       >
                         <RefreshCw size={18} />
                       </button>
@@ -326,13 +326,13 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Description
                     </label>
                     <textarea
                       {...form.register("description")}
                       rows={5}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none resize-none"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none resize-none"
                     />
                     {form.formState.errors.description && (
                       <p className="text-red-500 text-xs">
@@ -343,11 +343,11 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                 </div>
               </div>
 
-                <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 shadow-sm relative overflow-hidden">
+                <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
                   <Zap size={80} className="text-indigo-600" />
                 </div>
-                <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                   <Zap size={20} className="text-indigo-600" /> Technical Specifications
                 </h2>
                 
@@ -368,7 +368,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                               "px-4 py-3 rounded-xl border text-sm font-bold transition-all flex items-center justify-center gap-2",
                               watchedValues.switchType === type
                                 ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200"
-                                : "bg-white border-gray-200 text-gray-500 hover:border-indigo-200"
+                                : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-500 dark:text-gray-400 hover:border-indigo-200"
                             )}
                           >
                             {watchedValues.switchType === type && <Zap size={14} fill="currentColor" />}
@@ -379,7 +379,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                       <input 
                         {...form.register("switchType")}
                         placeholder="Other switch type..."
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                       />
                     </div>
 
@@ -392,13 +392,13 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                         {watchedValues.colors?.map((color: string, index: number) => (
                           <div 
                             key={index}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg group animate-in fade-in zoom-in duration-200"
+                            className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-800 rounded-lg group animate-in fade-in zoom-in duration-200"
                           >
                             <div 
                                className="w-3 h-3 rounded-full border border-gray-300"
                                style={{ backgroundColor: color.toLowerCase() }}
                             />
-                            <span className="text-xs font-bold text-gray-700 uppercase tracking-tighter">{color}</span>
+                            <span className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tighter">{color}</span>
                             <button
                               type="button"
                               onClick={() => {
@@ -420,7 +420,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                         <input 
                           id="color-input-edit"
                           placeholder="Add color (e.g. Red, #FF0000)"
-                          className="flex-1 px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                          className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
                               e.preventDefault();
@@ -449,7 +449,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                               input.value = "";
                             }
                           }}
-                          className="p-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-100 text-indigo-600 transition-all"
+                          className="p-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-indigo-600 transition-all"
                         >
                           <Plus size={18} />
                         </button>
@@ -457,24 +457,24 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                     </div>
                   </div>
 
-                  <hr className="border-gray-100" />
+                  <hr className="border-gray-100 dark:border-gray-800" />
 
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <label className="text-sm font-black text-gray-900 uppercase tracking-tighter block">
+                        <label className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter block">
                           Technical Index Matrix
                         </label>
-                        <p className="text-xs text-gray-500">Edit parameters used in the comparison matrix.</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Edit parameters used in the comparison matrix.</p>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {Object.entries(watchedValues.specs || {}).map(([key, value]) => (
-                        <div key={key} className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100 group">
+                        <div key={key} className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800 group">
                            <div className="flex-1 min-w-0">
                              <div className="text-[10px] font-black text-indigo-600 uppercase tracking-widest truncate">{key}</div>
-                             <div className="text-sm font-bold text-gray-900 truncate">{value as string}</div>
+                             <div className="text-sm font-bold text-gray-900 dark:text-white truncate">{value as string}</div>
                            </div>
                            <button
                              type="button"
@@ -495,12 +495,12 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                        <input 
                         id="spec-key-edit"
                         placeholder="Key (e.g. Brand)"
-                        className="flex-1 px-4 py-2 text-sm font-bold rounded-xl border border-gray-200 outline-none focus:border-indigo-500"
+                        className="flex-1 px-4 py-2 text-sm font-bold rounded-xl border border-gray-200 dark:border-gray-800 outline-none focus:border-indigo-500"
                        />
                        <input 
                         id="spec-value-edit"
                         placeholder="Value (e.g. Logitech)"
-                        className="flex-1 px-4 py-2 text-sm font-bold rounded-xl border border-gray-200 outline-none focus:border-indigo-500"
+                        className="flex-1 px-4 py-2 text-sm font-bold rounded-xl border border-gray-200 dark:border-gray-800 outline-none focus:border-indigo-500"
                         onKeyDown={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
@@ -544,8 +544,8 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                 </div>
               </div>
 
-              <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 shadow-sm">
-                <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                   <Cpu size={20} className="text-indigo-600" /> Advanced Technical Index
                 </h2>
                 
@@ -555,7 +555,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                     <input 
                       {...form.register("brand")}
                       placeholder="e.g. Logitech, Razer"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -564,7 +564,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                     <input 
                       {...form.register("sku")}
                       placeholder="e.g. G-PRO-WL-01"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -572,7 +572,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                     <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Availability Status</label>
                     <select
                       {...form.register("availability")}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold appearance-none cursor-pointer"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold appearance-none cursor-pointer"
                     >
                       <option value="In Stock">In Stock</option>
                       <option value="Out of Stock">Out of Stock</option>
@@ -586,7 +586,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                     <input 
                       {...form.register("sensor")}
                       placeholder="e.g. HERO 25K, Focus Pro"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -595,7 +595,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                     <input 
                       {...form.register("dpi")}
                       placeholder="e.g. 25,600 DPI"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -604,7 +604,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                     <input 
                       {...form.register("weight")}
                       placeholder="e.g. 63g (Ultra-light)"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -613,7 +613,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                     <input 
                       {...form.register("connectionType")}
                       placeholder="e.g. LIGHTSPEED, Bluetooth"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -622,7 +622,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                     <input 
                       {...form.register("pollingRate")}
                       placeholder="e.g. 1000Hz, 8000Hz"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -631,17 +631,17 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                     <input 
                       {...form.register("warranty")}
                       placeholder="e.g. 2 Year Limited"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 shadow-sm">
-                <h2 className="text-lg font-bold text-gray-900 mb-6">Media</h2>
+              <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Media</h2>
                 <div className="space-y-4">
                   {watchedValues.image ? (
-                    <div className="relative rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 group h-64 w-full flex items-center justify-center">
+                    <div className="relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 group h-64 w-full flex items-center justify-center">
                       <div className="relative h-full w-full">
                         <Image
                           src={watchedValues.image}
@@ -659,7 +659,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                               shouldDirty: true,
                             })
                           }
-                          className="bg-white text-red-500 p-2.5 rounded-xl shadow-lg border border-gray-100 hover:bg-red-50 transition-colors"
+                          className="bg-white dark:bg-gray-900 text-red-500 p-2.5 rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 hover:bg-red-50 transition-colors"
                         >
                           <Trash2 size={18} />
                         </button>
@@ -689,42 +689,42 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 shadow-sm">
-                  <h2 className="text-lg font-bold text-gray-900 mb-6">
+                <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6">
                     Pricing
                   </h2>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 font-bold">
                       $
                     </span>
                     <input
                       type="number"
                       step="0.01"
                       {...form.register("price")}
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none font-bold text-lg"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none font-bold text-lg"
                     />
                   </div>
                 </div>
 
-                <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 shadow-sm">
-                  <h2 className="text-lg font-bold text-gray-900 mb-6">
+                <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6">
                     Inventory
                   </h2>
                   <input
                     type="number"
                     {...form.register("stock")}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none"
                   />
                 </div>
               </div>
 
-              <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 shadow-sm">
-                <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                   <RefreshCw size={20} className="text-indigo-600" /> Status & Scheduling
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-4">
-                    <label className="text-sm font-medium text-gray-700 block">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
                       Product Status
                     </label>
                     <div className="flex items-center gap-4">
@@ -738,30 +738,30 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                       >
                         <span
                           className={cn(
-                            "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                            "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white dark:bg-gray-900 shadow ring-0 transition duration-200 ease-in-out",
                             watchedValues.isActive ? "translate-x-5" : "translate-x-0"
                           )}
                         />
                       </button>
-                      <span className="text-sm font-bold text-gray-900">
+                      <span className="text-sm font-bold text-gray-900 dark:text-white">
                         {watchedValues.isActive ? "Active" : "Disabled"}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Inactive products won&apos;t be visible to customers.
                     </p>
                   </div>
 
                   <div className="space-y-4">
-                    <label className="text-sm font-medium text-gray-700 block">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
                       Scheduled Launch (Optional)
                     </label>
                     <input
                       type="datetime-local"
                       {...form.register("scheduledAt")}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Product will go live automatically at this time.
                     </p>
                   </div>
@@ -783,10 +783,10 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
             )}
 
             <div className={cn(
-              "fixed inset-y-0 right-0 w-full sm:w-[450px] bg-white shadow-2xl z-100 transition-transform duration-500 ease-in-out border-l border-gray-100 flex flex-col",
+              "fixed inset-y-0 right-0 w-full sm:w-[450px] bg-white dark:bg-gray-900 shadow-2xl z-100 transition-transform duration-500 ease-in-out border-l border-gray-100 dark:border-gray-800 flex flex-col",
               isPreviewOpen ? "translate-x-0" : "translate-x-full"
             )}>
-              <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-white shrink-0">
+              <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
                     <Eye size={20} />
@@ -806,7 +806,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                   <span className="text-[10px] font-black uppercase tracking-widest">Store Front View</span>
                 </div>
                 <div className="flex justify-center">
-                  <div className="w-full max-w-sm ring-1 ring-gray-100 rounded-3xl overflow-hidden bg-white shadow-xl shadow-indigo-500/5">
+                  <div className="w-full max-w-sm ring-1 ring-gray-100 rounded-3xl overflow-hidden bg-white dark:bg-gray-900 shadow-xl shadow-indigo-500/5">
                     <ProductCard
                       data={{
                         id: product.id,
@@ -852,7 +852,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                   </div>
                 </div>
                 
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+                <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
                   <h4 className="text-xs font-black uppercase tracking-widest text-indigo-600">Quick Stats</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 bg-neutral-50 rounded-xl">
@@ -881,7 +881,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
         isModal && "relative bottom-0 px-0 mt-10 z-0"
       )}>
         <div className={cn(
-          "bg-white/80 backdrop-blur-2xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-4 sm:p-5 rounded-[2rem] flex flex-col sm:flex-row items-center justify-between gap-4 ring-1 ring-black/5",
+          "bg-white dark:bg-gray-900/80 backdrop-blur-2xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-4 sm:p-5 rounded-[2rem] flex flex-col sm:flex-row items-center justify-between gap-4 ring-1 ring-black/5",
           isModal && "rounded-2xl shadow-none border-neutral-100 bg-neutral-50/50 backdrop-blur-none"
         )}>
           <div className="flex items-center gap-4 pl-2">

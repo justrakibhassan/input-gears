@@ -70,7 +70,7 @@ export default async function CustomersPage({
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="h-12 inline-flex items-center gap-2 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-6 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-gray-50 dark:bg-gray-800/50 transition-all shadow-sm dark:shadow-none active:scale-95">
+          <button className="h-12 inline-flex items-center gap-2 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-900 dark:text-white px-6 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all shadow-sm dark:shadow-none active:scale-95">
             <Download size={18} className="text-indigo-600" /> Export List
           </button>
         </div>

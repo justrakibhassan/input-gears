@@ -237,7 +237,7 @@ export default function SettingsForm({ initialData }: SettingsFormProps) {
                         title={c}
                       />
                     ))}
-                    <button className="w-10 h-10 rounded-full border border-gray-300 dark:border-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-800/50 dark:hover:bg-gray-800 transition-colors">
+                    <button className="w-10 h-10 rounded-full border border-gray-300 dark:border-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 dark:hover:bg-gray-800 transition-colors">
                       +
                     </button>
                   </div>
@@ -281,7 +281,7 @@ export default function SettingsForm({ initialData }: SettingsFormProps) {
                       title={c}
                     />
                   ))}
-                  <button className="w-10 h-10 rounded-full border border-gray-300 dark:border-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-800/50 dark:hover:bg-gray-800 transition-colors">
+                  <button className="w-10 h-10 rounded-full border border-gray-300 dark:border-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 dark:hover:bg-gray-800 transition-colors">
                     +
                   </button>
                 </div>
@@ -386,7 +386,7 @@ export default function SettingsForm({ initialData }: SettingsFormProps) {
                 <div key={idx} className="flex items-center justify-between py-3 border-b border-gray-50 dark:border-gray-800 last:border-0">
                   <div>
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300 block">{item.title}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-500 dark:text-gray-400">{item.desc}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{item.desc}</span>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" className="sr-only peer" defaultChecked />

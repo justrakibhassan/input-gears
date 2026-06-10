@@ -228,10 +228,10 @@ export default async function CustomerDetailsPage({
                   <Link
                     key={order.id}
                     href={`/admin/orders/${order.id}`}
-                    className="p-6 flex items-center justify-between hover:bg-gray-50 dark:bg-gray-800/50/50 transition-all group"
+                    className="p-6 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50/50 transition-all group"
                   >
                     <div className="flex items-center gap-6">
-                      <div className="h-14 w-14 rounded-2xl bg-gray-50 flex items-center justify-center text-[10px] font-black text-gray-400 border border-gray-100 dark:border-gray-800 group-hover:bg-white dark:bg-gray-900 group-hover:border-indigo-100 transition-all">
+                      <div className="h-14 w-14 rounded-2xl bg-gray-50 dark:bg-gray-800/50 flex items-center justify-center text-[10px] font-black text-gray-400 border border-gray-100 dark:border-gray-800 group-hover:bg-white dark:hover:bg-gray-900 group-hover:border-indigo-100 transition-all">
                         #{order.orderNumber.slice(-4).toUpperCase()}
                       </div>
                       <div className="flex flex-col">

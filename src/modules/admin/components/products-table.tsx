@@ -260,7 +260,7 @@ export default function ProductsTable({
 
               <button
                 onClick={() => setSelectedIds([])}
-                className="flex items-center gap-2 hover:bg-white dark:bg-gray-900/10 p-2 rounded-xl transition-colors text-xs font-black uppercase tracking-widest"
+                className="flex items-center gap-2 hover:bg-white dark:hover:bg-gray-900/10 p-2 rounded-xl transition-colors text-xs font-black uppercase tracking-widest"
               >
                 <X size={16} />
                 Cancel
@@ -290,7 +290,7 @@ export default function ProductsTable({
                   Image
                 </th>
                 <th
-                  className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:text-white transition-colors"
+                  className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:hover:text-white transition-colors"
                   onClick={() => handleSort("name")}
                 >
                   <div className="flex items-center gap-2">
@@ -298,7 +298,7 @@ export default function ProductsTable({
                   </div>
                 </th>
                 <th
-                  className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:text-white transition-colors"
+                  className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:hover:text-white transition-colors"
                   onClick={() => handleSort("price")}
                 >
                   <div className="flex items-center gap-2">
@@ -306,7 +306,7 @@ export default function ProductsTable({
                   </div>
                 </th>
                 <th
-                  className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:text-white transition-colors"
+                  className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:hover:text-white transition-colors"
                   onClick={() => handleSort("stock")}
                 >
                   <div className="flex items-center gap-2">
@@ -314,7 +314,7 @@ export default function ProductsTable({
                   </div>
                 </th>
                 <th
-                  className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:text-white transition-colors"
+                  className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:hover:text-white transition-colors"
                   onClick={() => handleSort("updatedAt")}
                 >
                   <div className="flex items-center gap-2">
@@ -332,17 +332,17 @@ export default function ProductsTable({
                 // Stock Status Logic
                 let stockStatus = {
                   label: "In Stock",
-                  color: "bg-emerald-50 text-emerald-700 border-emerald-100",
+                  color: "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-500/20",
                 };
                 if (product.stock === 0)
                   stockStatus = {
                     label: "Out of Stock",
-                    color: "bg-red-50 text-red-700 border-red-100",
+                    color: "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-100 dark:border-red-500/20",
                   };
                 else if (product.stock <= 10)
                   stockStatus = {
                     label: "Low Stock",
-                    color: "bg-amber-50 text-amber-700 border-amber-100",
+                    color: "bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-100 dark:border-amber-500/20",
                   };
 
                 return (
@@ -463,7 +463,7 @@ export default function ProductsTable({
                         <Link
                           href={`/products/${product.slug}`}
                           target="_blank"
-                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-white dark:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all"
+                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-white dark:hover:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all"
                           title="View Live"
                         >
                           <Eye size={18} />
@@ -473,12 +473,12 @@ export default function ProductsTable({
                             setSelectedProduct(product);
                             setIsEditModalOpen(true);
                           }}
-                          className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-white dark:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all"
+                          className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-white dark:hover:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all"
                           title="Edit"
                         >
                           <Edit size={18} />
                         </button>
-                        <button className="p-2 text-gray-400 hover:text-gray-900 dark:text-white hover:bg-white dark:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all">
+                        <button className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all">
                           <MoreHorizontal size={18} />
                         </button>
                       </div>
@@ -519,7 +519,7 @@ export default function ProductsTable({
 
       {/* 4. Pagination Footer */}
       {totalCount > 0 && (
-        <div className="px-8 py-6 border-t border-gray-50 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50 dark:bg-gray-800/50/10">
+        <div className="px-8 py-6 border-t border-gray-50 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50 dark:bg-gray-900/50">
           <div className="flex items-center gap-2">
             <Box size={14} className="text-gray-400" />
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
@@ -537,7 +537,7 @@ export default function ProductsTable({
                 params.set("page", (currentPage - 1).toString());
                 router.push(`${pathname}?${params.toString()}`);
               }}
-              className="px-5 py-2 text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-sm dark:shadow-none active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white dark:bg-gray-900 disabled:hover:text-gray-300 disabled:hover:border-gray-100 dark:border-gray-800"
+              className="px-5 py-2 text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-sm dark:shadow-none active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white dark:hover:bg-gray-900 disabled:hover:text-gray-300 disabled:hover:border-gray-100 dark:border-gray-800"
             >
               Prev
             </button>
@@ -554,7 +554,7 @@ export default function ProductsTable({
                 params.set("page", (currentPage + 1).toString());
                 router.push(`${pathname}?${params.toString()}`);
               }}
-              className="px-5 py-2 text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-sm dark:shadow-none active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white dark:bg-gray-900 disabled:hover:text-gray-300 disabled:hover:border-gray-100 dark:border-gray-800"
+              className="px-5 py-2 text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-sm dark:shadow-none active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white dark:hover:bg-gray-900 disabled:hover:text-gray-300 disabled:hover:border-gray-100 dark:border-gray-800"
             >
               Next
             </button>

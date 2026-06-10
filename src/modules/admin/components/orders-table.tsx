@@ -150,7 +150,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
 
               <button
                 onClick={() => setSelectedIds([])}
-                className="flex items-center gap-2 hover:bg-white dark:bg-gray-900/10 p-2 rounded-xl transition-colors text-xs font-black uppercase tracking-widest"
+                className="flex items-center gap-2 hover:bg-white dark:hover:bg-gray-900/10 p-2 rounded-xl transition-colors text-xs font-black uppercase tracking-widest"
               >
                 <X size={16} />
                 Cancel
@@ -173,7 +173,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                 />
               </th>
               <th
-                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:text-white transition-colors"
+                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:hover:text-white transition-colors"
                 onClick={() => handleSort("orderNumber")}
               >
                 <div className="flex items-center gap-2">
@@ -181,7 +181,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                 </div>
               </th>
               <th
-                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:text-white transition-colors"
+                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:hover:text-white transition-colors"
                 onClick={() => handleSort("name")}
               >
                 <div className="flex items-center gap-2">
@@ -189,7 +189,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                 </div>
               </th>
               <th
-                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:text-white transition-colors"
+                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:hover:text-white transition-colors"
                 onClick={() => handleSort("createdAt")}
               >
                 <div className="flex items-center gap-2">
@@ -197,7 +197,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                 </div>
               </th>
               <th
-                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:text-white transition-colors"
+                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:hover:text-white transition-colors"
                 onClick={() => handleSort("totalAmount")}
               >
                 <div className="flex items-center gap-2">
@@ -205,7 +205,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                 </div>
               </th>
               <th
-                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:text-white transition-colors"
+                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:hover:text-white transition-colors"
                 onClick={() => handleSort("paymentStatus")}
               >
                 <div className="flex items-center gap-2">
@@ -213,7 +213,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                 </div>
               </th>
               <th
-                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:text-white transition-colors"
+                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:hover:text-white transition-colors"
                 onClick={() => handleSort("status")}
               >
                 <div className="flex items-center gap-2">
@@ -301,12 +301,12 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                     <div className="flex items-center justify-end gap-2">
                       <Link
                         href={`/admin/orders/${order.id}`}
-                        className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-white dark:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all"
+                        className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all"
                         title="View Details"
                       >
                         <Eye size={18} />
                       </Link>
-                      <button className="p-2 text-gray-400 hover:text-gray-900 dark:text-white hover:bg-white dark:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all">
+                      <button className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all">
                         <MoreHorizontal size={18} />
                       </button>
                     </div>

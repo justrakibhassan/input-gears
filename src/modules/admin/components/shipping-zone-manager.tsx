@@ -142,7 +142,7 @@ export default function ShippingZoneManager({ initialZones }: ShippingZoneManage
           editingId !== zone.id && (
             <div
               key={zone.id}
-              className="group flex items-center justify-between p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:bg-gray-800/50 transition-all"
+              className="group flex items-center justify-between p-4 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all"
             >
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
@@ -156,13 +156,13 @@ export default function ShippingZoneManager({ initialZones }: ShippingZoneManage
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   onClick={() => startEdit(zone)}
-                  className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-white dark:bg-gray-900 rounded-lg transition-all"
+                  className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-900 rounded-lg transition-all"
                 >
                   <Edit2 size={14} />
                 </button>
                 <button
                   onClick={() => handleDelete(zone.id)}
-                  className="p-2 text-gray-400 hover:text-red-600 hover:bg-white dark:bg-gray-900 rounded-lg transition-all"
+                  className="p-2 text-gray-400 hover:text-red-600 hover:bg-white dark:hover:bg-gray-900 rounded-lg transition-all"
                 >
                   <Trash2 size={14} />
                 </button>
