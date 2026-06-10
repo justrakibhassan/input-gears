@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useTransition } from "react";
 import AdminSidebar from "./admin-sidebar";
-import { Menu, Search, Bell, BadgeCheck, ChevronDown } from "lucide-react";
+import { Menu, Search, Bell, BadgeCheck, ChevronDown, Sun, Moon } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useTheme } from "next-themes";
 
 interface AdminLayoutWrapperProps {
   children: React.ReactNode;
@@ -25,6 +26,14 @@ export default function AdminLayoutWrapper({
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const pathname = usePathname();
   const router = useRouter();
+  
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Sync search input with URL
   useEffect(() => {
@@ -123,10 +132,25 @@ export default function AdminLayoutWrapper({
             {/* Search Toggle (Mobile) */}
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="lg:hidden p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-800 rounded-full transition-colors"
+              className="lg:hidden p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800 rounded-full transition-colors"
             >
               <Search size={20} />
             </button>
+
+            {/* Theme Toggle */}
+            {mounted && (
+              <button
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800 rounded-full transition-colors group"
+                aria-label="Toggle Theme"
+              >
+                {theme === "dark" ? (
+                  <Sun size={20} className="group-hover:text-amber-500 transition-colors" />
+                ) : (
+                  <Moon size={20} className="group-hover:text-indigo-600 transition-colors" />
+                )}
+              </button>
+            )}
 
             {/* Notification Bell */}
             <button className="relative p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-800 rounded-full transition-colors group">

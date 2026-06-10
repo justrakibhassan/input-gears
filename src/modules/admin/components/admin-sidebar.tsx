@@ -150,7 +150,8 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const router = useRouter();
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const isCollapsed = mounted ? compactSidebar : false;
@@ -251,7 +252,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                       "flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl transition-all group relative",
                       isActive
                         ? "text-white shadow-lg dark:shadow-none"
-                        : "text-gray-400 hover:bg-white dark:bg-gray-900/10 hover:text-white",
+                        : "text-gray-400 hover:bg-white/10 hover:text-white",
                       isCollapsed && "justify-center px-2"
                     )}
                   >

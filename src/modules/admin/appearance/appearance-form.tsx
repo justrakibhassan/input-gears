@@ -623,7 +623,7 @@ export default function AppearancePage({
                             >
                               {slide.image ? (
                                 <>
-                                  {slide.image.startsWith("http") ? (
+                                  {slide.image.startsWith("http") || slide.image.startsWith("/") || slide.image.startsWith("data:") ? (
                                     <img
                                       src={slide.image}
                                       className="w-full h-full object-cover"

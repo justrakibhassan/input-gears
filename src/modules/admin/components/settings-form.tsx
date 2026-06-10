@@ -289,53 +289,6 @@ export default function SettingsForm({ initialData }: SettingsFormProps) {
               </div>
             </div>
 
-            {/* Display Mode */}
-            <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm dark:shadow-none">
-              <h3 className="font-bold text-gray-900 dark:text-white mb-1">Display mode</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                Sets the overall theme for the admin panel.
-              </p>
-
-              <div className="grid grid-cols-3 gap-4">
-                <button
-                  onClick={() => setTheme("light")}
-                  className={cn(
-                    "p-4 rounded-xl border-2 text-center transition-all flex flex-col items-center justify-center gap-2",
-                    theme === "light"
-                      ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400"
-                      : "border-gray-200 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-800 text-gray-600 dark:text-gray-400"
-                  )}
-                >
-                  <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-1">☀️</div>
-                  <span className="font-bold text-sm">Light</span>
-                </button>
-                <button
-                  onClick={() => setTheme("dark")}
-                  className={cn(
-                    "p-4 rounded-xl border-2 text-center transition-all flex flex-col items-center justify-center gap-2",
-                    theme === "dark"
-                      ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400"
-                      : "border-gray-200 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-800 text-gray-600 dark:text-gray-400"
-                  )}
-                >
-                  <div className="w-12 h-12 rounded-full bg-gray-900 flex items-center justify-center mb-1 text-white">🌙</div>
-                  <span className="font-bold text-sm">Dark</span>
-                </button>
-                <button
-                  onClick={() => setTheme("system")}
-                  className={cn(
-                    "p-4 rounded-xl border-2 text-center transition-all flex flex-col items-center justify-center gap-2",
-                    theme === "system"
-                      ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400"
-                      : "border-gray-200 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-800 text-gray-600 dark:text-gray-400"
-                  )}
-                >
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-gray-100 to-gray-900 flex items-center justify-center mb-1 text-white">💻</div>
-                  <span className="font-bold text-sm">System</span>
-                </button>
-              </div>
-            </div>
-
             {/* Compact Sidebar */}
             <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm dark:shadow-none flex items-center justify-between">
               <div>
