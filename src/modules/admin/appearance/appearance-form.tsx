@@ -267,8 +267,8 @@ export default function AppearancePage({
 
               <button
                 onClick={barForm.handleSubmit(onSaveBar)}
-                disabled={savingBar}
-                className="flex items-center gap-2 px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 disabled:opacity-50 transition-all shadow-md"
+                disabled={savingBar || !barForm.formState.isDirty}
+                className="flex items-center gap-2 px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md"
               >
                 {savingBar ? (
                   <Loader2 className="animate-spin" size={16} />
@@ -415,8 +415,8 @@ export default function AppearancePage({
                 </button>
                 <button
                   onClick={slidesForm.handleSubmit(onSaveSlides)}
-                  disabled={savingSlides}
-                  className="flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-all shadow-md shadow-indigo-200"
+                  disabled={savingSlides || !slidesForm.formState.isDirty}
+                  className="flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-indigo-200"
                 >
                   {savingSlides ? (
                     <Loader2 className="animate-spin" size={16} />

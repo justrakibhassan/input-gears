@@ -10,16 +10,19 @@ import {
   CreditCard,
   Ticket,
   Truck,
+  Paintbrush,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { updateMaintenanceMode, updateTaxRate } from "@/modules/admin/actions";
 import CouponManager from "./coupon-manager";
 import ShippingZoneManager from "./shipping-zone-manager";
 import { Coupon, ShippingZone } from "@prisma/client";
+import { useTheme } from "next-themes";
 
 // Tabs Configuration
 const TABS = [
   { id: "general", label: "General", icon: Store },
+  { id: "appearance", label: "Appearance", icon: Paintbrush },
   { id: "payment", label: "Payment & Currency", icon: CreditCard },
   { id: "shipping", label: "Shipping", icon: Truck }, // New Tab
   { id: "coupons", label: "Coupons & Discounts", icon: Ticket },
@@ -41,6 +44,11 @@ export default function SettingsForm({ initialData }: SettingsFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isMaintenance, setIsMaintenance] = useState(initialData.maintenanceMode);
   const [taxRate, setTaxRate] = useState(initialData.taxRate);
+  const { theme, setTheme } = useTheme();
+
+  const hasChanges =
+    isMaintenance !== initialData.maintenanceMode ||
+    taxRate !== initialData.taxRate;
 
   // Save Function
   const handleSave = async () => {
@@ -222,6 +230,65 @@ export default function SettingsForm({ initialData }: SettingsFormProps) {
           </div>
         )}
 
+        {/* Appearance Settings */}
+        {activeTab === "appearance" && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+              <h3 className="font-bold text-gray-900 mb-1">Admin Panel Theme</h3>
+              <p className="text-sm text-gray-500 mb-6">
+                Choose how the admin dashboard looks.
+              </p>
+
+              <div className="grid grid-cols-3 gap-4">
+                <button
+                  onClick={() => setTheme("light")}
+                  className={cn(
+                    "p-4 rounded-xl border-2 text-center transition-all",
+                    theme === "light"
+                      ? "border-indigo-600 bg-indigo-50 text-indigo-700"
+                      : "border-gray-200 hover:border-indigo-300 text-gray-600"
+                  )}
+                >
+                  <div className="w-8 h-8 mx-auto mb-2 bg-white rounded-full shadow-sm border border-gray-200 flex items-center justify-center">
+                    ☀️
+                  </div>
+                  <span className="text-sm font-medium">Light</span>
+                </button>
+
+                <button
+                  onClick={() => setTheme("dark")}
+                  className={cn(
+                    "p-4 rounded-xl border-2 text-center transition-all",
+                    theme === "dark"
+                      ? "border-indigo-600 bg-indigo-50 text-indigo-700"
+                      : "border-gray-200 hover:border-indigo-300 text-gray-600"
+                  )}
+                >
+                  <div className="w-8 h-8 mx-auto mb-2 bg-gray-900 rounded-full shadow-sm flex items-center justify-center">
+                    🌙
+                  </div>
+                  <span className="text-sm font-medium">Dark</span>
+                </button>
+
+                <button
+                  onClick={() => setTheme("system")}
+                  className={cn(
+                    "p-4 rounded-xl border-2 text-center transition-all",
+                    theme === "system"
+                      ? "border-indigo-600 bg-indigo-50 text-indigo-700"
+                      : "border-gray-200 hover:border-indigo-300 text-gray-600"
+                  )}
+                >
+                  <div className="w-8 h-8 mx-auto mb-2 bg-gradient-to-tr from-gray-900 to-white rounded-full shadow-sm border border-gray-200 flex items-center justify-center">
+                    💻
+                  </div>
+                  <span className="text-sm font-medium">System</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Coupons Management */}
         {activeTab === "coupons" && (
           <CouponManager initialCoupons={initialData.coupons} />
@@ -231,8 +298,8 @@ export default function SettingsForm({ initialData }: SettingsFormProps) {
         <div className="flex justify-end pt-4">
           <button
             onClick={handleSave}
-            disabled={isLoading}
-            className="px-6 py-2.5 bg-gray-900 hover:bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-gray-200 transition-all active:scale-95 disabled:opacity-70 flex items-center gap-2"
+            disabled={isLoading || !hasChanges}
+            className="px-6 py-2.5 bg-gray-900 hover:bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-gray-200 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {isLoading ? (
               "Saving..."
