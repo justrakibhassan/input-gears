@@ -12,7 +12,7 @@ interface HeroPreviewProps {
 
 export default function HeroPreviewCard({ data }: HeroPreviewProps) {
   return (
-    <div className="relative w-full h-[400px] rounded-xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm group">
+    <div className="relative w-full h-[400px] rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-none group">
       {/* Background Image */}
       {data.image ? (
         <Image
@@ -44,7 +44,7 @@ export default function HeroPreviewCard({ data }: HeroPreviewProps) {
 
         {data.link && (
           <div className="pt-4 animate-in fade-in slide-in-from-bottom-5 delay-200">
-            <Button className="rounded-full px-8 bg-white text-black hover:bg-gray-200">
+            <Button className="rounded-full px-8 bg-white dark:bg-gray-900 text-black hover:bg-gray-200">
               Shop Now
             </Button>
           </div>

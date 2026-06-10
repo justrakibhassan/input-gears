@@ -36,10 +36,10 @@ interface StockLogsViewProps {
 
 export default function StockLogsView({ logs }: StockLogsViewProps) {
   return (
-    <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="p-8 border-b border-gray-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="bg-white dark:bg-gray-900 rounded-[32px] border border-gray-100 dark:border-gray-800 shadow-sm dark:shadow-none overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="p-8 border-b border-gray-50 dark:border-gray-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h3 className="text-xl font-black text-gray-900 tracking-tight uppercase flex items-center gap-2">
+          <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight uppercase flex items-center gap-2">
             <History className="text-indigo-600" size={24} />
             Stock History Log
           </h3>
@@ -55,7 +55,7 @@ export default function StockLogsView({ logs }: StockLogsViewProps) {
           <input
             type="text"
             placeholder="Search logs..."
-            className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all"
+            className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 rounded-2xl text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all"
           />
         </div>
       </div>
@@ -63,7 +63,7 @@ export default function StockLogsView({ logs }: StockLogsViewProps) {
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
-            <tr className="bg-gray-50/50 text-gray-400 border-b border-gray-50">
+            <tr className="bg-gray-50 dark:bg-gray-800/50/50 text-gray-400 border-b border-gray-50 dark:border-gray-800">
               <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest">
                 Product
               </th>
@@ -81,7 +81,7 @@ export default function StockLogsView({ logs }: StockLogsViewProps) {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
             {logs.length > 0 ? (
               logs.map((log) => (
                 <tr
@@ -90,7 +90,7 @@ export default function StockLogsView({ logs }: StockLogsViewProps) {
                 >
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden relative shrink-0">
+                      <div className="h-12 w-12 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 overflow-hidden relative shrink-0">
                         {log.product.image ? (
                           <Image
                             src={log.product.image}
@@ -105,7 +105,7 @@ export default function StockLogsView({ logs }: StockLogsViewProps) {
                         )}
                       </div>
                       <div className="flex flex-col min-w-0">
-                        <span className="text-sm font-black text-gray-900 uppercase tracking-tight truncate">
+                        <span className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight truncate">
                           {log.product.name}
                         </span>
                         <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest">
@@ -138,23 +138,23 @@ export default function StockLogsView({ logs }: StockLogsViewProps) {
                     </div>
                   </td>
                   <td className="px-8 py-6">
-                    <span className="text-xs font-bold text-gray-600 uppercase tracking-tight">
+                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-tight">
                       {log.reason || "No reason provided"}
                     </span>
                   </td>
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                      <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400">
                         <User size={14} />
                       </div>
-                      <span className="text-xs font-black text-gray-900 uppercase tracking-tight">
+                      <span className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-tight">
                         {log.user?.name || "System"}
                       </span>
                     </div>
                   </td>
                   <td className="px-8 py-6 text-right">
                     <div className="flex flex-col items-end">
-                      <span className="text-[10px] font-black text-gray-900 uppercase tracking-widest flex items-center gap-1.5">
+                      <span className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-widest flex items-center gap-1.5">
                         <Calendar size={12} className="text-indigo-400" />
                         {new Date(log.createdAt).toLocaleDateString("en-US", {
                           month: "short",

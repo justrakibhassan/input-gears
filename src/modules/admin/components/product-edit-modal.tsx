@@ -21,12 +21,12 @@ export default function ProductEditModal({
 
   return (
     <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 md:p-8 animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-6xl max-h-[90vh] rounded-3xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+      <div className="bg-white dark:bg-gray-900 w-full max-w-6xl max-h-[90vh] rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between px-8 py-5 border-b border-gray-100 bg-gray-50/30">
+        <div className="flex items-center justify-between px-8 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50/30">
           <div>
-            <h3 className="font-bold text-xl text-gray-900">Edit Product</h3>
-            <p className="text-sm text-gray-500">
+            <h3 className="font-bold text-xl text-gray-900 dark:text-white">Edit Product</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Updating:{" "}
               <span className="font-semibold text-indigo-600">
                 {productData.name}
@@ -35,7 +35,7 @@ export default function ProductEditModal({
           </div>
           <button
             onClick={onClose}
-            className="p-2.5 hover:bg-gray-200 rounded-xl transition-all text-gray-500 hover:text-gray-900"
+            className="p-2.5 hover:bg-gray-200 rounded-xl transition-all text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:text-white"
           >
             <X size={20} />
           </button>

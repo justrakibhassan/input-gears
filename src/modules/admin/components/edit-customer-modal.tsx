@@ -82,12 +82,12 @@ export default function EditCustomerModal({
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="bg-white w-full max-w-xl rounded-[40px] overflow-hidden shadow-2xl pointer-events-auto"
+              className="bg-white dark:bg-gray-900 w-full max-w-xl rounded-[40px] overflow-hidden shadow-2xl pointer-events-auto"
             >
               <div className="p-8 sm:p-10">
                 <div className="flex justify-between items-center mb-10">
                   <div>
-                    <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tight">
+                    <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
                       Edit Customer{" "}
                       <span className="text-indigo-600">Profile</span>
                     </h2>
@@ -97,7 +97,7 @@ export default function EditCustomerModal({
                   </div>
                   <button
                     onClick={onClose}
-                    className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-50 rounded-2xl transition-all"
+                    className="p-2 text-gray-400 hover:text-gray-900 dark:text-white hover:bg-gray-50 dark:bg-gray-800/50 rounded-2xl transition-all"
                   >
                     <X size={24} />
                   </button>
@@ -121,7 +121,7 @@ export default function EditCustomerModal({
                         <input
                           {...form.register("name")}
                           placeholder="Ex: John Doe"
-                          className="w-full h-14 bg-gray-50 border-gray-100 border rounded-2xl pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 transition-all outline-none"
+                          className="w-full h-14 bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 border rounded-2xl pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 transition-all outline-none"
                         />
                       </div>
                       {form.formState.errors.name && (
@@ -144,7 +144,7 @@ export default function EditCustomerModal({
                         <input
                           {...form.register("email")}
                           placeholder="john@example.com"
-                          className="w-full h-14 bg-gray-50 border-gray-100 border rounded-2xl pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 transition-all outline-none"
+                          className="w-full h-14 bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 border rounded-2xl pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 transition-all outline-none"
                         />
                       </div>
                       {form.formState.errors.email && (
@@ -167,7 +167,7 @@ export default function EditCustomerModal({
                         <input
                           {...form.register("phone")}
                           placeholder="+880 1xxx-xxxxxx"
-                          className="w-full h-14 bg-gray-50 border-gray-100 border rounded-2xl pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 transition-all outline-none"
+                          className="w-full h-14 bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 border rounded-2xl pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 transition-all outline-none"
                         />
                       </div>
                     </div>
@@ -184,7 +184,7 @@ export default function EditCustomerModal({
                         />
                         <select
                           {...form.register("role")}
-                          className="w-full h-14 bg-gray-50 border-gray-100 border rounded-2xl pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 transition-all outline-none appearance-none cursor-pointer uppercase"
+                          className="w-full h-14 bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 border rounded-2xl pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 transition-all outline-none appearance-none cursor-pointer uppercase"
                         >
                           <option value="USER">User</option>
                           <option value="MANAGER">Manager</option>
@@ -199,14 +199,14 @@ export default function EditCustomerModal({
                     <button
                       type="button"
                       onClick={onClose}
-                      className="flex-1 h-14 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 bg-gray-50 hover:bg-gray-100 hover:text-gray-900 transition-all active:scale-95"
+                      className="flex-1 h-14 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:bg-gray-800 hover:text-gray-900 dark:text-white transition-all active:scale-95"
                     >
                       Discard Changes
                     </button>
                     <button
                       type="submit"
                       disabled={isPending}
-                      className="flex-1 h-14 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="flex-1 h-14 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg dark:shadow-none shadow-indigo-100 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       {isPending ? (
                         <Loader2 size={16} className="animate-spin" />

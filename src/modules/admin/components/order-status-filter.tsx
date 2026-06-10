@@ -19,7 +19,7 @@ export default function OrderStatusFilter() {
   );
 
   return (
-    <div className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors relative">
+    <div className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-gray-800/50 transition-colors relative">
       <Filter size={16} className="text-gray-400" />
       <select
         value={status}

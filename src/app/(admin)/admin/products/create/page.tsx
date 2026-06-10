@@ -204,22 +204,22 @@ export default function CreateProductPage() {
   };
 
   return (
-    <div className="min-h-full flex flex-col bg-gray-50/50 pb-24 md:pb-32">
+    <div className="min-h-full flex flex-col bg-gray-50 dark:bg-gray-800/50/50 pb-24 md:pb-32">
       <div className="w-full flex-1 flex flex-col">
         {/* Header */}
         <div className="pt-8 pb-6 px-6 max-w-[1600px] mx-auto w-full">
           <div className="flex items-center gap-4">
             <Link
               href="/admin/products"
-              className="p-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors shadow-sm"
+              className="p-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-100 dark:bg-gray-800 transition-colors shadow-sm dark:shadow-none"
             >
-              <ArrowLeft size={20} className="text-gray-600" />
+              <ArrowLeft size={20} className="text-gray-600 dark:text-gray-400" />
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Add New Product
               </h1>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Create a new product for your store inventory.
               </p>
             </div>
@@ -227,10 +227,10 @@ export default function CreateProductPage() {
             <button
               onClick={() => setShowPreview(!showPreview)}
               className={cn(
-                "ml-auto flex items-center gap-2 px-4 py-2 rounded-xl border transition-all shadow-sm",
+                "ml-auto flex items-center gap-2 px-4 py-2 rounded-xl border transition-all shadow-sm dark:shadow-none",
                 showPreview 
                   ? "bg-indigo-50 border-indigo-200 text-indigo-600" 
-                  : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                  : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-800/50"
               )}
             >
               {showPreview ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -250,21 +250,21 @@ export default function CreateProductPage() {
           )}>
             <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
               {/* General Info */}
-              <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 shadow-sm">
-                <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-none">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                   <Info size={20} className="text-indigo-600" /> General
                   Information
                 </h2>
                 <div className="space-y-6">
                   {/* Name */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Product Name <span className="text-red-500">*</span>
                     </label>
                     <input
                       {...form.register("name")}
                       onChange={handleNameChange}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none transition-all"
                       placeholder="e.g. Wireless Noise Cancelling Headphones"
                     />
                     {form.formState.errors.name && (
@@ -276,7 +276,7 @@ export default function CreateProductPage() {
 
                   {/* Slug */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
                       Slug (URL) <span className="text-red-500">*</span>
                     </label>
                     <div className="relative group flex items-center gap-2">
@@ -286,10 +286,10 @@ export default function CreateProductPage() {
                         </span>
                         <input
                           {...form.register("slug")}
-                          className={`w-full pl-24 pr-10 py-3 rounded-xl border bg-gray-50 focus:bg-white outline-none font-mono text-sm text-indigo-600 transition-all ${
+                          className={`w-full pl-24 pr-10 py-3 rounded-xl border bg-gray-50 focus:bg-white dark:bg-gray-900 outline-none font-mono text-sm text-indigo-600 transition-all ${
                             form.formState.errors.slug
                               ? "border-red-300 focus:border-red-500"
-                              : "border-gray-200 focus:border-indigo-500"
+                              : "border-gray-200 dark:border-gray-700 focus:border-indigo-500"
                           }`}
                         />
                         <button
@@ -317,7 +317,7 @@ export default function CreateProductPage() {
                         <Link
                           href={`/products/${watchedValues.slug}`}
                           target="_blank"
-                          className="p-3 border border-gray-200 bg-white rounded-xl hover:bg-gray-50 text-indigo-600 transition-colors"
+                          className="p-3 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl hover:bg-gray-50 dark:bg-gray-800/50 text-indigo-600 transition-colors"
                           title="Preview URL in new tab"
                         >
                           <ExternalLink size={18} />
@@ -335,7 +335,7 @@ export default function CreateProductPage() {
 
                   {/* Category Selection */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Category <span className="text-red-500">*</span>
                     </label>
                     <div className="flex gap-3">
@@ -346,10 +346,10 @@ export default function CreateProductPage() {
                         />
                         <select
                           {...form.register("categoryId")}
-                          className={`w-full pl-10 pr-4 py-3 rounded-xl border bg-gray-50 focus:bg-white outline-none appearance-none transition-all cursor-pointer ${
+                          className={`w-full pl-10 pr-4 py-3 rounded-xl border bg-gray-50 focus:bg-white dark:bg-gray-900 outline-none appearance-none transition-all cursor-pointer ${
                             form.formState.errors.categoryId
                               ? "border-red-300 focus:border-red-500"
-                              : "border-gray-200 focus:border-indigo-500"
+                              : "border-gray-200 dark:border-gray-700 focus:border-indigo-500"
                           }`}
                         >
                           <option value="">Select a category...</option>
@@ -376,7 +376,7 @@ export default function CreateProductPage() {
                       <button
                         type="button"
                         onClick={fetchCategories}
-                        className="p-3 border border-gray-200 bg-white rounded-xl hover:bg-gray-50 text-gray-500 transition-colors"
+                        className="p-3 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl hover:bg-gray-50 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 transition-colors"
                         title="Refresh Categories"
                       >
                         <RefreshCw size={18} />
@@ -391,13 +391,13 @@ export default function CreateProductPage() {
 
                   {/* Description */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Description
                     </label>
                     <textarea
                       {...form.register("description")}
                       rows={5}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none resize-none"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none resize-none"
                       placeholder="Detailed description of the product..."
                     />
                     {form.formState.errors.description && (
@@ -410,11 +410,11 @@ export default function CreateProductPage() {
               </div>
 
               {/* Specifications & Variants */}
-              <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 shadow-sm relative overflow-hidden">
+              <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-none relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
                   <Zap size={80} className="text-indigo-600" />
                 </div>
-                <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                   <Zap size={20} className="text-indigo-600" /> Technical Specifications
                 </h2>
                 
@@ -434,8 +434,8 @@ export default function CreateProductPage() {
                             className={cn(
                               "px-4 py-3 rounded-xl border text-sm font-bold transition-all flex items-center justify-center gap-2",
                               watchedValues.switchType === type
-                                ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200"
-                                : "bg-white border-gray-100 text-gray-500 hover:border-indigo-200"
+                                ? "bg-indigo-600 border-indigo-600 text-white shadow-lg dark:shadow-none shadow-indigo-200"
+                                : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-500 dark:text-gray-400 hover:border-indigo-200"
                             )}
                           >
                             {watchedValues.switchType === type && <Zap size={14} fill="currentColor" />}
@@ -446,7 +446,7 @@ export default function CreateProductPage() {
                       <input 
                         {...form.register("switchType")}
                         placeholder="Other switch type..."
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                       />
                     </div>
 
@@ -459,13 +459,13 @@ export default function CreateProductPage() {
                         {watchedValues.colors?.map((color, index) => (
                           <div 
                             key={index}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg group animate-in fade-in zoom-in duration-200"
+                            className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg group animate-in fade-in zoom-in duration-200"
                           >
                             <div 
                                className="w-3 h-3 rounded-full border border-gray-300"
                                style={{ backgroundColor: color.toLowerCase() }}
                             />
-                            <span className="text-xs font-bold text-gray-700 uppercase tracking-tighter">{color}</span>
+                            <span className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tighter">{color}</span>
                             <button
                               type="button"
                               onClick={() => {
@@ -487,7 +487,7 @@ export default function CreateProductPage() {
                         <input 
                           id="color-input"
                           placeholder="Add color (e.g. Red, #FF0000)"
-                          className="flex-1 px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                          className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
                               e.preventDefault();
@@ -516,7 +516,7 @@ export default function CreateProductPage() {
                               input.value = "";
                             }
                           }}
-                          className="p-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-100 text-indigo-600 transition-all"
+                          className="p-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-100 dark:bg-gray-800 text-indigo-600 transition-all"
                         >
                           <Plus size={18} />
                         </button>
@@ -524,16 +524,16 @@ export default function CreateProductPage() {
                     </div>
                   </div>
 
-                  <hr className="border-gray-100" />
+                  <hr className="border-gray-100 dark:border-gray-800" />
 
                   {/* Matrix Specifications Editor */}
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <label className="text-sm font-black text-gray-900 uppercase tracking-tighter block">
+                        <label className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter block">
                           Technical Index Matrix
                         </label>
-                        <p className="text-xs text-gray-500">Add parameters used in the comparison matrix.</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Add parameters used in the comparison matrix.</p>
                       </div>
                       <Link 
                         href="/admin/products/compare-preview"
@@ -546,10 +546,10 @@ export default function CreateProductPage() {
                     {/* Active Specs List */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {Object.entries(watchedValues.specs || {}).map(([key, value]) => (
-                        <div key={key} className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100 group">
+                        <div key={key} className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800 group">
                            <div className="flex-1 min-w-0">
                              <div className="text-[10px] font-black text-indigo-600 uppercase tracking-widest truncate">{key}</div>
-                             <div className="text-sm font-bold text-gray-900 truncate">{value as string}</div>
+                             <div className="text-sm font-bold text-gray-900 dark:text-white truncate">{value as string}</div>
                            </div>
                            <button
                              type="button"
@@ -571,12 +571,12 @@ export default function CreateProductPage() {
                        <input 
                         id="spec-key"
                         placeholder="Key (e.g. Brand)"
-                        className="flex-1 px-4 py-2 text-sm font-bold rounded-xl border border-gray-200 outline-none focus:border-indigo-500"
+                        className="flex-1 px-4 py-2 text-sm font-bold rounded-xl border border-gray-200 dark:border-gray-700 outline-none focus:border-indigo-500"
                        />
                        <input 
                         id="spec-value"
                         placeholder="Value (e.g. Logitech)"
-                        className="flex-1 px-4 py-2 text-sm font-bold rounded-xl border border-gray-200 outline-none focus:border-indigo-500"
+                        className="flex-1 px-4 py-2 text-sm font-bold rounded-xl border border-gray-200 dark:border-gray-700 outline-none focus:border-indigo-500"
                         onKeyDown={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
@@ -621,8 +621,8 @@ export default function CreateProductPage() {
               </div>
 
               {/* Advanced Technical Specs */}
-              <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 shadow-sm">
-                <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-none">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                   <Cpu size={20} className="text-indigo-600" /> Advanced Technical Index
                 </h2>
                 
@@ -633,7 +633,7 @@ export default function CreateProductPage() {
                     <input 
                       {...form.register("brand")}
                       placeholder="e.g. Logitech, Razer"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -643,7 +643,7 @@ export default function CreateProductPage() {
                     <input 
                       {...form.register("sku")}
                       placeholder="e.g. G-PRO-WL-01"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -652,7 +652,7 @@ export default function CreateProductPage() {
                     <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Availability Status</label>
                     <select
                       {...form.register("availability")}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold appearance-none cursor-pointer"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold appearance-none cursor-pointer"
                     >
                       <option value="In Stock">In Stock</option>
                       <option value="Out of Stock">Out of Stock</option>
@@ -667,7 +667,7 @@ export default function CreateProductPage() {
                     <input 
                       {...form.register("sensor")}
                       placeholder="e.g. HERO 25K, Focus Pro"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -677,7 +677,7 @@ export default function CreateProductPage() {
                     <input 
                       {...form.register("dpi")}
                       placeholder="e.g. 25,600 DPI"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -687,7 +687,7 @@ export default function CreateProductPage() {
                     <input 
                       {...form.register("weight")}
                       placeholder="e.g. 63g (Ultra-light)"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -697,7 +697,7 @@ export default function CreateProductPage() {
                     <input 
                       {...form.register("connectionType")}
                       placeholder="e.g. LIGHTSPEED, Bluetooth"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -707,7 +707,7 @@ export default function CreateProductPage() {
                     <input 
                       {...form.register("pollingRate")}
                       placeholder="e.g. 1000Hz, 8000Hz"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
 
@@ -717,15 +717,15 @@ export default function CreateProductPage() {
                     <input 
                       {...form.register("warranty")}
                       placeholder="e.g. 2 Year Limited"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Media */}
-              <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 shadow-sm">
-                <h2 className="text-lg font-bold text-gray-900 mb-6">Media</h2>
+              <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-none">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Media</h2>
                 <div className="space-y-4">
                   <ImageUpload
                     value={watchedValues.image ? [watchedValues.image] : []}
@@ -747,19 +747,19 @@ export default function CreateProductPage() {
 
               {/* Pricing & Inventory */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 shadow-sm">
-                  <h2 className="text-lg font-bold text-gray-900 mb-6">
+                <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-none">
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6">
                     Pricing
                   </h2>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 font-bold">
                       $
                     </span>
                     <input
                       type="number"
                       step="0.01"
                       {...form.register("price")}
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none font-bold text-lg"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none font-bold text-lg"
                       placeholder="0.00"
                     />
                   </div>
@@ -770,18 +770,18 @@ export default function CreateProductPage() {
                   )}
                 </div>
 
-                <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 shadow-sm">
-                  <h2 className="text-lg font-bold text-gray-900 mb-6">
+                <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-none">
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6">
                     Inventory
                   </h2>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Stock Quantity
                     </label>
                     <input
                       type="number"
                       {...form.register("stock")}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none"
                       placeholder="0"
                     />
                     {form.formState.errors.stock && (
@@ -794,13 +794,13 @@ export default function CreateProductPage() {
               </div>
 
               {/* Status & Schedule */}
-              <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 shadow-sm">
-                <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-none">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                   <RefreshCw size={20} className="text-indigo-600" /> Status & Scheduling
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-4">
-                    <label className="text-sm font-medium text-gray-700 block">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
                       Product Status
                     </label>
                     <div className="flex items-center gap-4">
@@ -814,30 +814,30 @@ export default function CreateProductPage() {
                       >
                         <span
                           className={cn(
-                            "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                            "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white dark:bg-gray-900 shadow ring-0 transition duration-200 ease-in-out",
                             watchedValues.isActive ? "translate-x-5" : "translate-x-0"
                           )}
                         />
                       </button>
-                      <span className="text-sm font-bold text-gray-900">
+                      <span className="text-sm font-bold text-gray-900 dark:text-white">
                         {watchedValues.isActive ? "Active" : "Disabled"}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Inactive products won&apos;t be visible to customers.
                     </p>
                   </div>
 
                   <div className="space-y-4">
-                    <label className="text-sm font-medium text-gray-700 block">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
                       Scheduled Launch (Optional)
                     </label>
                     <input
                       type="datetime-local"
                       {...form.register("scheduledAt")}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
                     />
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Product will go live automatically at this time.
                     </p>
                   </div>
@@ -854,31 +854,31 @@ export default function CreateProductPage() {
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: "100%", opacity: 0 }}
                 transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                className="fixed inset-y-0 right-0 w-full sm:w-[400px] bg-white border-l border-gray-200 shadow-2xl z-50 overflow-y-auto"
+                className="fixed inset-y-0 right-0 w-full sm:w-[400px] bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-700 shadow-2xl z-50 overflow-y-auto"
               >
                 <div className="p-6 space-y-6 pb-32">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-bold text-lg text-gray-900">Live Preview</h3>
+                      <h3 className="font-bold text-lg text-gray-900 dark:text-white">Live Preview</h3>
                       <p className="text-indigo-600 text-xs font-medium">
                         Real-time customer view
                       </p>
                     </div>
                     <button 
                       onClick={() => setShowPreview(false)}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-400"
+                      className="p-2 hover:bg-gray-100 dark:bg-gray-800 rounded-lg transition-colors text-gray-400"
                     >
                       <X size={20} />
                     </button>
                   </div>
 
-                  <div className="bg-linear-to-br from-indigo-900 to-indigo-800 rounded-2xl p-4 text-white shadow-lg">
+                  <div className="bg-linear-to-br from-indigo-900 to-indigo-800 rounded-2xl p-4 text-white shadow-lg dark:shadow-none">
                     <p className="text-indigo-100 text-xs font-medium">
                       This is how customers will see your product on the storefront.
                     </p>
                   </div>
 
-                  <div className="ring-8 ring-gray-50 rounded-[2.5rem] overflow-hidden bg-white shadow-xl border border-gray-100">
+                  <div className="ring-8 ring-gray-50 rounded-[2.5rem] overflow-hidden bg-white dark:bg-gray-900 shadow-xl border border-gray-100 dark:border-gray-800">
                     <ProductCard
                         data={{
                           id: "preview",
@@ -927,14 +927,14 @@ export default function CreateProductPage() {
                     />
                   </div>
 
-                  <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100 text-sm space-y-4 shadow-sm">
-                    <h4 className="font-bold text-gray-900 flex items-center gap-2">
+                  <div className="bg-gray-50 dark:bg-gray-800/50 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 text-sm space-y-4 shadow-sm dark:shadow-none">
+                    <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
                        <Zap size={16} className="text-indigo-600" />
                        Quick Summary
                     </h4>
                     <div className="space-y-3">
-                      <div className="flex justify-between items-center py-2 border-b border-gray-200/50">
-                        <span className="text-gray-500 font-medium text-xs uppercase tracking-wider">Status</span>
+                      <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700/50">
+                        <span className="text-gray-500 dark:text-gray-400 font-medium text-xs uppercase tracking-wider">Status</span>
                         <span className={cn(
                           "font-bold text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full border",
                           watchedValues.isActive 
@@ -944,15 +944,15 @@ export default function CreateProductPage() {
                           {watchedValues.isActive ? "Active" : "Disabled"}
                         </span>
                       </div>
-                      <div className="flex justify-between items-center py-2 border-b border-gray-200/50">
-                        <span className="text-gray-500 font-medium text-xs uppercase tracking-wider">Category</span>
-                        <span className="font-bold text-gray-800">
+                      <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700/50">
+                        <span className="text-gray-500 dark:text-gray-400 font-medium text-xs uppercase tracking-wider">Category</span>
+                        <span className="font-bold text-gray-800 dark:text-gray-200">
                           {categories.find((c) => c.id === watchedValues.categoryId)
                             ?.name || "None"}
                         </span>
                       </div>
                       <div className="flex justify-between items-center py-2">
-                        <span className="text-gray-500 font-medium text-xs uppercase tracking-wider">Price</span>
+                        <span className="text-gray-500 dark:text-gray-400 font-medium text-xs uppercase tracking-wider">Price</span>
                         <span className="font-black text-indigo-600 text-base">
                           ${watchedValues.price?.toString() || "0.00"}
                         </span>
@@ -968,11 +968,11 @@ export default function CreateProductPage() {
 
       {/* Fixed Bottom Action Bar */}
       <div className={cn(
-        "fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-200 p-4 z-40 transition-all duration-500",
+        "fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-200 dark:border-gray-700 p-4 z-40 transition-all duration-500",
         showPreview && "lg:right-[400px]"
       )}>
         <div className="max-w-[1600px] mx-auto flex items-center justify-between lg:pl-72">
-          <div className="hidden sm:flex items-center gap-4 text-sm text-gray-500">
+          <div className="hidden sm:flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
             {form.formState.isDirty
               ? "You have unsaved changes."
               : "Ready to save."}
@@ -983,8 +983,8 @@ export default function CreateProductPage() {
               className={cn(
                 "flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all",
                 showPreview 
-                  ? "bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm" 
-                  : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50"
+                  ? "bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm dark:shadow-none" 
+                  : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-800/50"
               )}
             >
               {showPreview ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -995,14 +995,14 @@ export default function CreateProductPage() {
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
+              className="px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:bg-gray-800/50 transition-colors shadow-sm dark:shadow-none"
             >
               Cancel
             </button>
             <button
               onClick={form.handleSubmit(onSubmit, onInvalid)}
               disabled={isPending}
-              className="px-8 py-2.5 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="px-8 py-2.5 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all shadow-lg dark:shadow-none shadow-indigo-200 flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {isPending ? (
                 <Loader2 className="animate-spin" size={18} />

@@ -207,12 +207,12 @@ export default function AppearancePage({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-32">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-32">
       {/* 1. Sticky Header Toolbar */}
-      <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
+      <div className="sticky top-0 z-30 bg-white dark:bg-gray-900 backdrop-blur-xl border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between shadow-sm dark:shadow-none">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Store Appearance</h1>
-          <p className="text-sm text-gray-500">Customize Homepage & Banners</p>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Store Appearance</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Customize Homepage & Banners</p>
         </div>
 
         <button
@@ -221,7 +221,7 @@ export default function AppearancePage({
           className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all font-medium ${
             showPreview
               ? "bg-indigo-50 border-indigo-200 text-indigo-700 shadow-inner"
-              : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm"
+              : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-gray-800 shadow-sm dark:shadow-none"
           }`}
         >
           {showPreview ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -240,15 +240,15 @@ export default function AppearancePage({
         {/* --- LEFT SIDE: FORMS --- */}
         <div className="space-y-8">
           {/* Top Bar Form */}
-          <section className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm group hover:border-indigo-200 transition-colors">
-            <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
+          <section className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-none group hover:border-indigo-200 transition-colors">
+            <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl">
                   <Megaphone size={20} />
                 </div>
                 <div>
                   <div className="flex items-center gap-3">
-                    <h2 className="font-bold text-gray-900">
+                    <h2 className="font-bold text-gray-900 dark:text-white">
                       Top Notification Bar
                     </h2>
                     {/* ✅ Status Badge */}
@@ -259,7 +259,7 @@ export default function AppearancePage({
                       endDate={barForm.watch("topBarEnd")}
                     />
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     Manage announcements & offers.
                   </p>
                 </div>
@@ -268,7 +268,7 @@ export default function AppearancePage({
               <button
                 onClick={barForm.handleSubmit(onSaveBar)}
                 disabled={savingBar || !barForm.formState.isDirty}
-                className="flex items-center gap-2 px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md"
+                className="flex items-center gap-2 px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md dark:shadow-none"
               >
                 {savingBar ? (
                   <Loader2 className="animate-spin" size={16} />
@@ -281,7 +281,7 @@ export default function AppearancePage({
 
             <div className="space-y-6">
               {/* --- CONTROL PANEL --- */}
-              <div className="bg-gray-50 rounded-xl border border-gray-100 overflow-hidden">
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden">
                 {/* 1. Master Switch (Active/Inactive) */}
                 <div className="p-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -294,11 +294,11 @@ export default function AppearancePage({
                     <div>
                       <label
                         htmlFor="barActive"
-                        className="text-sm font-bold text-gray-900 cursor-pointer block"
+                        className="text-sm font-bold text-gray-900 dark:text-white cursor-pointer block"
                       >
                         Enable Notification Bar
                       </label>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         Toggle this to show/hide the bar globally.
                       </p>
                     </div>
@@ -307,7 +307,7 @@ export default function AppearancePage({
 
                 {/* 2. Mode Selection (Visible only if Active) */}
                 {barForm.watch("isActive") && (
-                  <div className="border-t border-gray-200 bg-white p-4 animate-in fade-in slide-in-from-top-1">
+                  <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 animate-in fade-in slide-in-from-top-1">
                     <div className="flex items-center gap-3 mb-4">
                       <input
                         type="checkbox"
@@ -317,7 +317,7 @@ export default function AppearancePage({
                       />
                       <label
                         htmlFor="useSchedule"
-                        className="text-sm font-medium text-gray-700 cursor-pointer select-none"
+                        className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer select-none"
                       >
                         Run on a specific schedule?
                       </label>
@@ -327,25 +327,25 @@ export default function AppearancePage({
                     {barForm.watch("useSchedule") ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-8">
                         <div className="space-y-1">
-                          <label className="text-xs font-bold text-gray-500 uppercase">
+                          <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">
                             Start Time
                           </label>
                           <input
                             type="datetime-local"
                             {...barForm.register("topBarStart")}
                             min={currentDateTime}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:border-amber-500 outline-none"
+                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm focus:border-amber-500 outline-none"
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-xs font-bold text-gray-500 uppercase">
+                          <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">
                             End Time
                           </label>
                           <input
                             type="datetime-local"
                             {...barForm.register("topBarEnd")}
                             min={watchedTopBarStart || currentDateTime}
-                            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:border-amber-500 outline-none"
+                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm focus:border-amber-500 outline-none"
                           />
                           {barForm.formState.errors.topBarEnd && (
                             <p className="text-red-500 text-xs mt-1">
@@ -371,22 +371,22 @@ export default function AppearancePage({
               {/* Text Inputs */}
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-500 uppercase ml-1">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase ml-1">
                     Announcement Text
                   </label>
                   <input
                     {...barForm.register("text")}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:border-indigo-500 outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:border-indigo-500 outline-none transition-all"
                     placeholder="e.g. Summer Sale is Live!"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-500 uppercase ml-1">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase ml-1">
                     Link URL
                   </label>
                   <input
                     {...barForm.register("link")}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm font-mono text-indigo-600 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-mono text-indigo-600 focus:border-indigo-500 outline-none transition-all"
                     placeholder="/products/sale"
                   />
                 </div>
@@ -395,14 +395,14 @@ export default function AppearancePage({
           </section>
 
           {/* Hero Slider Form */}
-          <section className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm group hover:border-indigo-200 transition-colors">
+          <section className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-none group hover:border-indigo-200 transition-colors">
             {/* Slider Header */}
-            <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
+            <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
                   <LayoutTemplate size={20} />
                 </div>
-                <h2 className="font-bold text-gray-900">Hero Slider</h2>
+                <h2 className="font-bold text-gray-900 dark:text-white">Hero Slider</h2>
               </div>
               <div className="flex gap-3">
                 <button
@@ -416,7 +416,7 @@ export default function AppearancePage({
                 <button
                   onClick={slidesForm.handleSubmit(onSaveSlides)}
                   disabled={savingSlides || !slidesForm.formState.isDirty}
-                  className="flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-indigo-200"
+                  className="flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md dark:shadow-none shadow-indigo-200"
                 >
                   {savingSlides ? (
                     <Loader2 className="animate-spin" size={16} />
@@ -445,10 +445,10 @@ export default function AppearancePage({
                     setDraggedOverIndex(null);
                     setDraggedIndex(null);
                   }}
-                  className={`bg-gray-50 p-5 rounded-2xl border transition-all relative group ${
+                  className={`bg-gray-50 dark:bg-gray-800 p-5 rounded-2xl border transition-all relative group ${
                     draggedOverIndex === index
-                      ? "border-indigo-500 bg-indigo-50/50 scale-[1.01] shadow-md shadow-indigo-100/50"
-                      : "border-gray-200 hover:shadow-sm"
+                      ? "border-indigo-500 bg-indigo-50/50 scale-[1.01] shadow-md dark:shadow-none shadow-indigo-100/50"
+                      : "border-gray-200 dark:border-gray-700 hover:shadow-sm dark:shadow-none"
                   } ${draggedIndex === index ? "opacity-40 scale-95 border-dashed border-gray-300" : ""}`}
                 >
                   <div className="flex justify-between items-center mb-4">
@@ -478,7 +478,7 @@ export default function AppearancePage({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Image Upload */}
                     <div className="md:col-span-2 space-y-2">
-                      <label className="text-xs font-bold text-gray-500 uppercase ml-1">
+                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase ml-1">
                         Banner Image
                       </label>
                       <CloudinaryUpload
@@ -505,28 +505,28 @@ export default function AppearancePage({
                     {/* Inputs */}
                     <div className="space-y-4">
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-500 uppercase ml-1">
+                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase ml-1">
                           Title (Optional)
                         </label>
                         <input
                           {...slidesForm.register(`slides.${index}.title`)}
-                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-bold"
+                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-bold"
                           placeholder="Leave empty to hide"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-xs font-bold text-gray-500 uppercase ml-1">
+                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase ml-1">
                           Subtitle (Optional)
                         </label>
                         <input
                           {...slidesForm.register(`slides.${index}.subtitle`)}
-                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm"
+                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm"
                           placeholder="Leave empty to hide"
                         />
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-gray-500 uppercase ml-1">
+                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase ml-1">
                         Redirect Link
                       </label>
                       <div className="relative h-full">
@@ -536,7 +536,7 @@ export default function AppearancePage({
                         />
                         <input
                           {...slidesForm.register(`slides.${index}.link`)}
-                          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-mono text-indigo-600"
+                          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-mono text-indigo-600"
                           placeholder="/collection/mens"
                         />
                       </div>
@@ -561,14 +561,14 @@ export default function AppearancePage({
                 </div>
                 <div className="flex-1 bg-[#3a3a3a] rounded-md flex justify-center py-1">
                   <span className="text-[11px] text-gray-400 font-medium font-sans flex items-center gap-1">
-                    <span className="text-gray-500">🔒</span> inputgears.com
+                    <span className="text-gray-500 dark:text-gray-400">🔒</span> inputgears.com
                   </span>
                 </div>
                 <div className="w-10"></div>
               </div>
 
               {/* Viewport Area */}
-              <div className="bg-white border-x border-b border-gray-200 rounded-b-xl shadow-2xl overflow-hidden h-[70vh] overflow-y-auto no-scrollbar relative">
+              <div className="bg-white dark:bg-gray-900 border-x border-b border-gray-200 dark:border-gray-700 rounded-b-xl shadow-2xl overflow-hidden h-[70vh] overflow-y-auto no-scrollbar relative">
                 {/* 🌏 Top Bar Preview */}
                 <AnimatePresence>
                   {watchedBar.isActive && (
@@ -587,16 +587,16 @@ export default function AppearancePage({
                 </AnimatePresence>
 
                 {/* Navbar Mockup */}
-                <div className="border-b border-gray-100 py-4 px-6 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur-md z-50">
+                <div className="border-b border-gray-100 dark:border-gray-800 py-4 px-6 flex items-center justify-between sticky top-0 bg-white dark:bg-gray-900 backdrop-blur-md z-50">
                   <span className="font-bold text-xl tracking-tighter">
                     INPUT<span className="text-indigo-600">GEARS</span>
                   </span>
                   <div className="hidden lg:flex gap-6 text-xs font-bold uppercase tracking-widest text-gray-400">
-                    <span className="text-gray-900">Home</span>
+                    <span className="text-gray-900 dark:text-white">Home</span>
                     <span>Shop</span>
                     <span>Drop</span>
                   </div>
-                  <div className="flex gap-4 text-gray-600">
+                  <div className="flex gap-4 text-gray-600 dark:text-gray-400">
                     <Search size={18} />
                     <ShoppingBag size={18} />
                     <Menu size={18} className="lg:hidden" />
@@ -604,8 +604,8 @@ export default function AppearancePage({
                 </div>
 
                 {/* 🎭 Hero Banner Preview (Animated) */}
-                <div className="p-4 md:p-6 bg-white">
-                  <div className="relative w-full aspect-16/8 md:aspect-21/8 rounded-2xl md:rounded-3xl overflow-hidden shadow-sm bg-gray-50 group isolate border border-gray-100">
+                <div className="p-4 md:p-6 bg-white dark:bg-gray-900">
+                  <div className="relative w-full aspect-16/8 md:aspect-21/8 rounded-2xl md:rounded-3xl overflow-hidden shadow-sm dark:shadow-none bg-gray-50 dark:bg-gray-800 group isolate border border-gray-100 dark:border-gray-800">
                     <AnimatePresence mode="wait">
                       {watchedSlides.slides.length > 0 ? (
                         watchedSlides.slides.map((slide, index) => {
@@ -650,7 +650,7 @@ export default function AppearancePage({
                                             {slide.title}
                                           </h2>
                                         )}
-                                        <div className="mt-4 px-6 py-2 bg-white text-black rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform">
+                                        <div className="mt-4 px-6 py-2 bg-white dark:bg-gray-900 text-black rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform">
                                            Explore Now
                                         </div>
                                       </div>
@@ -658,7 +658,7 @@ export default function AppearancePage({
                                   )}
                                 </>
                               ) : (
-                                <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-50">
+                                <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-50 dark:bg-gray-800">
                                   <span className="text-[10px] font-black uppercase tracking-widest">Awaiting Visual Asset</span>
                                 </div>
                               )}
@@ -666,7 +666,7 @@ export default function AppearancePage({
                           );
                         })
                       ) : (
-                        <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-50 animate-pulse">
+                        <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-50 dark:bg-gray-800 animate-pulse">
                           <span className="text-[10px] font-black uppercase tracking-widest">No Slides Configured</span>
                         </div>
                       )}
@@ -680,8 +680,8 @@ export default function AppearancePage({
                             key={i}
                             className={`h-1 rounded-full transition-all duration-300 ${
                               i === currentPreviewIndex
-                                ? "w-8 bg-white"
-                                : "w-2 bg-white/40"
+                                ? "w-8 bg-white dark:bg-gray-900"
+                                : "w-2 bg-white dark:bg-gray-900/40"
                             }`}
                           />
                         ))}
@@ -693,15 +693,15 @@ export default function AppearancePage({
                 {/* Page Skeleton for Context */}
                 <div className="px-6 pb-12 space-y-12">
                   <div className="space-y-6">
-                    <div className="h-4 w-48 bg-gray-100 rounded-full" />
+                    <div className="h-4 w-48 bg-gray-100 dark:bg-gray-800 rounded-full" />
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="aspect-square bg-gray-50 rounded-2xl border border-gray-100" />
+                        <div key={i} className="aspect-square bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800" />
                       ))}
                     </div>
                   </div>
                   <div className="grid grid-cols-1 gap-8">
-                    <div className="h-64 bg-gray-50 rounded-[40px] border border-gray-100 flex items-center justify-center">
+                    <div className="h-64 bg-gray-50 dark:bg-gray-800 rounded-[40px] border border-gray-100 dark:border-gray-800 flex items-center justify-center">
                        <span className="text-[10px] font-black text-gray-200 uppercase tracking-widest">Content Container</span>
                     </div>
                   </div>
@@ -709,7 +709,7 @@ export default function AppearancePage({
               </div>
               
               {/* Preview Footer Info */}
-              <div className="mt-4 p-4 bg-white/50 backdrop-blur-md rounded-2xl border border-gray-100 text-center">
+              <div className="mt-4 p-4 bg-white dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-800 text-center">
                  <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">
                    Live Preview Synchronized
                  </p>

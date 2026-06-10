@@ -104,16 +104,16 @@ export default async function ProductsPage({
       {/* 1. Header & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 font-sans tracking-tight">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white font-sans tracking-tight">
             Products
           </h1>
-          <p className="text-sm text-gray-500 font-medium">
+          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
             Manage your store&apos;s inventory and catalog.
           </p>
         </div>
         <Link
           href="/admin/products/create"
-          className="inline-flex items-center gap-2 bg-gray-900 hover:bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-gray-200 active:scale-95"
+          className="inline-flex items-center gap-2 bg-gray-900 hover:bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg dark:shadow-none shadow-gray-200 active:scale-95"
         >
           <Plus size={18} strokeWidth={3} /> Add Product
         </Link>
@@ -121,7 +121,7 @@ export default async function ProductsPage({
 
       {/* 2. Quick Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4 group hover:border-blue-100 transition-all">
+        <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm dark:shadow-none flex items-center gap-4 group hover:border-blue-100 transition-all">
           <div className="p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:scale-110 transition-transform">
             <Package size={20} />
           </div>
@@ -129,12 +129,12 @@ export default async function ProductsPage({
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">
               Total Products
             </p>
-            <h3 className="text-xl font-black text-gray-900 tracking-tighter tabular-nums">
+            <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tighter tabular-nums">
               {totalCount}
             </h3>
           </div>
         </div>
-        <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4 group hover:border-green-100 transition-all">
+        <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm dark:shadow-none flex items-center gap-4 group hover:border-green-100 transition-all">
           <div className="p-3 bg-green-50 text-green-600 rounded-xl group-hover:scale-110 transition-transform">
             <DollarSign size={20} />
           </div>
@@ -142,17 +142,17 @@ export default async function ProductsPage({
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">
               Inventory Value
             </p>
-            <h3 className="text-xl font-black text-gray-900 tracking-tighter tabular-nums">
+            <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tighter tabular-nums">
               ${inventoryValue.toLocaleString()}
             </h3>
           </div>
         </div>
-        <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4 group hover:border-orange-100 transition-all">
+        <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm dark:shadow-none flex items-center gap-4 group hover:border-orange-100 transition-all">
           <div
             className={`p-3 rounded-xl transition-all group-hover:scale-110 ${
               lowStockCount > 0
                 ? "bg-orange-50 text-orange-600"
-                : "bg-gray-50 text-gray-400"
+                : "bg-gray-50 dark:bg-gray-800/50 text-gray-400"
             }`}
           >
             <AlertTriangle size={20} />
@@ -161,7 +161,7 @@ export default async function ProductsPage({
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">
               Low Stock Items
             </p>
-            <h3 className="text-xl font-black text-gray-900 tracking-tighter tabular-nums">
+            <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tighter tabular-nums">
               {lowStockCount}
             </h3>
           </div>
@@ -169,9 +169,9 @@ export default async function ProductsPage({
       </div>
 
       {/* 3. Main Product Table Wrapper */}
-      <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-3xl shadow-sm dark:shadow-none overflow-hidden">
         {/* A. Toolbar (Search & Filter) */}
-        <div className="p-6 border-b border-gray-50 flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-gray-50/30">
+        <div className="p-6 border-b border-gray-50 dark:border-gray-800 flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-gray-50 dark:bg-gray-800/50/30">
           <AdminSearch placeholder="Search by name, SKU..." />
         </div>
 

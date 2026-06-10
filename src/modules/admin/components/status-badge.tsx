@@ -101,7 +101,7 @@ export default function StatusBadge({
 
   if (status === "inactive") {
     return (
-      <div className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 text-gray-500 border border-gray-200 text-[10px] sm:text-[11px] font-semibold tracking-wide whitespace-nowrap", className)}>
+      <div className={cn("inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 text-[10px] sm:text-[11px] font-semibold tracking-wide whitespace-nowrap", className)}>
         <Ban size={12} /> DISABLED
       </div>
     );

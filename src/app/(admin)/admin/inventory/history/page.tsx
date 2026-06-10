@@ -10,7 +10,7 @@ export default async function InventoryHistoryPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tighter uppercase">
+          <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase">
             Inventory Logs
           </h1>
           <div className="flex items-center gap-2 mt-2">
@@ -30,7 +30,7 @@ export default async function InventoryHistoryPage() {
 
         <Link
           href="/admin/products"
-          className="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-lg active:scale-95 shadow-indigo-100"
+          className="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-lg dark:shadow-none active:scale-95 shadow-indigo-100"
         >
           <Box size={16} />
           Manage Stock

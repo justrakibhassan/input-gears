@@ -61,7 +61,7 @@ export default function CategoryModal() {
           e.preventDefault();
           setIsOpen(true);
         }}
-        className="p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors shadow-sm"
+        className="p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors shadow-sm dark:shadow-none"
         title="Quick Add Category"
       >
         <Plus size={18} />
@@ -71,15 +71,15 @@ export default function CategoryModal() {
       {isOpen && (
         <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-100 animate-in fade-in transition-all duration-300" />
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-gray-100 overflow-hidden animate-in zoom-in-95 duration-200 z-101">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-              <h3 className="font-bold text-lg text-gray-900">
+          <div className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden animate-in zoom-in-95 duration-200 z-101">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50/50">
+              <h3 className="font-bold text-lg text-gray-900 dark:text-white">
                 Add New Category
               </h3>
               <button
                 type="button" // ✅ Here too
                 onClick={() => setIsOpen(false)}
-                className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500"
+                className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500 dark:text-gray-400"
               >
                 <X size={18} />
               </button>
@@ -88,13 +88,13 @@ export default function CategoryModal() {
             {/* Note: We are using a div instead of form tag here to avoid nesting issues if parent is a form */}
             <div className="p-6 space-y-4">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Name
                 </label>
                 <input
                   {...form.register("name")}
                   onChange={handleNameChange}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
                   placeholder="e.g. Headphones"
                 />
                 {form.formState.errors.name && (
@@ -105,17 +105,17 @@ export default function CategoryModal() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Slug
                 </label>
                 <input
                   {...form.register("slug")}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 font-mono text-sm text-indigo-600 outline-none"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800/50 font-mono text-sm text-indigo-600 outline-none"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Icon / Image
                 </label>
                 <div className="w-full">
@@ -128,11 +128,11 @@ export default function CategoryModal() {
               </div>
             </div>
 
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+            <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:bg-gray-800 transition-colors"
               >
                 Cancel
               </button>

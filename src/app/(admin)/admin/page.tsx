@@ -114,7 +114,7 @@ export default async function AdminDashboardPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* --- Low Stock Alerts --- */}
       {lowStockProducts.length > 0 && (
-        <div className="bg-red-50 border border-red-100 rounded-[24px] p-6 flex items-center justify-between shadow-sm">
+        <div className="bg-red-50 border border-red-100 rounded-[24px] p-6 flex items-center justify-between shadow-sm dark:shadow-none">
           <div className="flex items-center gap-4">
             <div className="bg-red-500 p-3 rounded-2xl text-white animate-pulse">
               <AlertTriangle size={24} />
@@ -130,7 +130,7 @@ export default async function AdminDashboardPage() {
           </div>
           <Link
             href="/admin/products?stock=low-stock"
-            className="px-5 py-2.5 bg-red-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-800 transition-all shadow-lg active:scale-95"
+            className="px-5 py-2.5 bg-red-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-800 transition-all shadow-lg dark:shadow-none active:scale-95"
           >
             Review Inventory
           </Link>
@@ -147,7 +147,7 @@ export default async function AdminDashboardPage() {
           return (
             <div
               key={i}
-              className="bg-white p-6 rounded-[24px] border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-100/50 transition-all group overflow-hidden relative"
+              className="bg-white dark:bg-gray-900 p-6 rounded-[24px] border border-gray-100 dark:border-gray-800 shadow-sm dark:shadow-none hover:shadow-xl hover:shadow-gray-100/50 transition-all group overflow-hidden relative"
             >
               <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-125 transition-transform duration-700">
                 <stat.icon size={80} />
@@ -166,7 +166,7 @@ export default async function AdminDashboardPage() {
                 <p className="text-xs font-black text-gray-400 uppercase tracking-widest">
                   {stat.title}
                 </p>
-                <h3 className="text-2xl font-black text-gray-900 mt-1 tracking-tight">
+                <h3 className="text-2xl font-black text-gray-900 dark:text-white mt-1 tracking-tight">
                   {stat.value}
                 </h3>
                 <p className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-wide">
@@ -184,10 +184,10 @@ export default async function AdminDashboardPage() {
         <div className="lg:col-span-2 space-y-8">
           {/* Revenue Chart Section */}
           {userRole === "SUPER_ADMIN" && (
-            <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm">
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-[32px] border border-gray-100 dark:border-gray-800 shadow-sm dark:shadow-none">
               <div className="flex items-center justify-between mb-8 px-2">
                 <div>
-                  <h3 className="text-lg font-black text-gray-900 tracking-tight">
+                  <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">
                     Revenue Overview
                   </h3>
                   <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">
@@ -210,7 +210,7 @@ export default async function AdminDashboardPage() {
           {/* Trending Products */}
           <div>
             <div className="flex items-center justify-between mb-5 px-1">
-              <h3 className="text-lg font-black text-gray-900 tracking-tight flex items-center gap-2 uppercase">
+              <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-2 uppercase">
                 <Zap className="text-yellow-500 fill-yellow-500" size={18} />
                 Trending Products
               </h3>
@@ -226,9 +226,9 @@ export default async function AdminDashboardPage() {
               {trendingProducts.map((product, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-4 bg-white p-4 rounded-[24px] border border-gray-100 shadow-sm hover:border-indigo-200 hover:shadow-lg transition-all group cursor-pointer"
+                  className="flex items-center gap-4 bg-white dark:bg-gray-900 p-4 rounded-[24px] border border-gray-100 dark:border-gray-800 shadow-sm dark:shadow-none hover:border-indigo-200 hover:shadow-lg dark:shadow-none transition-all group cursor-pointer"
                 >
-                  <div className="h-20 w-20 bg-gray-50 rounded-[18px] relative overflow-hidden shrink-0 border border-gray-50">
+                  <div className="h-20 w-20 bg-gray-50 dark:bg-gray-800/50 rounded-[18px] relative overflow-hidden shrink-0 border border-gray-50 dark:border-gray-800">
                     {product.image ? (
                       <Image
                         src={product.image}
@@ -243,7 +243,7 @@ export default async function AdminDashboardPage() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-black text-gray-900 truncate group-hover:text-indigo-600 transition-colors uppercase text-sm tracking-tight">
+                    <h4 className="font-black text-gray-900 dark:text-white truncate group-hover:text-indigo-600 transition-colors uppercase text-sm tracking-tight">
                       {product.name}
                     </h4>
                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">
@@ -255,12 +255,12 @@ export default async function AdminDashboardPage() {
                       <span className="text-sm font-black text-indigo-600">
                         ${product.price}
                       </span>
-                      <span className="text-[9px] font-black bg-gray-100 px-2 py-0.5 rounded-full text-gray-500 uppercase tracking-widest">
+                      <span className="text-[9px] font-black bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full text-gray-500 dark:text-gray-400 uppercase tracking-widest">
                         24 sales
                       </span>
                     </div>
                   </div>
-                  <div className="h-10 w-10 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-indigo-600 group-hover:text-white group-hover:rotate-45 transition-all shadow-sm">
+                  <div className="h-10 w-10 rounded-2xl bg-gray-50 dark:bg-gray-800/50 flex items-center justify-center text-gray-400 group-hover:bg-indigo-600 group-hover:text-white group-hover:rotate-45 transition-all shadow-sm dark:shadow-none">
                     <ArrowRight size={18} />
                   </div>
                 </div>
@@ -273,9 +273,9 @@ export default async function AdminDashboardPage() {
         <div className="space-y-8">
           {/* Traffic Source Donut */}
           {userRole === "SUPER_ADMIN" && (
-            <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm p-8">
+            <div className="bg-white dark:bg-gray-900 rounded-[32px] border border-gray-100 dark:border-gray-800 shadow-sm dark:shadow-none p-8">
               <div className="flex items-center justify-between mb-8">
-                <h3 className="font-black text-gray-900 uppercase tracking-tighter text-lg">
+                <h3 className="font-black text-gray-900 dark:text-white uppercase tracking-tighter text-lg">
                   Traffic
                 </h3>
                 <PieChart size={20} className="text-indigo-600" />
@@ -293,11 +293,11 @@ export default async function AdminDashboardPage() {
                       <div
                         className={`w-3 h-3 rounded-full ${data.color} ring-4 ring-transparent group-hover:ring-gray-50 transition-all`}
                       />
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                      <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
                         {data.source}
                       </span>
                     </div>
-                    <span className="text-sm font-black text-gray-900 tracking-tight">
+                    <span className="text-sm font-black text-gray-900 dark:text-white tracking-tight">
                       {data.percent}%
                     </span>
                   </div>
@@ -321,13 +321,13 @@ export default async function AdminDashboardPage() {
 
               <div className="mt-8 flex items-end justify-between">
                 <h4 className="text-4xl font-black tracking-tighter">75%</h4>
-                <span className="text-[10px] font-black uppercase tracking-widest bg-white/20 px-3 py-1 rounded-full">
+                <span className="text-[10px] font-black uppercase tracking-widest bg-white dark:bg-gray-900/20 px-3 py-1 rounded-full">
                   On Track
                 </span>
               </div>
 
-              <div className="mt-4 w-full h-3 bg-white/20 rounded-full overflow-hidden">
-                <div className="h-full bg-white w-3/4 rounded-full" />
+              <div className="mt-4 w-full h-3 bg-white dark:bg-gray-900/20 rounded-full overflow-hidden">
+                <div className="h-full bg-white dark:bg-gray-900 w-3/4 rounded-full" />
               </div>
 
               <p className="mt-6 text-[11px] leading-relaxed font-bold opacity-90">
@@ -340,10 +340,10 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Recent Transactions Section */}
-      <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm overflow-hidden">
-        <div className="p-8 border-b border-gray-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-gray-900 rounded-[32px] border border-gray-100 dark:border-gray-800 shadow-sm dark:shadow-none overflow-hidden">
+        <div className="p-8 border-b border-gray-50 dark:border-gray-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h3 className="text-xl font-black text-gray-900 tracking-tight uppercase">
+            <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight uppercase">
               Recent Transactions
             </h3>
             <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">
@@ -352,7 +352,7 @@ export default async function AdminDashboardPage() {
           </div>
           <Link
             href="/admin/orders"
-            className="group flex items-center gap-2 px-5 py-3 bg-gray-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all active:scale-95 shadow-lg shadow-gray-200"
+            className="group flex items-center gap-2 px-5 py-3 bg-gray-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all active:scale-95 shadow-lg dark:shadow-none shadow-gray-200"
           >
             View All Orders{" "}
             <ArrowRight
@@ -365,7 +365,7 @@ export default async function AdminDashboardPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-gray-50/50 text-gray-400 border-b border-gray-50">
+              <tr className="bg-gray-50 dark:bg-gray-800/50/50 text-gray-400 border-b border-gray-50 dark:border-gray-800">
                 <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest">
                   Order
                 </th>
@@ -383,20 +383,20 @@ export default async function AdminDashboardPage() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
               {recentOrders.map((order) => (
                 <tr
                   key={order.id}
                   className="group hover:bg-indigo-50/30 transition-colors"
                 >
                   <td className="px-8 py-5">
-                    <span className="font-black text-gray-900 text-sm">
+                    <span className="font-black text-gray-900 dark:text-white text-sm">
                       #{order.orderNumber.slice(-6)}
                     </span>
                   </td>
                   <td className="px-8 py-5">
                     <div className="flex flex-col">
-                      <span className="text-sm font-black text-gray-900 uppercase tracking-tight">
+                      <span className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">
                         {order.name || order.user?.name || "Guest User"}
                       </span>
                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
@@ -421,7 +421,7 @@ export default async function AdminDashboardPage() {
                             ? "bg-amber-50 text-amber-600 border-amber-100"
                             : order.status === "DELIVERED"
                             ? "bg-green-50 text-green-600 border-green-100"
-                            : "bg-gray-100 text-gray-500 border-gray-200"
+                            : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700"
                         }`}
                       >
                         {order.status}
@@ -429,7 +429,7 @@ export default async function AdminDashboardPage() {
                     </div>
                   </td>
                   <td className="px-8 py-5 text-right">
-                    <button className="h-9 w-9 inline-flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:bg-white hover:shadow-sm rounded-xl transition-all">
+                    <button className="h-9 w-9 inline-flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:bg-white dark:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all">
                       <MoreHorizontal size={18} />
                     </button>
                   </td>

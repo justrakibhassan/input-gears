@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
+import { useAdminTheme } from "@/store/use-admin-theme";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -139,13 +140,22 @@ interface AdminSidebarProps {
 }
 
 export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { compactSidebar, setCompactSidebar, sidebarColor, accentColor } = useAdminTheme();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const { data: session } = authClient.useSession();
   const userRole = (session?.user as { role?: UserRole })?.role;
   const pathname = usePathname();
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isCollapsed = mounted ? compactSidebar : false;
+  const currentSidebarColor = mounted ? sidebarColor : "#111827";
+  const currentAccentColor = mounted ? accentColor : "#4f46e5";
 
   const handleSignOut = async () => {
     setIsLoggingOut(true);
@@ -162,34 +172,42 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
 
   return (
     <aside
+      style={{ backgroundColor: currentSidebarColor }}
       className={cn(
-        "h-screen bg-gray-900 text-white transition-all duration-300 flex flex-col border-r border-gray-800 z-50",
+        "h-screen text-white transition-all duration-300 flex flex-col border-r border-white/10 z-50",
         isCollapsed ? "w-20" : "w-72",
         "fixed lg:sticky top-0 left-0",
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}
     >
       {/* 1. Logo Area */}
-      <div className="h-16 flex items-center justify-center border-b border-gray-800 relative shrink-0">
+      <div className="h-16 flex items-center justify-center border-b border-white/10 relative shrink-0">
         {isCollapsed ? (
-          <div className="bg-indigo-600 text-white p-1.5 rounded-lg shadow-lg shadow-indigo-900/40">
+          <div 
+            style={{ backgroundColor: currentAccentColor }}
+            className="text-white p-1.5 rounded-lg shadow-lg dark:shadow-none"
+          >
             <Zap size={20} fill="currentColor" />
           </div>
         ) : (
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="bg-indigo-600 text-white p-1.5 rounded-lg transform group-hover:rotate-10 transition-all duration-300">
+            <div 
+              style={{ backgroundColor: currentAccentColor }}
+              className="text-white p-1.5 rounded-lg transform group-hover:rotate-10 transition-all duration-300"
+            >
               <Zap size={18} fill="currentColor" />
             </div>
             <span className="font-bold text-lg tracking-tight">
-              INPUT<span className="text-indigo-500 font-black">GEARS</span>
+              INPUT<span style={{ color: currentAccentColor }} className="font-black">GEARS</span>
             </span>
           </Link>
         )}
 
         {/* Collapse Button (Hidden on Mobile) */}
         <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="absolute -right-3 top-6 bg-indigo-600 rounded-full p-1 text-white shadow-lg hover:bg-indigo-500 transition-colors z-50 hidden lg:block"
+          onClick={() => setCompactSidebar(!isCollapsed)}
+          style={{ backgroundColor: currentAccentColor }}
+          className="absolute -right-3 top-6 rounded-full p-1 text-white shadow-lg dark:shadow-none transition-colors z-50 hidden lg:block hover:brightness-110"
         >
           {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
         </button>
@@ -228,11 +246,12 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                     key={idx}
                     href={item.href!}
                     onClick={onClose}
+                    style={isActive ? { backgroundColor: currentAccentColor } : {}}
                     className={cn(
                       "flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl transition-all group relative",
                       isActive
-                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/20"
-                        : "text-gray-400 hover:bg-gray-800/50 hover:text-white",
+                        ? "text-white shadow-lg dark:shadow-none"
+                        : "text-gray-400 hover:bg-white dark:bg-gray-900/10 hover:text-white",
                       isCollapsed && "justify-center px-2"
                     )}
                   >
@@ -247,7 +266,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                     {!isCollapsed && <span>{item.title}</span>}
 
                     {isCollapsed && (
-                      <div className="absolute left-full ml-6 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-gray-700 pointer-events-none z-100 shadow-xl">
+                      <div className="absolute left-full ml-6 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-gray-700 pointer-events-none z-[100] shadow-xl">
                         {item.title}
                         <div className="absolute top-1/2 -left-1 -mt-1 border-4 border-transparent border-r-gray-700" />
                       </div>
@@ -262,7 +281,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       </nav>
 
       {/* 3. Footer / Logout */}
-      <div className="p-4 border-t border-gray-800 shrink-0">
+      <div className="p-4 border-t border-white/10 shrink-0">
         <button
           onClick={handleSignOut}
           disabled={isLoggingOut}

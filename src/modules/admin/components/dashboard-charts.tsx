@@ -46,7 +46,7 @@ export function RevenueChart({
   const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const displayData = data.length > 0 ? data : revenueData;
 
-  if (!isMounted) return <div className="h-[300px] bg-gray-50/50 animate-pulse rounded-[24px]" />;
+  if (!isMounted) return <div className="h-[300px] bg-gray-50 dark:bg-gray-800/50/50 animate-pulse rounded-[24px]" />;
 
   return (
     <motion.div
@@ -105,7 +105,7 @@ export function RevenueChart({
 export function TrafficDonutChart() {
   const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
 
-  if (!isMounted) return <div className="h-[200px] w-full bg-gray-50/50 animate-pulse rounded-full" />;
+  if (!isMounted) return <div className="h-[200px] w-full bg-gray-50 dark:bg-gray-800/50/50 animate-pulse rounded-full" />;
 
   return (
     <motion.div
@@ -141,7 +141,7 @@ export function TrafficDonutChart() {
         </PieChart>
       </ResponsiveContainer>
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-        <span className="text-xl font-black text-gray-900">12k</span>
+        <span className="text-xl font-black text-gray-900 dark:text-white">12k</span>
         <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
           Visits
         </span>

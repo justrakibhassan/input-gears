@@ -33,8 +33,8 @@ export default async function CategoriesPage() {
       {/* 1. Header & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Categories</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Categories</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Organize your products into catalog groups.
           </p>
         </div>
@@ -44,30 +44,30 @@ export default async function CategoriesPage() {
       {/* 2. Quick Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Total Categories */}
-        <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4 group hover:border-indigo-200 transition-colors">
-          <div className="p-3 rounded-2xl bg-linear-to-br from-indigo-50 to-white border border-indigo-100 shadow-sm group-hover:scale-110 transition-transform">
+        <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-none flex items-center gap-4 group hover:border-indigo-200 transition-colors">
+          <div className="p-3 rounded-2xl bg-linear-to-br from-indigo-50 to-white border border-indigo-100 shadow-sm dark:shadow-none group-hover:scale-110 transition-transform">
             <Layers size={24} />
           </div>
           <div>
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               Total Categories
             </p>
-            <h3 className="text-2xl font-bold text-gray-900">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
               {totalCategories}
             </h3>
           </div>
         </div>
 
         {/* Products Linked */}
-        <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4 group hover:border-emerald-200 transition-colors">
+        <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-none flex items-center gap-4 group hover:border-emerald-200 transition-colors">
           <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:scale-110 transition-transform">
             <Package size={24} />
           </div>
           <div>
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               Products Linked
             </p>
-            <h3 className="text-2xl font-bold text-gray-900">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
               {totalProductsLinked}
             </h3>
           </div>
@@ -75,9 +75,9 @@ export default async function CategoriesPage() {
       </div>
 
       {/* 3. Main Content Wrapper */}
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm dark:shadow-none overflow-hidden">
         {/* Toolbar */}
-        <div className="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50/50">
+        <div className="p-5 border-b border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50 dark:bg-gray-800/50/50">
           <div className="relative max-w-sm w-full">
             <Search
               className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -86,7 +86,7 @@ export default async function CategoriesPage() {
             <input
               type="text"
               placeholder="Search categories..."
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition-all"
+              className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition-all"
             />
           </div>
         </div>
@@ -95,7 +95,7 @@ export default async function CategoriesPage() {
         {categories.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-100">
+              <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 font-medium border-b border-gray-100 dark:border-gray-800">
                 <tr>
                   <th className="px-6 py-4 w-16">Icon</th>
                   <th className="px-6 py-4">Category Name & Description</th>
@@ -104,15 +104,15 @@ export default async function CategoriesPage() {
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
                 {categories.map((category) => (
                   <tr
                     key={category.id}
-                    className="hover:bg-gray-50/80 transition-colors group"
+                    className="hover:bg-gray-50 dark:bg-gray-800/50/80 transition-colors group"
                   >
                     {/* Icon / Image */}
                     <td className="px-6 py-4">
-                      <div className="h-12 w-12 rounded-xl overflow-hidden border border-gray-200 relative bg-white shadow-sm">
+                      <div className="h-12 w-12 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 relative bg-white dark:bg-gray-900 shadow-sm dark:shadow-none">
                         {category.image ? (
                           <Image
                             src={category.image}
@@ -131,7 +131,7 @@ export default async function CategoriesPage() {
 
                     {/* Name & Desc */}
                     <td className="px-6 py-4">
-                      <span className="font-semibold text-gray-900 block">
+                      <span className="font-semibold text-gray-900 dark:text-white block">
                         {category.name}
                       </span>
                       <span className="text-xs text-gray-400 truncate max-w-[250px] block">
@@ -141,7 +141,7 @@ export default async function CategoriesPage() {
 
                     {/* Slug Badge */}
                     <td className="px-6 py-4">
-                      <div className="inline-flex items-center px-2.5 py-1 rounded-md bg-gray-100 text-gray-600 font-mono text-xs border border-gray-200">
+                      <div className="inline-flex items-center px-2.5 py-1 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-mono text-xs border border-gray-200 dark:border-gray-700">
                         /{category.slug}
                       </div>
                     </td>
@@ -154,7 +154,7 @@ export default async function CategoriesPage() {
                              ${
                                category._count.products > 0
                                  ? "bg-indigo-50 text-indigo-600"
-                                 : "bg-gray-100 text-gray-400"
+                                 : "bg-gray-100 dark:bg-gray-800 text-gray-400"
                              }`}
                         >
                           {category._count.products}
@@ -189,13 +189,13 @@ export default async function CategoriesPage() {
         ) : (
           // Empty State
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="h-20 w-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+            <div className="h-20 w-20 bg-gray-50 dark:bg-gray-800/50 rounded-full flex items-center justify-center mb-4">
               <Layers size={32} className="text-gray-300" />
             </div>
-            <h3 className="text-lg font-bold text-gray-900">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
               No categories found
             </h3>
-            <p className="text-gray-500 max-w-xs mx-auto mt-2 mb-6">
+            <p className="text-gray-500 dark:text-gray-400 max-w-xs mx-auto mt-2 mb-6">
               Create categories to organize your products efficiently.
             </p>
             <CategoryModal />

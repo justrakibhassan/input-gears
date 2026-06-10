@@ -50,7 +50,7 @@ export default function OrderStatusSelector({
   // Determine colors
   const activeColor =
     STATUS_OPTIONS.find((s) => s.value === status)?.color ||
-    "bg-gray-100 text-gray-700";
+    "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300";
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newStatus = e.target.value;

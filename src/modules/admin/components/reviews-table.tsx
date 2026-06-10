@@ -98,7 +98,7 @@ export default function ReviewsTable() {
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-2 p-1 bg-gray-100 rounded-xl w-max">
+      <div className="flex gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl w-max">
         {(["ALL", "PENDING", "APPROVED", "REJECTED"] as const).map((f) => (
           <button
             key={f}
@@ -106,8 +106,8 @@ export default function ReviewsTable() {
             className={cn(
               "px-4 py-2 text-xs font-bold rounded-lg transition-all",
               filter === f 
-                ? "bg-white text-gray-900 shadow-sm" 
-                : "text-gray-500 hover:text-gray-900"
+                ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm dark:shadow-none" 
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:text-white"
             )}
           >
             {f}
@@ -115,35 +115,35 @@ export default function ReviewsTable() {
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm dark:shadow-none">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-gray-50/50 border-b border-gray-100">
+            <tr className="bg-gray-50 dark:bg-gray-800/50/50 border-b border-gray-100 dark:border-gray-800">
               <th className="py-4 px-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">User / Product</th>
               <th className="py-4 px-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Rating & Comment</th>
               <th className="py-4 px-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
               <th className="py-4 px-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
             {loading ? (
               [1, 2, 3].map(i => (
                 <tr key={i} className="animate-pulse">
-                  <td colSpan={4} className="p-8 bg-gray-50/20" />
+                  <td colSpan={4} className="p-8 bg-gray-50 dark:bg-gray-800/50/20" />
                 </tr>
               ))
             ) : reviews.length === 0 ? (
               <tr>
-                <td colSpan={4} className="p-12 text-center text-gray-500 italic font-medium">
+                <td colSpan={4} className="p-12 text-center text-gray-500 dark:text-gray-400 italic font-medium">
                   No reviews found.
                 </td>
               </tr>
             ) : (
               reviews.map((review) => (
-                <tr key={review.id} className="group hover:bg-gray-50/30 transition-colors">
+                <tr key={review.id} className="group hover:bg-gray-50 dark:bg-gray-800/50/30 transition-colors">
                   <td className="py-4 px-6">
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2 font-bold text-gray-900">
+                      <div className="flex items-center gap-2 font-bold text-gray-900 dark:text-white">
                         <User size={14} className="text-gray-400" /> {review.user.name}
                       </div>
                       <Link 
@@ -162,11 +162,11 @@ export default function ReviewsTable() {
                           <Star key={s} size={12} className={cn("fill-current", s <= review.rating ? "text-yellow-400" : "text-gray-200")} />
                         ))}
                       </div>
-                      <p className="text-sm text-gray-600 line-clamp-2">{review.comment || <span className="italic">No comment</span>}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{review.comment || <span className="italic">No comment</span>}</p>
                       {review.images.length > 0 && (
                         <div className="flex gap-1">
                           {review.images.map((img: string, i: number) => (
-                            <div key={i} className="relative w-8 h-8 rounded border border-gray-100 overflow-hidden">
+                            <div key={i} className="relative w-8 h-8 rounded border border-gray-100 dark:border-gray-800 overflow-hidden">
                               <NextImage src={img} alt="review" fill className="object-cover" />
                             </div>
                           ))}

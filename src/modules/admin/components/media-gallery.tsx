@@ -51,7 +51,7 @@ export function MediaGallery({ initialMedia }: MediaGalleryProps) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
       {media.map((item) => (
-        <div key={item.id} className="group relative aspect-square rounded-2xl overflow-hidden border bg-gray-50 hover:shadow-xl transition-all">
+        <div key={item.id} className="group relative aspect-square rounded-2xl overflow-hidden border bg-gray-50 dark:bg-gray-800/50 hover:shadow-xl transition-all">
           <Image
             src={item.url}
             alt={item.name || "Media asset"}
@@ -63,7 +63,7 @@ export function MediaGallery({ initialMedia }: MediaGalleryProps) {
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
             <button
               onClick={() => handleCopy(item.url, item.id)}
-              className="p-2 bg-white/20 hover:bg-white/40 rounded-lg text-white transition-colors backdrop-blur-md"
+              className="p-2 bg-white dark:bg-gray-900/20 hover:bg-white dark:bg-gray-900/40 rounded-lg text-white transition-colors backdrop-blur-md"
               title="Copy URL"
             >
               {copiedId === item.id ? <Check size={18} /> : <Copy size={18} />}
@@ -72,7 +72,7 @@ export function MediaGallery({ initialMedia }: MediaGalleryProps) {
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 bg-white/20 hover:bg-white/40 rounded-lg text-white transition-colors backdrop-blur-md"
+              className="p-2 bg-white dark:bg-gray-900/20 hover:bg-white dark:bg-gray-900/40 rounded-lg text-white transition-colors backdrop-blur-md"
               title="View Large"
             >
               <ExternalLink size={18} />

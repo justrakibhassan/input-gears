@@ -157,7 +157,7 @@ export default function ProductsTable({
         />
       )}
       {/* 1. Enhanced Toolbar (Filtering) */}
-      <div className="px-6 py-4 border-b border-gray-50 flex flex-wrap items-center gap-4 bg-gray-50/20">
+      <div className="px-6 py-4 border-b border-gray-50 dark:border-gray-800 flex flex-wrap items-center gap-4 bg-gray-50 dark:bg-gray-800/50/20">
         <div className="flex items-center gap-2">
           <Filter size={14} className="text-gray-400" />
           <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
@@ -168,13 +168,13 @@ export default function ProductsTable({
         {/* Stock History Link */}
         <Link
           href="/admin/inventory/history"
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:border-indigo-200 hover:shadow-sm transition-all group"
+          className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-indigo-200 hover:shadow-sm dark:shadow-none transition-all group"
         >
           <History
             size={14}
             className="text-gray-400 group-hover:text-indigo-600 transition-colors"
           />
-          <span className="text-[10px] font-black uppercase tracking-widest text-gray-600 group-hover:text-indigo-600 transition-colors">
+          <span className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 group-hover:text-indigo-600 transition-colors">
             Stock History
           </span>
         </Link>
@@ -183,7 +183,7 @@ export default function ProductsTable({
         <select
           value={categoryFilter || ""}
           onChange={(e) => setCategoryFilter(e.target.value || null)}
-          className="bg-white border border-gray-200 text-xs font-bold rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-100 outline-none transition-all cursor-pointer"
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs font-bold rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-100 outline-none transition-all cursor-pointer"
         >
           <option value="">All Categories</option>
           {categories.map((c) => (
@@ -197,7 +197,7 @@ export default function ProductsTable({
         <select
           value={stockFilter || ""}
           onChange={(e) => setStockFilter(e.target.value || null)}
-          className="bg-white border border-gray-200 text-xs font-bold rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-100 outline-none transition-all cursor-pointer"
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs font-bold rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-100 outline-none transition-all cursor-pointer"
         >
           <option value="">Stock Status</option>
           <option value="in-stock">In Stock (&gt;10)</option>
@@ -260,7 +260,7 @@ export default function ProductsTable({
 
               <button
                 onClick={() => setSelectedIds([])}
-                className="flex items-center gap-2 hover:bg-white/10 p-2 rounded-xl transition-colors text-xs font-black uppercase tracking-widest"
+                className="flex items-center gap-2 hover:bg-white dark:bg-gray-900/10 p-2 rounded-xl transition-colors text-xs font-black uppercase tracking-widest"
               >
                 <X size={16} />
                 Cancel
@@ -274,7 +274,7 @@ export default function ProductsTable({
       {products.length > 0 ? (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 text-gray-400 font-bold border-b border-gray-100">
+            <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-400 font-bold border-b border-gray-100 dark:border-gray-800">
               <tr>
                 <th className="px-6 py-4 w-12">
                   <div className="relative flex items-center">
@@ -290,7 +290,7 @@ export default function ProductsTable({
                   Image
                 </th>
                 <th
-                  className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 transition-colors"
+                  className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:text-white transition-colors"
                   onClick={() => handleSort("name")}
                 >
                   <div className="flex items-center gap-2">
@@ -298,7 +298,7 @@ export default function ProductsTable({
                   </div>
                 </th>
                 <th
-                  className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 transition-colors"
+                  className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:text-white transition-colors"
                   onClick={() => handleSort("price")}
                 >
                   <div className="flex items-center gap-2">
@@ -306,7 +306,7 @@ export default function ProductsTable({
                   </div>
                 </th>
                 <th
-                  className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 transition-colors"
+                  className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:text-white transition-colors"
                   onClick={() => handleSort("stock")}
                 >
                   <div className="flex items-center gap-2">
@@ -314,7 +314,7 @@ export default function ProductsTable({
                   </div>
                 </th>
                 <th
-                  className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 transition-colors"
+                  className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:text-white transition-colors"
                   onClick={() => handleSort("updatedAt")}
                 >
                   <div className="flex items-center gap-2">
@@ -326,7 +326,7 @@ export default function ProductsTable({
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50/50 font-medium">
+            <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50 font-medium">
               {products.map((product) => {
                 const isSelected = selectedIds.includes(product.id);
                 // Stock Status Logic
@@ -365,7 +365,7 @@ export default function ProductsTable({
 
                     {/* Image */}
                     <td className="px-6 py-5">
-                      <div className="h-12 w-12 bg-gray-50 rounded-xl border border-gray-100 overflow-hidden relative group-hover:scale-105 transition-transform">
+                      <div className="h-12 w-12 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden relative group-hover:scale-105 transition-transform">
                         {product.image ? (
                           <Image
                             src={product.image}
@@ -386,7 +386,7 @@ export default function ProductsTable({
                       <div className="flex flex-col gap-0.5">
                         <Link
                           href={`/admin/products/edit/${product.id}`}
-                          className="font-bold text-gray-900 hover:text-indigo-600 transition-colors uppercase tracking-tight"
+                          className="font-bold text-gray-900 dark:text-white hover:text-indigo-600 transition-colors uppercase tracking-tight"
                         >
                           {product.name}
                         </Link>
@@ -405,7 +405,7 @@ export default function ProductsTable({
                               <RefreshCw size={10} className="animate-spin-slow" /> Active
                             </span>
                           ) : (
-                            <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded-md border border-gray-200">
+                            <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-gray-400 bg-gray-50 dark:bg-gray-800/50 px-1.5 py-0.5 rounded-md border border-gray-200 dark:border-gray-700">
                               Disabled
                             </span>
                           )}
@@ -421,7 +421,7 @@ export default function ProductsTable({
 
                     {/* Price */}
                     <td className="px-6 py-5">
-                      <span className="font-black text-gray-900 text-base">
+                      <span className="font-black text-gray-900 dark:text-white text-base">
                         ${product.price.toFixed(2)}
                       </span>
                     </td>
@@ -463,7 +463,7 @@ export default function ProductsTable({
                         <Link
                           href={`/products/${product.slug}`}
                           target="_blank"
-                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-white hover:shadow-sm rounded-xl transition-all"
+                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-white dark:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all"
                           title="View Live"
                         >
                           <Eye size={18} />
@@ -473,12 +473,12 @@ export default function ProductsTable({
                             setSelectedProduct(product);
                             setIsEditModalOpen(true);
                           }}
-                          className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-white hover:shadow-sm rounded-xl transition-all"
+                          className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-white dark:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all"
                           title="Edit"
                         >
                           <Edit size={18} />
                         </button>
-                        <button className="p-2 text-gray-400 hover:text-gray-900 hover:bg-white hover:shadow-sm rounded-xl transition-all">
+                        <button className="p-2 text-gray-400 hover:text-gray-900 dark:text-white hover:bg-white dark:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all">
                           <MoreHorizontal size={18} />
                         </button>
                       </div>
@@ -492,10 +492,10 @@ export default function ProductsTable({
       ) : (
         // Empty State
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="h-24 w-24 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-gray-100">
+          <div className="h-24 w-24 bg-gray-50 dark:bg-gray-800/50 rounded-full flex items-center justify-center mb-4 border border-gray-100 dark:border-gray-800">
             <Box size={40} className="text-gray-200" />
           </div>
-          <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">
+          <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
             No products found
           </h3>
           <p className="text-gray-400 max-w-sm mx-auto mt-2 mb-8 font-medium text-sm">
@@ -509,7 +509,7 @@ export default function ProductsTable({
                 setStockFilter(null);
                 router.push(pathname);
               }}
-              className="px-6 py-3 bg-gray-900 text-white rounded-2xl font-bold text-sm hover:bg-indigo-600 transition-all shadow-lg active:scale-95"
+              className="px-6 py-3 bg-gray-900 text-white rounded-2xl font-bold text-sm hover:bg-indigo-600 transition-all shadow-lg dark:shadow-none active:scale-95"
             >
               Clear All Filters
             </button>
@@ -519,12 +519,12 @@ export default function ProductsTable({
 
       {/* 4. Pagination Footer */}
       {totalCount > 0 && (
-        <div className="px-8 py-6 border-t border-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50/10">
+        <div className="px-8 py-6 border-t border-gray-50 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50 dark:bg-gray-800/50/10">
           <div className="flex items-center gap-2">
             <Box size={14} className="text-gray-400" />
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-              Showing <span className="text-gray-900">{products.length}</span>{" "}
-              of <span className="text-gray-900">{totalCount}</span>{" "}
+              Showing <span className="text-gray-900 dark:text-white">{products.length}</span>{" "}
+              of <span className="text-gray-900 dark:text-white">{totalCount}</span>{" "}
               {totalCount !== allCount ? "Filtered" : ""} Products
             </p>
           </div>
@@ -537,7 +537,7 @@ export default function ProductsTable({
                 params.set("page", (currentPage - 1).toString());
                 router.push(`${pathname}?${params.toString()}`);
               }}
-              className="px-5 py-2 text-[10px] font-black uppercase tracking-widest text-gray-900 bg-white border border-gray-100 rounded-xl hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-sm active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-300 disabled:hover:border-gray-100"
+              className="px-5 py-2 text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-sm dark:shadow-none active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white dark:bg-gray-900 disabled:hover:text-gray-300 disabled:hover:border-gray-100 dark:border-gray-800"
             >
               Prev
             </button>
@@ -554,7 +554,7 @@ export default function ProductsTable({
                 params.set("page", (currentPage + 1).toString());
                 router.push(`${pathname}?${params.toString()}`);
               }}
-              className="px-5 py-2 text-[10px] font-black uppercase tracking-widest text-gray-900 bg-white border border-gray-100 rounded-xl hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-sm active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-300 disabled:hover:border-gray-100"
+              className="px-5 py-2 text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-sm dark:shadow-none active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white dark:bg-gray-900 disabled:hover:text-gray-300 disabled:hover:border-gray-100 dark:border-gray-800"
             >
               Next
             </button>

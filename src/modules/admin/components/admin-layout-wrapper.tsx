@@ -67,7 +67,7 @@ export default function AdminLayoutWrapper({
   }, [isSidebarOpen]);
 
   return (
-    <div className="flex min-h-screen bg-gray-50/50">
+    <div className="flex min-h-screen bg-gray-50/50 dark:bg-gray-950 transition-colors">
       {/* Mobile Backdrop */}
       <div
         className={cn(
@@ -86,17 +86,17 @@ export default function AdminLayoutWrapper({
       {/* 2. Main Content Wrapper */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* --- Modern Header --- */}
-        <header className="h-16 sticky top-0 z-40 flex items-center justify-between px-4 md:px-6 border-b border-gray-200/80 bg-white/80 backdrop-blur-md shadow-sm transition-all">
+        <header className="h-16 sticky top-0 z-40 flex items-center justify-between px-4 md:px-6 border-b border-gray-200 dark:border-gray-700/80 dark:border-gray-800/80 bg-white dark:bg-gray-900/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm dark:shadow-none transition-all">
           {/* Left: Mobile Toggle & Breadcrumb Placeholder */}
           <div className="flex items-center gap-4">
             {/* Mobile Menu Button (Visible only on mobile/tablet) */}
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-all active:scale-95"
+              className="lg:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-800 rounded-xl transition-all active:scale-95"
             >
               <Menu size={20} />
             </button>
-            <h2 className="hidden md:block font-bold text-gray-700 tracking-tight">
+            <h2 className="hidden md:block font-bold text-gray-700 dark:text-gray-200 tracking-tight">
               Admin Dashboard
             </h2>
           </div>
@@ -105,7 +105,7 @@ export default function AdminLayoutWrapper({
           <div className="flex-1 max-w-md mx-4 hidden lg:block">
             <form onSubmit={handleSearch} className="relative group">
               <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 dark:text-gray-400 group-focus-within:text-indigo-500 dark:group-focus-within:text-indigo-400 transition-colors"
                 size={18}
               />
               <input
@@ -113,7 +113,7 @@ export default function AdminLayoutWrapper({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search orders, products..."
-                className="w-full bg-gray-100/50 border border-gray-200 text-sm rounded-xl pl-10 pr-4 py-2.5 outline-none focus:bg-white focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100 transition-all placeholder:text-gray-400"
+                className="w-full bg-gray-100/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 text-sm rounded-xl pl-10 pr-4 py-2.5 outline-none focus:bg-white dark:focus:bg-gray-900 focus:border-indigo-300 dark:focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 dark:focus:ring-indigo-900/20 transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:text-gray-400 text-gray-900 dark:text-gray-100"
               />
             </form>
           </div>
@@ -123,21 +123,21 @@ export default function AdminLayoutWrapper({
             {/* Search Toggle (Mobile) */}
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="lg:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
+              className="lg:hidden p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-800 rounded-full transition-colors"
             >
               <Search size={20} />
             </button>
 
             {/* Notification Bell */}
-            <button className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors group">
-              <Bell size={20} className="group-hover:text-gray-700" />
-              <span className="absolute top-2 right-2 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+            <button className="relative p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-800 rounded-full transition-colors group">
+              <Bell size={20} className="group-hover:text-gray-700 dark:group-hover:text-gray-200" />
+              <span className="absolute top-2 right-2 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-900 animate-pulse"></span>
             </button>
 
             {/* User Profile */}
-            <div className="flex items-center gap-3 pl-2 md:pl-4 border-l border-gray-200 cursor-pointer group">
+            <div className="flex items-center gap-3 pl-2 md:pl-4 border-l border-gray-200 dark:border-gray-800 cursor-pointer group">
               <div className="relative shrink-0">
-                <div className="h-9 w-9 rounded-full bg-indigo-50 border border-indigo-100 overflow-hidden shadow-sm group-hover:ring-2 group-hover:ring-indigo-100 transition-all">
+                <div className="h-9 w-9 rounded-full bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 overflow-hidden shadow-sm dark:shadow-none group-hover:ring-2 group-hover:ring-indigo-100 dark:group-hover:ring-indigo-800 transition-all">
                   {user.image ? (
                     <Image
                       src={user.image}
@@ -147,21 +147,21 @@ export default function AdminLayoutWrapper({
                       className="object-cover"
                     />
                   ) : (
-                    <div className="h-full w-full flex items-center justify-center bg-indigo-100 text-indigo-600 font-bold text-sm">
+                    <div className="h-full w-full flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 font-bold text-sm">
                       {user.name.charAt(0)}
                     </div>
                   )}
                 </div>
-                <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-px shadow-sm ring-1 ring-gray-100">
+                <div className="absolute -bottom-1 -right-1 bg-white dark:bg-gray-900 rounded-full p-px shadow-sm dark:shadow-none ring-1 ring-gray-100 dark:ring-gray-800">
                   <BadgeCheck
                     size={14}
-                    className="text-blue-600 fill-blue-50"
+                    className="text-blue-600 dark:text-blue-400 fill-blue-50 dark:fill-blue-900/30"
                   />
                 </div>
               </div>
               <ChevronDown
                 size={14}
-                className="text-gray-400 hidden sm:block"
+                className="text-gray-400 dark:text-gray-500 dark:text-gray-400 hidden sm:block"
               />
             </div>
           </div>
@@ -170,7 +170,7 @@ export default function AdminLayoutWrapper({
         {/* Mobile Search Overlay */}
         <div
           className={cn(
-            "lg:hidden absolute top-16 left-0 right-0 bg-white border-b border-gray-200 p-4 z-30 transition-all duration-300",
+            "lg:hidden absolute top-16 left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 p-4 z-30 transition-all duration-300",
             isSearchOpen
               ? "opacity-100 translate-y-0 visible"
               : "opacity-0 -translate-y-4 invisible"
@@ -178,7 +178,7 @@ export default function AdminLayoutWrapper({
         >
           <form onSubmit={handleSearch} className="relative">
             <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 dark:text-gray-400"
               size={18}
             />
             <input
@@ -186,14 +186,14 @@ export default function AdminLayoutWrapper({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search..."
-              className="w-full bg-gray-100 border-none rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 transition-all"
+              className="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-all text-gray-900 dark:text-gray-100"
               autoFocus={isSearchOpen}
             />
           </form>
         </div>
 
         {/* Dynamic Page Content */}
-        <main className="p-4 md:p-6 overflow-y-auto h-[calc(100vh-64px)]">
+        <main className="p-4 md:p-6 overflow-y-auto h-[calc(100vh-64px)] text-gray-900 dark:text-gray-100">
           {children}
         </main>
       </div>
@@ -203,30 +203,30 @@ export default function AdminLayoutWrapper({
 
 export function AdminHeaderSkeleton() {
   return (
-    <div className="flex min-h-screen bg-gray-50/50">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-800/50/50">
       {/* Sidebar Placeholder */}
-      <div className="hidden lg:block w-64 bg-white border-r border-gray-200 h-full fixed" />
+      <div className="hidden lg:block w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-full fixed" />
 
       <div className="flex-1 flex flex-col lg:pl-64">
-        <header className="h-16 sticky top-0 z-40 flex items-center justify-between px-4 md:px-6 border-b border-gray-200/80 bg-white/80 backdrop-blur-md shadow-sm">
+        <header className="h-16 sticky top-0 z-40 flex items-center justify-between px-4 md:px-6 border-b border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-900/80 backdrop-blur-md shadow-sm dark:shadow-none">
           <div className="flex items-center gap-4">
-            <div className="h-8 w-8 bg-gray-100 animate-pulse rounded-xl lg:hidden" />
-            <div className="h-4 w-32 bg-gray-100 animate-pulse rounded-full hidden md:block" />
+            <div className="h-8 w-8 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-xl lg:hidden" />
+            <div className="h-4 w-32 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-full hidden md:block" />
           </div>
 
           <div className="flex-1 max-w-md mx-4 hidden lg:block">
-            <div className="h-10 w-full bg-gray-100/50 animate-pulse rounded-xl" />
+            <div className="h-10 w-full bg-gray-100 dark:bg-gray-800/50 animate-pulse rounded-xl" />
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="h-8 w-8 bg-gray-100 animate-pulse rounded-full" />
-            <div className="h-9 w-24 bg-gray-100 animate-pulse rounded-xl" />
+            <div className="h-8 w-8 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-full" />
+            <div className="h-9 w-24 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-xl" />
           </div>
         </header>
         <main className="p-4 md:p-6">
           <div className="space-y-4">
-            <div className="h-8 w-1/4 bg-gray-100 animate-pulse rounded-full" />
-            <div className="h-64 w-full bg-gray-100 animate-pulse rounded-3xl" />
+            <div className="h-8 w-1/4 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-full" />
+            <div className="h-64 w-full bg-gray-100 dark:bg-gray-800 animate-pulse rounded-3xl" />
           </div>
         </main>
       </div>

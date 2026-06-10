@@ -150,7 +150,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
 
               <button
                 onClick={() => setSelectedIds([])}
-                className="flex items-center gap-2 hover:bg-white/10 p-2 rounded-xl transition-colors text-xs font-black uppercase tracking-widest"
+                className="flex items-center gap-2 hover:bg-white dark:bg-gray-900/10 p-2 rounded-xl transition-colors text-xs font-black uppercase tracking-widest"
               >
                 <X size={16} />
                 Cancel
@@ -162,7 +162,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
 
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="bg-gray-50 text-gray-400 font-bold border-b border-gray-100">
+          <thead className="bg-gray-50 dark:bg-gray-800/50 text-gray-400 font-bold border-b border-gray-100 dark:border-gray-800">
             <tr>
               <th className="px-6 py-4 w-12">
                 <input
@@ -173,7 +173,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                 />
               </th>
               <th
-                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 transition-colors"
+                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:text-white transition-colors"
                 onClick={() => handleSort("orderNumber")}
               >
                 <div className="flex items-center gap-2">
@@ -181,7 +181,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                 </div>
               </th>
               <th
-                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 transition-colors"
+                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:text-white transition-colors"
                 onClick={() => handleSort("name")}
               >
                 <div className="flex items-center gap-2">
@@ -189,7 +189,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                 </div>
               </th>
               <th
-                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 transition-colors"
+                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:text-white transition-colors"
                 onClick={() => handleSort("createdAt")}
               >
                 <div className="flex items-center gap-2">
@@ -197,7 +197,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                 </div>
               </th>
               <th
-                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 transition-colors"
+                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:text-white transition-colors"
                 onClick={() => handleSort("totalAmount")}
               >
                 <div className="flex items-center gap-2">
@@ -205,7 +205,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                 </div>
               </th>
               <th
-                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 transition-colors"
+                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:text-white transition-colors"
                 onClick={() => handleSort("paymentStatus")}
               >
                 <div className="flex items-center gap-2">
@@ -213,7 +213,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                 </div>
               </th>
               <th
-                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 transition-colors"
+                className="px-6 py-4 font-black uppercase tracking-widest text-[10px] cursor-pointer hover:text-gray-900 dark:text-white transition-colors"
                 onClick={() => handleSort("status")}
               >
                 <div className="flex items-center gap-2">
@@ -225,7 +225,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
             {orders.map((order) => {
               const isSelected = selectedIds.includes(order.id);
               return (
@@ -245,19 +245,19 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                     />
                   </td>
                   <td className="px-6 py-5">
-                    <span className="font-black text-gray-900 text-sm tracking-tighter">
+                    <span className="font-black text-gray-900 dark:text-white text-sm tracking-tighter">
                       #{order.orderNumber.slice(-6).toUpperCase()}
                     </span>
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-2xl bg-gray-100 flex items-center justify-center text-[10px] font-black text-gray-500 border border-gray-200">
+                      <div className="h-9 w-9 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-[10px] font-black text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
                         {(order.user?.name || order.name || "G")
                           .charAt(0)
                           .toUpperCase()}
                       </div>
                       <div className="flex flex-col">
-                        <span className="font-black text-gray-900 text-sm uppercase tracking-tight">
+                        <span className="font-black text-gray-900 dark:text-white text-sm uppercase tracking-tight">
                           {order.user?.name || order.name || "Guest User"}
                         </span>
                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
@@ -267,7 +267,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                     </div>
                   </td>
                   <td className="px-6 py-5">
-                    <span className="text-xs font-bold text-gray-500 uppercase">
+                    <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">
                       {new Date(order.createdAt).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
@@ -301,12 +301,12 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                     <div className="flex items-center justify-end gap-2">
                       <Link
                         href={`/admin/orders/${order.id}`}
-                        className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-white hover:shadow-sm rounded-xl transition-all"
+                        className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-white dark:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all"
                         title="View Details"
                       >
                         <Eye size={18} />
                       </Link>
-                      <button className="p-2 text-gray-400 hover:text-gray-900 hover:bg-white hover:shadow-sm rounded-xl transition-all">
+                      <button className="p-2 text-gray-400 hover:text-gray-900 dark:text-white hover:bg-white dark:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all">
                         <MoreHorizontal size={18} />
                       </button>
                     </div>
