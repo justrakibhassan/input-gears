@@ -204,7 +204,7 @@ export default function CreateProductPage() {
   };
 
   return (
-    <div className="min-h-full flex flex-col bg-gray-50 dark:bg-gray-800/50/50 pb-24 md:pb-32">
+    <div className="min-h-full flex flex-col bg-gray-50 dark:bg-gray-800/50 pb-24 md:pb-32">
       <div className="w-full flex-1 flex flex-col">
         {/* Header */}
         <div className="pt-8 pb-6 px-6 max-w-[1600px] mx-auto w-full">

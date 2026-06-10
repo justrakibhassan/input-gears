@@ -76,7 +76,7 @@ export default function AdminLayoutWrapper({
   }, [isSidebarOpen]);
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-800/50/50 dark:bg-gray-950 transition-colors">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-800/50 dark:bg-gray-950 transition-colors">
       {/* Mobile Backdrop */}
       <div
         className={cn(
@@ -227,7 +227,7 @@ export default function AdminLayoutWrapper({
 
 export function AdminHeaderSkeleton() {
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-800/50/50">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-800/50">
       {/* Sidebar Placeholder */}
       <div className="hidden lg:block w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-full fixed" />
 

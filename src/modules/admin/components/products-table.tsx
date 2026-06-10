@@ -157,7 +157,7 @@ export default function ProductsTable({
         />
       )}
       {/* 1. Enhanced Toolbar (Filtering) */}
-      <div className="px-6 py-4 border-b border-gray-50 dark:border-gray-800 flex flex-wrap items-center gap-4 bg-gray-50 dark:bg-gray-800/50/20">
+      <div className="px-6 py-4 border-b border-gray-50 dark:border-gray-800 flex flex-wrap items-center gap-4 bg-gray-50 dark:bg-gray-800/50">
         <div className="flex items-center gap-2">
           <Filter size={14} className="text-gray-400" />
           <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">

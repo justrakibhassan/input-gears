@@ -116,7 +116,7 @@ export default function ShippingZoneManager({ initialZones }: ShippingZoneManage
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => { setIsAdding(false); setEditingId(null); }}
-                className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-200 rounded-lg transition-colors"
+                className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
               >
                 <X size={16} />
               </button>

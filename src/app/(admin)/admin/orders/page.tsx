@@ -182,7 +182,7 @@ export default async function OrdersPage({
       {/* 3. Main Order Table Container */}
       <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[32px] shadow-sm dark:shadow-none overflow-hidden">
         {/* Toolbar */}
-        <div className="p-6 border-b border-gray-50 dark:border-gray-800 flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-gray-50 dark:bg-gray-800/50/30">
+        <div className="p-6 border-b border-gray-50 dark:border-gray-800 flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-gray-50 dark:bg-gray-800/50">
           {/* Search */}
           <div className="w-full lg:max-w-md">
             <AdminSearch placeholder="Search Order ID, Customer..." />
@@ -213,7 +213,7 @@ export default async function OrdersPage({
 
         {/* Pagination Footer */}
         {orders.length > 0 && (
-          <div className="px-8 py-6 border-t border-gray-50 dark:border-gray-800 flex items-center justify-between bg-gray-50 dark:bg-gray-800/50/10">
+          <div className="px-8 py-6 border-t border-gray-50 dark:border-gray-800 flex items-center justify-between bg-gray-50 dark:bg-gray-800/50">
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
               Showing{" "}
               <span className="text-gray-900 dark:text-white">{orders.length}</span>{" "}

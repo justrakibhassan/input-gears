@@ -171,7 +171,7 @@ export default async function ProductsPage({
       {/* 3. Main Product Table Wrapper */}
       <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-3xl shadow-sm dark:shadow-none overflow-hidden">
         {/* A. Toolbar (Search & Filter) */}
-        <div className="p-6 border-b border-gray-50 dark:border-gray-800 flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-gray-50 dark:bg-gray-800/50/30">
+        <div className="p-6 border-b border-gray-50 dark:border-gray-800 flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-gray-50 dark:bg-gray-800/50">
           <AdminSearch placeholder="Search by name, SKU..." />
         </div>
 

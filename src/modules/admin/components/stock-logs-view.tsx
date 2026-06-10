@@ -63,7 +63,7 @@ export default function StockLogsView({ logs }: StockLogsViewProps) {
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
-            <tr className="bg-gray-50 dark:bg-gray-800/50/50 text-gray-400 border-b border-gray-50 dark:border-gray-800">
+            <tr className="bg-gray-50 dark:bg-gray-800/50 text-gray-400 border-b border-gray-50 dark:border-gray-800">
               <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest">
                 Product
               </th>

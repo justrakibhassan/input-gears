@@ -200,7 +200,7 @@ export default async function CustomerDetailsPage({
         {/* Right Column: Order History */}
         <div className="lg:col-span-2">
           <div className="bg-white dark:bg-gray-900 rounded-[40px] border border-gray-50 dark:border-gray-800 shadow-sm dark:shadow-none min-h-full overflow-hidden flex flex-col">
-            <div className="p-8 border-b border-gray-50 dark:border-gray-800 flex items-center justify-between bg-gray-50 dark:bg-gray-800/50/30">
+            <div className="p-8 border-b border-gray-50 dark:border-gray-800 flex items-center justify-between bg-gray-50 dark:bg-gray-800/50">
               <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-[0.2em] flex items-center gap-2">
                 <History size={18} className="text-indigo-600" />
                 Purchase History
@@ -228,7 +228,7 @@ export default async function CustomerDetailsPage({
                   <Link
                     key={order.id}
                     href={`/admin/orders/${order.id}`}
-                    className="p-6 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50/50 transition-all group"
+                    className="p-6 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group"
                   >
                     <div className="flex items-center gap-6">
                       <div className="h-14 w-14 rounded-2xl bg-gray-50 dark:bg-gray-800/50 flex items-center justify-center text-[10px] font-black text-gray-400 border border-gray-100 dark:border-gray-800 group-hover:bg-white dark:hover:bg-gray-900 group-hover:border-indigo-100 transition-all">

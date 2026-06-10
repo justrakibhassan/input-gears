@@ -121,7 +121,7 @@ export default async function CustomersPage({
 
       {/* Customer Management Table */}
       <div className="bg-white dark:bg-gray-900 border border-gray-50 dark:border-gray-800 rounded-[40px] shadow-sm dark:shadow-none overflow-hidden">
-        <div className="p-6 border-b border-gray-50 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-gray-50 dark:bg-gray-800/50/30">
+        <div className="p-6 border-b border-gray-50 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-gray-50 dark:bg-gray-800/50">
           <div className="w-full md:max-w-md">
             <AdminSearch placeholder="Search name, email, or digital ID..." />
           </div>

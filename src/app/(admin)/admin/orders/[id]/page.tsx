@@ -105,7 +105,7 @@ export default async function OrderDetailsPage({
         <div className="lg:col-span-2 space-y-8">
           {/* A. Order Items List */}
           <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[32px] shadow-sm dark:shadow-none overflow-hidden">
-            <div className="p-6 border-b border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50/30 flex items-center justify-between">
+            <div className="p-6 border-b border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex items-center justify-between">
               <h2 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest flex items-center gap-2">
                 <ShoppingBag size={14} className="text-indigo-600" />
                 Products Information
@@ -174,7 +174,7 @@ export default async function OrderDetailsPage({
                 ))}
               </div>
             </div>
-            <div className="p-6 border-t border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50/20">
+            <div className="p-6 border-t border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
               <div className="flex justify-between items-center bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 ring-4 ring-gray-50/50">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
@@ -206,7 +206,7 @@ export default async function OrderDetailsPage({
         <div className="space-y-8">
           {/* B. Customer Information */}
           <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[32px] shadow-sm dark:shadow-none overflow-hidden">
-            <div className="p-6 border-b border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50/30 flex items-center justify-between">
+            <div className="p-6 border-b border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex items-center justify-between">
               <h2 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest flex items-center gap-2">
                 <User size={14} className="text-indigo-600" />
                 Customer Contact
@@ -265,14 +265,14 @@ export default async function OrderDetailsPage({
 
           {/* C. Shipping Address */}
           <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[32px] shadow-sm dark:shadow-none overflow-hidden">
-            <div className="p-6 border-b border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50/30">
+            <div className="p-6 border-b border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
               <h2 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest flex items-center gap-2">
                 <MapPin size={14} className="text-indigo-600" />
                 Shipping Address
               </h2>
             </div>
             <div className="p-6">
-              <div className="bg-gray-50 dark:bg-gray-800/50/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 border-dashed">
+              <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 border-dashed">
                 <p className="text-xs font-bold text-gray-600 dark:text-gray-400 leading-relaxed uppercase tracking-tight">
                   {order.address}
                 </p>
@@ -282,7 +282,7 @@ export default async function OrderDetailsPage({
 
           {/* D. Payment Summary */}
           <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[32px] shadow-sm dark:shadow-none overflow-hidden">
-            <div className="p-6 border-b border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50/30 flex items-center justify-between">
+            <div className="p-6 border-b border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex items-center justify-between">
               <h2 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest flex items-center gap-2">
                 <CreditCard size={14} className="text-indigo-600" />
                 Billing Summary

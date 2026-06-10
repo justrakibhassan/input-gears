@@ -118,7 +118,7 @@ export default function ReviewsTable() {
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm dark:shadow-none">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-gray-50 dark:bg-gray-800/50/50 border-b border-gray-100 dark:border-gray-800">
+            <tr className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800">
               <th className="py-4 px-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">User / Product</th>
               <th className="py-4 px-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Rating & Comment</th>
               <th className="py-4 px-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
@@ -129,7 +129,7 @@ export default function ReviewsTable() {
             {loading ? (
               [1, 2, 3].map(i => (
                 <tr key={i} className="animate-pulse">
-                  <td colSpan={4} className="p-8 bg-gray-50 dark:bg-gray-800/50/20" />
+                  <td colSpan={4} className="p-8 bg-gray-50 dark:bg-gray-800/50" />
                 </tr>
               ))
             ) : reviews.length === 0 ? (
@@ -140,7 +140,7 @@ export default function ReviewsTable() {
               </tr>
             ) : (
               reviews.map((review) => (
-                <tr key={review.id} className="group hover:bg-gray-50 dark:hover:bg-gray-800/50/30 transition-colors">
+                <tr key={review.id} className="group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                   <td className="py-4 px-6">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 font-bold text-gray-900 dark:text-white">

@@ -55,7 +55,7 @@ export function MediaLibraryModal({ onSelect, onClose }: MediaLibraryModalProps)
         </div>
 
         {/* Toolbar */}
-        <div className="p-4 border-b bg-gray-50 dark:bg-gray-800/50/50 flex items-center gap-4">
+        <div className="p-4 border-b bg-gray-50 dark:bg-gray-800/50 flex items-center gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
@@ -116,7 +116,7 @@ export function MediaLibraryModal({ onSelect, onClose }: MediaLibraryModalProps)
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t bg-gray-50 dark:bg-gray-800/50/50 flex justify-end gap-3">
+        <div className="p-6 border-t bg-gray-50 dark:bg-gray-800/50 flex justify-end gap-3">
           <button
             onClick={onClose}
             className="px-6 py-2.5 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all"

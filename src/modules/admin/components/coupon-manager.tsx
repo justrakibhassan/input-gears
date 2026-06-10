@@ -130,7 +130,7 @@ export default function CouponManager({ initialCoupons }: CouponManagerProps) {
           className={cn(
             "flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all",
             showAddForm 
-              ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200" 
+              ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700" 
               : "bg-gray-900 text-white hover:bg-indigo-600 shadow-lg dark:shadow-none shadow-gray-200"
           )}
         >
@@ -271,7 +271,7 @@ export default function CouponManager({ initialCoupons }: CouponManagerProps) {
                   </tr>
                 ) : (
                   coupons.map((coupon) => (
-                    <tr key={coupon.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50/50 transition-colors group">
+                    <tr key={coupon.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600 font-mono font-bold text-xs border border-indigo-100">
@@ -329,7 +329,7 @@ export default function CouponManager({ initialCoupons }: CouponManagerProps) {
                       <td className="px-6 py-4 text-right">
                         <button
                           onClick={() => handleDelete(coupon.id)}
-                          className="p-2 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                          className="p-2 text-gray-300 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-all"
                         >
                           <Trash2 size={18} />
                         </button>
