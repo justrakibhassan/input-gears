@@ -11,6 +11,14 @@ import {
   Ticket,
   Truck,
   Paintbrush,
+  Lock,
+  Check,
+  X,
+  Scan,
+  LogOut,
+  Monitor,
+  Smartphone,
+  ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { updateMaintenanceMode, updateTaxRate } from "@/modules/admin/actions";
@@ -199,7 +207,7 @@ export default function SettingsForm({ initialData }: SettingsFormProps) {
                   checked={isMaintenance}
                   onChange={(e) => setIsMaintenance(e.target.checked)}
                 />
-                <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:bg-gray-900 after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
+                <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-gray-900 after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500 dark:peer-checked:bg-red-500"></div>
               </label>
             </div>
           </div>
@@ -304,7 +312,7 @@ export default function SettingsForm({ initialData }: SettingsFormProps) {
                   checked={compactSidebar}
                   onChange={(e) => setCompactSidebar(e.target.checked)}
                 />
-                <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:bg-gray-900 after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-gray-900 after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600 dark:peer-checked:bg-indigo-600"></div>
               </label>
             </div>
 
@@ -390,11 +398,231 @@ export default function SettingsForm({ initialData }: SettingsFormProps) {
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" className="sr-only peer" defaultChecked />
-                    <div className="w-9 h-5 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:bg-gray-900 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
+                    <div className="w-9 h-5 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-gray-900 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600 dark:peer-checked:bg-indigo-600"></div>
                   </label>
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Security Settings */}
+        {activeTab === "security" && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">Security</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                Manage your account security, sessions and access.
+              </p>
+            </div>
+
+            {/* Change password */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm dark:shadow-none relative">
+              <div className="absolute top-6 right-6 text-gray-400">
+                <Lock size={20} />
+              </div>
+              <h3 className="font-bold text-gray-900 dark:text-white mb-1">Change password</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                Use a strong password with letters, numbers and symbols.
+              </p>
+              
+              <div className="space-y-4 max-w-xl">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1.5">
+                    Current password
+                  </label>
+                  <input
+                    type="password"
+                    defaultValue="••••••••••"
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-800 focus:border-indigo-500 outline-none transition-all"
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1.5">
+                      New password
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="Min. 8 characters"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-800 focus:border-indigo-500 outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1.5">
+                      Confirm new password
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="Repeat new password"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-800 focus:border-indigo-500 outline-none transition-all"
+                    />
+                  </div>
+                </div>
+                <div className="pt-2">
+                  <button className="px-5 py-2.5 bg-gray-900 dark:bg-gray-800 hover:bg-gray-800 dark:hover:bg-gray-700 text-white rounded-xl font-medium transition-colors flex items-center gap-2 border border-transparent dark:border-gray-700">
+                    <Check size={18} /> Update password
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Two-factor authentication (2FA) */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm dark:shadow-none relative">
+              <div className="absolute top-6 right-6">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 border border-red-100 dark:border-red-800/30">
+                  <X size={12} /> Disabled
+                </span>
+              </div>
+              <h3 className="font-bold text-gray-900 dark:text-white mb-1">Two-factor authentication (2FA)</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                Add an extra layer of security to your account.
+              </p>
+              
+              <div className="space-y-3 mb-6">
+                {[
+                  "Install an authenticator app — Google Authenticator or Authy",
+                  "Scan the QR code shown after clicking Enable below",
+                  "Enter the 6-digit code to confirm and activate 2FA"
+                ].map((step, i) => (
+                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 text-sm text-gray-700 dark:text-gray-300">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs">
+                      {i + 1}
+                    </span>
+                    {step}
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <button className="px-5 py-2.5 bg-gray-900 dark:bg-gray-800 hover:bg-gray-800 dark:hover:bg-gray-700 text-white rounded-xl font-medium transition-colors flex items-center gap-2 border border-transparent dark:border-gray-700">
+                  <Scan size={18} /> Enable 2FA
+                </button>
+                <span className="text-sm text-gray-500 dark:text-gray-400">Recommended for all admins</span>
+              </div>
+            </div>
+
+            {/* Session settings */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm dark:shadow-none">
+              <h3 className="font-bold text-gray-900 dark:text-white mb-1">Session settings</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                Control automatic logout behavior.
+              </p>
+              
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h4 className="font-medium text-gray-900 dark:text-white">Auto logout on inactivity</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Automatically sign out after idle period</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" className="sr-only peer" defaultChecked />
+                  <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-gray-900 after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600 dark:peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-gray-900 dark:text-white">Timeout duration</label>
+                <select className="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-800 focus:border-indigo-500 outline-none w-48" defaultValue="30 minutes">
+                  <option>15 minutes</option>
+                  <option>30 minutes</option>
+                  <option>1 hour</option>
+                  <option>4 hours</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Active sessions */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm dark:shadow-none relative">
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <h3 className="font-bold text-gray-900 dark:text-white mb-1">Active sessions</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Devices currently logged in to your account.
+                  </p>
+                </div>
+                <button className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2">
+                  <LogOut size={16} /> Sign out all
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                {/* Session 1 */}
+                <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
+                  <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 shrink-0">
+                    <Monitor size={20} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">Windows · Chrome 124</p>
+                      <span className="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-[10px] font-medium">Current</span>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">103.x.x.x · Dhaka, Bangladesh · Active now</p>
+                  </div>
+                </div>
+                
+                {/* Session 2 */}
+                <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
+                  <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 shrink-0">
+                    <Smartphone size={20} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-gray-900 dark:text-white truncate mb-1">Android · Chrome Mobile</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">103.x.x.x · Khulna, Bangladesh · 2 hours ago</p>
+                  </div>
+                  <button className="px-4 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    Revoke
+                  </button>
+                </div>
+                
+                {/* Session 3 */}
+                <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
+                  <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 shrink-0">
+                    <Monitor size={20} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-gray-900 dark:text-white truncate mb-1">macOS · Safari 17</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">182.x.x.x · Unknown · 5 days ago</p>
+                  </div>
+                  <button className="px-4 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    Revoke
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent login history */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm dark:shadow-none">
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <h3 className="font-bold text-gray-900 dark:text-white mb-1">Recent login history</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Last 5 login attempts to your account.
+                  </p>
+                </div>
+                <a href="#" className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1 transition-colors">
+                  View all in audit logs <ArrowRight size={16} />
+                </a>
+              </div>
+              
+              <div className="space-y-4">
+                {[
+                  { status: "success", text: "Successful login · Chrome · Dhaka", time: "Today 03:39" },
+                  { status: "success", text: "Successful login · Chrome Mobile · Khulna", time: "Yesterday 21:14" },
+                  { status: "failed", text: "Failed attempt · Wrong password · Unknown IP", time: "Jun 8, 02:11" },
+                  { status: "success", text: "Successful login · Safari · macOS", time: "Jun 6, 18:45" },
+                  { status: "success", text: "Successful login · Chrome · Dhaka", time: "Jun 5, 09:20" },
+                ].map((log, i) => (
+                  <div key={i} className="flex items-center justify-between pb-4 border-b border-gray-50 dark:border-gray-800 last:border-0 last:pb-0">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full ${log.status === "success" ? "bg-green-500" : "bg-red-500"}`}></div>
+                      <span className={`text-sm font-medium ${log.status === "success" ? "text-gray-700 dark:text-gray-300" : "text-red-600 dark:text-red-500"}`}>{log.text}</span>
+                    </div>
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{log.time}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </div>
         )}
 
