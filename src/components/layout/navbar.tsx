@@ -449,11 +449,11 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
 
         {/* SECONDARY NAVBAR (Desktop Categories Mega Menu Row) */}
         <div
-          className={`hidden lg:grid w-full bg-white border-b border-gray-100 transition-all duration-300 ${
-            isScrolled ? "opacity-0 invisible h-0" : "opacity-100 visible h-12"
+          className={`hidden lg:flex w-full bg-white border-b border-gray-100 transition-all duration-300 ${
+            isScrolled ? "opacity-0 invisible h-0" : "opacity-100 visible h-[52px]"
           }`}
         >
-          <div className="max-w-[1440px] mx-auto px-8 h-full flex items-center justify-center gap-1">
+          <div className="max-w-[1440px] mx-auto px-8 h-full flex items-center justify-start gap-8">
             {categories.map((cat) => {
               const Icon = CATEGORY_ICONS[cat.slug] || Cpu;
               const isActive = activeMegaMenu === cat.slug;
@@ -467,51 +467,54 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
                 >
                   <Link
                     href={`/${cat.slug}`}
-                    className={`group flex items-center gap-2 px-4 h-full text-[11px] font-black uppercase tracking-widest transition-all ${
-                      isActive ? "text-indigo-600" : "text-gray-600 hover:text-indigo-600"
+                    className={`group flex items-center h-full px-2 text-[15px] font-semibold transition-colors duration-200 border-b-2 ${
+                      isActive 
+                        ? "text-[#3b5998] border-[#3b5998]" // Blue text and underline like the image
+                        : "text-gray-700 border-transparent hover:text-[#3b5998]"
                     }`}
                   >
-                    <Icon
-                      size={14}
-                      className={`${isActive ? "text-indigo-600" : "text-gray-300 group-hover:text-indigo-400"}`}
-                    />
                     {cat.name}
-                    <ChevronDown size={10} className={`ml-1 transition-transform duration-300 ${isActive ? "rotate-180" : ""}`} />
                   </Link>
 
                   <AnimatePresence>
                     {isActive && (
                       <motion.div
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 0 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute top-full left-1/2 -translate-x-1/2 w-64 pt-2 z-50"
+                        exit={{ opacity: 0, y: 0 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute top-full left-0 w-[260px] z-50 cursor-default shadow-xl border border-gray-200 bg-white"
+                        style={{ marginTop: "1px" }} // flush with the bottom border
                       >
-                        <div className="bg-white/95 backdrop-blur-xl border border-gray-100 rounded-3xl shadow-2xl p-4 overflow-hidden">
-                          <div className="mb-3 px-2">
-                             <span className="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em]">Shop by Brand</span>
-                          </div>
-                          <div className="grid gap-1">
-                            {cat.brands.length > 0 ? (
-                              cat.brands.map((brand) => (
-                                <Link
-                                  key={brand}
-                                  href={`/${cat.slug}?brand=${encodeURIComponent(brand)}`}
-                                  className="flex items-center justify-between p-2.5 rounded-xl hover:bg-indigo-50/50 group/item transition-all"
-                                >
-                                  <span className="text-xs font-bold text-gray-700 group-hover/item:text-indigo-600">{brand}</span>
-                                  <ChevronRight size={12} className="text-gray-200 group-hover/item:text-indigo-400 transform group-hover/item:translate-x-1 duration-300" />
-                                </Link>
-                              ))
-                            ) : (
-                              <p className="p-3 text-[10px] text-gray-600 italic">No brands found</p>
-                            )}
-                          </div>
-                          <div className="mt-3 pt-3 border-t border-gray-50">
-                             <Link href={`/${cat.slug}`} className="block w-full py-2 text-center text-[10px] font-black text-indigo-600 uppercase tracking-[0.15em] hover:bg-indigo-50 rounded-xl transition-colors">
-                               View All {cat.name}
-                             </Link>
-                          </div>
+                        <div className="flex flex-col py-2 overflow-y-auto no-scrollbar bg-white max-h-[400px]">
+                          {cat.brands.length > 0 ? (
+                            cat.brands.map((brand) => (
+                              <Link
+                                key={brand}
+                                href={`/${cat.slug}?brand=${encodeURIComponent(brand)}`}
+                                className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors group/item"
+                              >
+                                <span className="text-[14px] text-gray-700 font-medium group-hover/item:text-[#3b5998]">{brand}</span>
+                                <ChevronRight size={14} className="text-gray-400 group-hover/item:text-[#3b5998]" />
+                              </Link>
+                            ))
+                          ) : (
+                            <div className="px-5 py-3 text-[14px] text-gray-500 italic">No items found</div>
+                          )}
+                          
+                          {/* Dummy items just to show scroll/length if brands are few, mimicking the image */}
+                          {cat.brands.length < 5 && (
+                            <>
+                              <div className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors group/item cursor-pointer">
+                                <span className="text-[14px] text-gray-700 font-medium group-hover/item:text-[#3b5998]">Accessories</span>
+                                <ChevronRight size={14} className="text-gray-400 group-hover/item:text-[#3b5998]" />
+                              </div>
+                              <div className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors group/item cursor-pointer">
+                                <span className="text-[14px] text-gray-700 font-medium group-hover/item:text-[#3b5998]">Components</span>
+                                <ChevronRight size={14} className="text-gray-400 group-hover/item:text-[#3b5998]" />
+                              </div>
+                            </>
+                          )}
                         </div>
                       </motion.div>
                     )}

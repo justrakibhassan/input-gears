@@ -681,6 +681,18 @@ export async function getRevenueAnalytics() {
   try {
     await requireRole(["SUPER_ADMIN"]);
 
+    // --- DUMMY DATA FOR REVENUE OVERVIEW ---
+    return [
+      { name: "Mon", revenue: 4200 },
+      { name: "Tue", revenue: 3800 },
+      { name: "Wed", revenue: 5500 },
+      { name: "Thu", revenue: 2900 },
+      { name: "Fri", revenue: 1950 },
+      { name: "Sat", revenue: 6200 },
+      { name: "Sun", revenue: 4800 },
+    ];
+
+    /* --- REAL DATA FETCHING COMMENTED OUT FOR PRODUCTION ---
     const last7Days = Array.from({ length: 7 }, (_, i) => {
       const d = new Date();
       d.setDate(d.getDate() - (6 - i));
@@ -720,6 +732,7 @@ export async function getRevenueAnalytics() {
     });
 
     return chartData;
+    ----------------------------------------------------- */
   } catch (error) {
     logger.error("Get Revenue Analytics Error:", error);
     return [];

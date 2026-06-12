@@ -657,8 +657,41 @@ interface AppearanceFormProps {
                 return (
                   <div 
                     key={field.id} 
-                    className="group relative flex items-center gap-3 p-2.5 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-indigo-300 transition-colors shadow-sm"
+                    onDragOver={(e) => e.preventDefault()}
+                    onDragEnter={() => setDraggedOverBrandIndex(index)}
+                    onDrop={(e) => {
+                      const dragIndexStr = e.dataTransfer.getData("drag-brand-index");
+                      if (dragIndexStr) {
+                        const dragIndex = parseInt(dragIndexStr, 10);
+                        if (dragIndex !== index) {
+                          moveBrand(dragIndex, index);
+                        }
+                      }
+                      setDraggedOverBrandIndex(null);
+                      setDraggedBrandIndex(null);
+                    }}
+                    className={`group relative flex items-center gap-3 p-2.5 bg-white dark:bg-gray-800/50 rounded-xl border transition-all duration-200 shadow-sm ${
+                      draggedOverBrandIndex === index
+                        ? "border-indigo-500 bg-indigo-50/50 scale-[1.02] shadow-md dark:shadow-none"
+                        : "border-gray-200 dark:border-gray-700 hover:border-indigo-300"
+                    } ${draggedBrandIndex === index ? "opacity-50 scale-95 border-dashed border-gray-300" : ""}`}
                   >
+                    {/* Drag Handle */}
+                    <div
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData("drag-brand-index", index.toString());
+                        setDraggedBrandIndex(index);
+                      }}
+                      onDragEnd={() => {
+                        setDraggedBrandIndex(null);
+                        setDraggedOverBrandIndex(null);
+                      }}
+                      className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-indigo-500 transition-colors p-1 pl-0 shrink-0"
+                    >
+                      <GripVertical size={16} />
+                    </div>
+
                     {/* Brand logo thumbnail or upload button */}
                     <div className="w-12 h-12 shrink-0">
                       {imgUrl ? (
