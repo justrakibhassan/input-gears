@@ -4,6 +4,7 @@ import TopAnnouncement from "@/components/layout/top-announcement";
 import { getStoreAppearance } from "@/modules/admin/actions";
 import { Suspense } from "react";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { ThemeReset } from "@/components/theme-reset";
 import { prisma } from "@/lib/prisma";
 
 export default async function RootLayout({
@@ -39,6 +40,7 @@ export default async function RootLayout({
 
   return (
     <NuqsAdapter>
+      <ThemeReset />
       <TopAnnouncement data={settings} />
       <Suspense fallback={<NavbarSkeleton />}>
         <Navbar initialCategories={categoriesWithBrands} />

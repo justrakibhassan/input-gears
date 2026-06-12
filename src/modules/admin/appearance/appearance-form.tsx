@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -23,10 +23,14 @@ import {
   Laptop,
   Keyboard,
   Monitor,
-  Gamepad2
+  Gamepad2,
+  Search,
+  ShoppingBag,
+  Menu
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { CldUploadWidget, type CloudinaryUploadWidgetResults } from "next-cloudinary";
 import CloudinaryUpload from "@/components/ui/cloudinary-upload";
 import StatusBadge from "@/modules/admin/components/status-badge";
 import { 
@@ -106,12 +110,6 @@ interface AppearanceFormProps {
     image: string;
     link: string | null;
   }[];
-  initialFeaturedProducts: {
-    id: string;
-    name: string;
-    image: string | null;
-    price: number;
-  }[];
   initialBrandLogos: {
     id: string;
     name: string;
@@ -129,6 +127,7 @@ interface AppearanceFormProps {
   const [savingBar, setSavingBar] = useState(false);
   const [savingSlides, setSavingSlides] = useState(false);
   const [savingBrands, setSavingBrands] = useState(false);
+  const activeBrandIndexRef = useRef<number | null>(null);
   const [currentPreviewIndex, setCurrentPreviewIndex] = useState(0);
 
 
@@ -259,7 +258,7 @@ interface AppearanceFormProps {
     }
   };
 
-  const onSaveBrands = async (data: any) => {
+  const onSaveBrands = async (data: { brands: { name: string; image: string }[] }) => {
     setSavingBrands(true);
     try {
       await updateBrandLogos(data.brands);
@@ -623,7 +622,7 @@ interface AppearanceFormProps {
               </div>
               <div className="flex gap-3">
                 <button
-                  onClick={() => appendBrand({ name: "", image: "", isActive: true })}
+                  onClick={() => appendBrand({ id: "", name: "", image: "", isActive: true })}
                   className="px-4 py-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl text-sm font-medium flex items-center gap-1.5 transition-colors"
                 >
                   <Plus size={16} /> Add Brand
@@ -639,39 +638,73 @@ interface AppearanceFormProps {
               </div>
             </div>
 
+            {/* Single shared CldUploadWidget for ALL brand logos */}
+              <CldUploadWidget
+                uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET?.replace(/['"]/, "") || ""}
+                options={{ maxFiles: 1, resourceType: "image", clientAllowedFormats: ["png", "jpeg", "jpg", "webp", "svg"] }}
+                onSuccess={(result: CloudinaryUploadWidgetResults) => {
+                  const idx = activeBrandIndexRef.current;
+                  if (idx !== null && result.info && typeof result.info !== "string" && result.info.secure_url) {
+                    brandForm.setValue(`brands.${idx}.image`, result.info.secure_url, { shouldDirty: true });
+                    activeBrandIndexRef.current = null;
+                  }
+                }}
+              >
+                {({ open }) => (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {brandFields.map((field, index) => (
-                <div 
-                  key={field.id} 
-                  className="group relative flex items-center gap-3 p-2.5 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-indigo-300 transition-colors shadow-sm"
-                >
-                  <div className="w-12 h-12 shrink-0">
-                    <CloudinaryUpload
-                      compact
-                      value={brandForm.watch(`brands.${index}.image`)}
-                      onChange={(url) => brandForm.setValue(`brands.${index}.image`, url, { shouldValidate: true })}
-                      onRemove={() => brandForm.setValue(`brands.${index}.image`, "")}
-                    />
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <input
-                      {...brandForm.register(`brands.${index}.name`)}
-                      className="w-full px-3 py-1.5 rounded-md border border-transparent hover:border-gray-200 focus:border-indigo-500 focus:bg-white dark:bg-transparent dark:focus:bg-gray-900 text-sm font-bold uppercase tracking-widest transition-all text-gray-700 dark:text-gray-200"
-                      placeholder="BRAND NAME"
-                    />
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => removeBrand(index)}
-                    className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all shrink-0"
+              {brandFields.map((field, index) => {
+                const imgUrl = brandForm.watch(`brands.${index}.image`);
+                return (
+                  <div 
+                    key={field.id} 
+                    className="group relative flex items-center gap-3 p-2.5 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-indigo-300 transition-colors shadow-sm"
                   >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              ))}
+                    {/* Brand logo thumbnail or upload button */}
+                    <div className="w-12 h-12 shrink-0">
+                      {imgUrl ? (
+                        <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-gray-100 group/img">
+                          <img src={imgUrl} alt="logo" className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => brandForm.setValue(`brands.${index}.image`, "", { shouldDirty: true })}
+                            className="absolute inset-0 bg-black/50 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity"
+                          >
+                            <Trash2 size={14} className="text-white" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => { activeBrandIndexRef.current = index; open(); }}
+                          className="w-12 h-12 rounded-xl border-2 border-dashed border-gray-200 hover:border-indigo-400 bg-gray-50 flex flex-col items-center justify-center gap-0.5 transition-colors group/upload"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 group-hover/upload:text-indigo-500 transition-colors"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                          <span className="text-[8px] font-bold text-gray-400 group-hover/upload:text-indigo-500 uppercase transition-colors">Upload</span>
+                        </button>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <input
+                        {...brandForm.register(`brands.${index}.name`)}
+                        className="w-full px-3 py-1.5 rounded-md border border-transparent hover:border-gray-200 focus:border-indigo-500 focus:bg-white dark:bg-transparent dark:focus:bg-gray-900 text-sm font-bold uppercase tracking-widest transition-all text-gray-700 dark:text-gray-200"
+                        placeholder="BRAND NAME"
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => removeBrand(index)}
+                      className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all shrink-0"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
+                )}
+              </CldUploadWidget>
           </section>
 
         </div>

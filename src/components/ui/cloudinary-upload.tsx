@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { CldUploadWidget, CldImage, type CloudinaryUploadWidgetResults } from "next-cloudinary";
 import { Trash2, UploadCloud } from "lucide-react";
 import Image from "next/image";
@@ -22,8 +21,6 @@ export default function CloudinaryUpload({
   disabled,
   compact = false,
 }: CloudinaryUploadProps) {
-
-
   const onSuccess = (result: CloudinaryUploadWidgetResults) => {
     if (result.info && typeof result.info !== "string" && result.info.secure_url) {
       onChange(result.info.secure_url);
@@ -34,15 +31,13 @@ export default function CloudinaryUpload({
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET?.replace(/['"]/g, "");
   const isCloudinaryConfigured = !!cloudName && !!uploadPreset;
 
-
-
   const isLocalOrExternal = value.startsWith("/") || value.startsWith("http");
 
   return (
     <div className="w-full">
       <AnimatePresence mode="wait">
         {value ? (
-            <motion.div
+          <motion.div
             key="preview"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -64,7 +59,7 @@ export default function CloudinaryUpload({
                 <Trash2 size={compact ? 16 : 24} />
               </button>
             </div>
-            
+
             {isLocalOrExternal ? (
               <Image
                 fill
@@ -127,11 +122,13 @@ export default function CloudinaryUpload({
                     className={cn(
                       "w-full flex flex-col items-center justify-center border-2 border-dashed border-gray-100 hover:border-indigo-300 hover:text-indigo-600 transition-all group relative overflow-hidden bg-white",
                       disabled && "opacity-50 cursor-not-allowed",
-                      compact ? "aspect-square rounded-xl gap-2 bg-gray-50/50" : "aspect-video md:aspect-21/9 gap-4 rounded-[32px] bg-gray-50/50"
+                      compact
+                        ? "aspect-square rounded-xl gap-2 bg-gray-50/50"
+                        : "aspect-video md:aspect-21/9 gap-4 rounded-[32px] bg-gray-50/50"
                     )}
                   >
                     <div className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    
+
                     {compact ? (
                       <>
                         <div className="text-gray-400 group-hover:text-indigo-600 transition-colors">
@@ -145,8 +142,12 @@ export default function CloudinaryUpload({
                           <UploadCloud size={32} />
                         </div>
                         <div className="text-center">
-                          <p className="text-[11px] font-black uppercase tracking-widest text-gray-900">Deploy Visual Asset</p>
-                          <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase">Recommended: 21:9 ratio</p>
+                          <p className="text-[11px] font-black uppercase tracking-widest text-gray-900">
+                            Deploy Visual Asset
+                          </p>
+                          <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase">
+                            Recommended: 21:9 ratio
+                          </p>
                         </div>
                       </>
                     )}
@@ -155,8 +156,13 @@ export default function CloudinaryUpload({
               </CldUploadWidget>
             ) : (
               <div className="w-full aspect-video md:aspect-21/9 flex flex-col items-center justify-center gap-4 rounded-[32px] border-2 border-dashed border-red-200 bg-red-50/20 text-red-600 p-6">
-                <p className="text-xs font-black uppercase tracking-widest text-center">Cloudinary is not configured</p>
-                <p className="text-[10px] font-medium text-gray-500 text-center">Please configure NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME and NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET in your .env and restart the server.</p>
+                <p className="text-xs font-black uppercase tracking-widest text-center">
+                  Cloudinary is not configured
+                </p>
+                <p className="text-[10px] font-medium text-gray-500 text-center">
+                  Please configure NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME and NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET in
+                  your .env and restart the server.
+                </p>
               </div>
             )}
           </motion.div>

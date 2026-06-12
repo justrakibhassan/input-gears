@@ -48,7 +48,7 @@ export default async function BrandTicker() {
         <div className="flex whitespace-nowrap animate-ticker group-hover:paused">
           {tickerItems.map((brand, index) => (
             <div
-              key={index}
+              key={`${brand.id}-${index}`}
               className="flex items-center gap-3 mx-6 md:mx-10 group/item cursor-pointer"
             >
               <div className="text-gray-400 group-hover/item:text-indigo-600 transition-colors duration-300 w-8 h-8 md:w-10 md:h-10 relative flex items-center justify-center">

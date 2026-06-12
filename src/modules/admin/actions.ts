@@ -395,7 +395,7 @@ export async function updateHeroSlides(slides: HeroSlideInput[]) {
 export interface BrandLogoInput {
   name: string;
   image: string;
-  isActive: boolean;
+  isActive?: boolean;
 }
 
 export async function updateBrandLogos(brands: BrandLogoInput[]) {
@@ -406,8 +406,8 @@ export async function updateBrandLogos(brands: BrandLogoInput[]) {
     await prisma.brandLogo.createMany({
       data: brands.map((b, i) => ({
         name: b.name,
-        image: b.image,
-        isActive: b.isActive,
+        image: b.image || "",
+        isActive: b.isActive ?? true,
         order: i,
       })),
     });
