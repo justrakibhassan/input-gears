@@ -8,6 +8,7 @@ export default async function AppearancePage() {
     <AppearanceForm
       initialSettings={data.settings}
       initialSlides={data.slides}
+      initialBrandLogos={data.brandLogos}
     />
   );
 }

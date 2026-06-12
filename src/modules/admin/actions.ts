@@ -315,9 +315,14 @@ export async function getStoreAppearance() {
     orderBy: { order: "asc" },
   });
 
+  const brandLogos = await prisma.brandLogo.findMany({
+    orderBy: { order: "asc" },
+  });
+
   return {
     settings: finalSettings,
     slides: slides,
+    brandLogos,
   };
 }
 
@@ -385,6 +390,34 @@ export async function updateHeroSlides(slides: HeroSlideInput[]) {
   revalidatePath("/");
   return { success: true };
 }
+
+// --- Brand Logos Actions ---
+export interface BrandLogoInput {
+  name: string;
+  image: string;
+  isActive: boolean;
+}
+
+export async function updateBrandLogos(brands: BrandLogoInput[]) {
+  await requireRole(["SUPER_ADMIN", "CONTENT_EDITOR"]);
+  await prisma.brandLogo.deleteMany();
+
+  if (brands.length > 0) {
+    await prisma.brandLogo.createMany({
+      data: brands.map((b, i) => ({
+        name: b.name,
+        image: b.image,
+        isActive: b.isActive,
+        order: i,
+      })),
+    });
+  }
+
+  revalidatePath("/");
+  return { success: true };
+}
+
+
 
 // --- 4. Bulk Delete Orders ---
 export async function deleteOrders(orderIds: string[]) {

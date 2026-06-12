@@ -12,6 +12,7 @@ interface CloudinaryUploadProps {
   onChange: (value: string) => void;
   onRemove: () => void;
   disabled?: boolean;
+  compact?: boolean;
 }
 
 export default function CloudinaryUpload({
@@ -19,6 +20,7 @@ export default function CloudinaryUpload({
   onChange,
   onRemove,
   disabled,
+  compact = false,
 }: CloudinaryUploadProps) {
 
 
@@ -40,20 +42,26 @@ export default function CloudinaryUpload({
     <div className="w-full">
       <AnimatePresence mode="wait">
         {value ? (
-          <motion.div
+            <motion.div
             key="preview"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative w-full aspect-video md:aspect-21/9 rounded-[32px] overflow-hidden border border-gray-100 group bg-gray-50 shadow-inner"
+            className={cn(
+              "relative w-full overflow-hidden border border-gray-100 group shadow-inner bg-white",
+              compact ? "aspect-square rounded-xl" : "aspect-video md:aspect-21/9 rounded-[32px] bg-gray-50"
+            )}
           >
             <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-[2px]">
               <button
                 type="button"
                 onClick={() => onRemove()}
-                className="p-4 bg-white/90 hover:bg-white text-red-600 rounded-full shadow-2xl transform hover:scale-110 active:scale-95 transition-all"
+                className={cn(
+                  "bg-white/90 hover:bg-white text-red-600 rounded-full shadow-2xl transform hover:scale-110 active:scale-95 transition-all flex items-center justify-center",
+                  compact ? "p-2" : "p-4"
+                )}
               >
-                <Trash2 size={24} />
+                <Trash2 size={compact ? 16 : 24} />
               </button>
             </div>
             
@@ -117,18 +125,31 @@ export default function CloudinaryUpload({
                     disabled={disabled}
                     onClick={() => open()}
                     className={cn(
-                      "w-full aspect-video md:aspect-21/9 flex flex-col items-center justify-center gap-4 rounded-[32px] border-2 border-dashed border-gray-100 bg-gray-50/50 hover:bg-gray-50 hover:border-indigo-300 hover:text-indigo-600 transition-all group relative overflow-hidden",
-                      disabled && "opacity-50 cursor-not-allowed"
+                      "w-full flex flex-col items-center justify-center border-2 border-dashed border-gray-100 hover:border-indigo-300 hover:text-indigo-600 transition-all group relative overflow-hidden bg-white",
+                      disabled && "opacity-50 cursor-not-allowed",
+                      compact ? "aspect-square rounded-xl gap-2 bg-gray-50/50" : "aspect-video md:aspect-21/9 gap-4 rounded-[32px] bg-gray-50/50"
                     )}
                   >
                     <div className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="p-5 bg-white rounded-3xl shadow-sm text-gray-400 group-hover:text-indigo-600 group-hover:shadow-indigo-100 transition-all">
-                      <UploadCloud size={32} />
-                    </div>
-                    <div className="text-center">
-                      <p className="text-[11px] font-black uppercase tracking-widest text-gray-900">Deploy Visual Asset</p>
-                      <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase">Recommended: 21:9 ratio</p>
-                    </div>
+                    
+                    {compact ? (
+                      <>
+                        <div className="text-gray-400 group-hover:text-indigo-600 transition-colors">
+                          <UploadCloud size={24} />
+                        </div>
+                        <span className="text-[10px] font-bold text-gray-500 uppercase">Upload</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="p-5 bg-white rounded-3xl shadow-sm text-gray-400 group-hover:text-indigo-600 group-hover:shadow-indigo-100 transition-all">
+                          <UploadCloud size={32} />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-[11px] font-black uppercase tracking-widest text-gray-900">Deploy Visual Asset</p>
+                          <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase">Recommended: 21:9 ratio</p>
+                        </div>
+                      </>
+                    )}
                   </button>
                 )}
               </CldUploadWidget>

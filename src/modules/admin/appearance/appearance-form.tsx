@@ -16,15 +16,24 @@ import {
   ExternalLink,
   Loader2,
   GripVertical,
-  Menu,
-  Search,
-  ShoppingBag,
+  Zap,
+  MousePointer2,
+  Cpu,
+  Headphones,
+  Laptop,
+  Keyboard,
+  Monitor,
+  Gamepad2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import CloudinaryUpload from "@/components/ui/cloudinary-upload";
 import StatusBadge from "@/modules/admin/components/status-badge";
-import { updateHeroSlides, updateTopBar } from "../actions";
+import { 
+  updateHeroSlides, 
+  updateTopBar, 
+  updateBrandLogos,
+} from "../actions";
 
 // --- Zod Schemas ---
 const topBarSchema = z
@@ -61,6 +70,21 @@ const slidesFormSchema = z.object({
   slides: z.array(slideSchema),
 });
 
+const brandLogoSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(1, "Name is required"),
+  image: z.string().min(1, "Image is required"),
+  isActive: z.boolean().default(true),
+});
+
+const themeSchema = z.object({
+  primaryColor: z.string(),
+  secondaryColor: z.string(),
+  bgColor: z.string(),
+  textColor: z.string(),
+  brandTickerSpeed: z.number().min(5).max(300),
+});
+
 // ✅ Type Definitions
 type TopBarFormValues = z.infer<typeof topBarSchema>;
 type SlidesFormValues = z.infer<typeof slidesFormSchema>;
@@ -77,22 +101,37 @@ interface AppearanceFormProps {
   } | null;
   initialSlides: {
     id: string;
-    title: string;
+    title: string | null;
     subtitle: string | null;
     image: string;
     link: string | null;
   }[];
+  initialFeaturedProducts: {
+    id: string;
+    name: string;
+    image: string | null;
+    price: number;
+  }[];
+  initialBrandLogos: {
+    id: string;
+    name: string;
+    image: string;
+    isActive: boolean;
+  }[];
 }
 
-export default function AppearancePage({
+  export default function AppearancePage({
   initialSettings,
   initialSlides,
+  initialBrandLogos,
 }: AppearanceFormProps) {
-  // Loading state removed as data comes via props
   const [showPreview, setShowPreview] = useState(false);
   const [savingBar, setSavingBar] = useState(false);
   const [savingSlides, setSavingSlides] = useState(false);
+  const [savingBrands, setSavingBrands] = useState(false);
   const [currentPreviewIndex, setCurrentPreviewIndex] = useState(0);
+
+
 
   // --- Helper: Date Conversion (Date Object -> Local Input String) ---
   const formatDate = (date: Date | null | undefined) => {
@@ -143,12 +182,26 @@ export default function AppearancePage({
     name: "slides",
   });
 
+  const brandForm = useForm({
+    defaultValues: {
+      brands: initialBrandLogos,
+    },
+  });
+
+  const { fields: brandFields, append: appendBrand, remove: removeBrand, move: moveBrand } = useFieldArray({
+    control: brandForm.control,
+    name: "brands",
+  });
+
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [draggedOverIndex, setDraggedOverIndex] = useState<number | null>(null);
+  const [draggedBrandIndex, setDraggedBrandIndex] = useState<number | null>(null);
+  const [draggedOverBrandIndex, setDraggedOverBrandIndex] = useState<number | null>(null);
 
   // Watchers
   const watchedBar = barForm.watch();
   const watchedSlides = slidesForm.watch();
+  const watchedBrands = brandForm.watch();
   const watchedTopBarStart = barForm.watch("topBarStart");
 
   // --- Helper: Current DateTime for Min Attribute ---
@@ -203,6 +256,18 @@ export default function AppearancePage({
       toast.error("Failed to update slides");
     } finally {
       setSavingSlides(false);
+    }
+  };
+
+  const onSaveBrands = async (data: any) => {
+    setSavingBrands(true);
+    try {
+      await updateBrandLogos(data.brands);
+      toast.success("Brand logos updated!");
+    } catch {
+      toast.error("Failed to update brand logos");
+    } finally {
+      setSavingBrands(false);
     }
   };
 
@@ -546,6 +611,69 @@ export default function AppearancePage({
               ))}
             </div>
           </section>
+
+          {/* Brand Logos */}
+          <section className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-none group hover:border-indigo-200 transition-colors">
+            <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100 dark:border-gray-800">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl">
+                  <LayoutTemplate size={20} />
+                </div>
+                <h2 className="font-bold text-gray-900 dark:text-white">Brand Logos</h2>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => appendBrand({ name: "", image: "", isActive: true })}
+                  className="px-4 py-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl text-sm font-medium flex items-center gap-1.5 transition-colors"
+                >
+                  <Plus size={16} /> Add Brand
+                </button>
+                <button
+                  onClick={brandForm.handleSubmit(onSaveBrands)}
+                  disabled={savingBrands || !brandForm.formState.isDirty}
+                  className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md dark:shadow-none shadow-blue-200"
+                >
+                  {savingBrands ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
+                  Save Brands
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {brandFields.map((field, index) => (
+                <div 
+                  key={field.id} 
+                  className="group relative flex items-center gap-3 p-2.5 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-indigo-300 transition-colors shadow-sm"
+                >
+                  <div className="w-12 h-12 shrink-0">
+                    <CloudinaryUpload
+                      compact
+                      value={brandForm.watch(`brands.${index}.image`)}
+                      onChange={(url) => brandForm.setValue(`brands.${index}.image`, url, { shouldValidate: true })}
+                      onRemove={() => brandForm.setValue(`brands.${index}.image`, "")}
+                    />
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <input
+                      {...brandForm.register(`brands.${index}.name`)}
+                      className="w-full px-3 py-1.5 rounded-md border border-transparent hover:border-gray-200 focus:border-indigo-500 focus:bg-white dark:bg-transparent dark:focus:bg-gray-900 text-sm font-bold uppercase tracking-widest transition-all text-gray-700 dark:text-gray-200"
+                      placeholder="BRAND NAME"
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => removeBrand(index)}
+                    className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all shrink-0"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+
         </div>
 
         {/* --- RIGHT SIDE: STICKY PREVIEW --- */}

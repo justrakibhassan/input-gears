@@ -306,6 +306,18 @@ model Coupon {
   @@map("coupons")
 }
 
+model BrandLogo {
+  id        String   @id @default(cuid())
+  name      String
+  image     String
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("brand_logos")
+}
+
 model HeroSlide {
   id       String  @id @default(cuid())
   title    String
