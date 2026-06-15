@@ -27,7 +27,7 @@ import dynamic from "next/dynamic";
 import { useWishlist } from "@/modules/products/hooks/use-wishlist";
 import { useCompare } from "@/modules/products/hooks/use-compare";
 import MobileBottomNav from "./mobile-bottom-nav";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Dynamically import CartNav with SSR disabled
@@ -84,6 +84,7 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
   const compare = useCompare();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   // Sync search query from URL
   const currentQuery = searchParams.get("q") || "";
@@ -567,28 +568,28 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
                 <div className="flex-1 overflow-y-auto p-6 space-y-4">
                   <p className="text-[11px] font-bold text-gray-600 uppercase tracking-widest">Categories</p>
                   {categories.map((cat) => {
-                    const Icon = CATEGORY_ICONS[cat.slug] || Cpu;
+                    const isActive = pathname === `/${cat.slug}` || pathname.startsWith(`/${cat.slug}/`);
                     return (
                       <div key={cat.id} className="space-y-1">
                         <Link
                           href={`/${cat.slug}`}
-                          className="group flex items-center gap-4 py-3 px-4 rounded-2xl hover:bg-indigo-50 transition-all bg-gray-50/50"
+                          className={`group flex items-center py-2 px-3 rounded-lg transition-all border-l-2 ${
+                            isActive
+                              ? "bg-[#3b5998]/5 text-[#3b5998] border-[#3b5998] font-bold"
+                              : "text-gray-700 border-transparent hover:text-[#3b5998] hover:bg-gray-50/50 font-semibold"
+                          }`}
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
-                          <div className="p-2 bg-white text-gray-600 rounded-xl group-hover:text-indigo-600 shadow-sm">
-                            <Icon size={18} />
-                          </div>
-                          <span className="text-[15px] font-bold text-gray-900">{cat.name}</span>
-                          <ChevronRight size={14} className="ml-auto text-gray-300" />
+                          <span className="text-[15px]">{cat.name}</span>
                         </Link>
                         {/* Mobile Brands Shortcut */}
-                        <div className="pl-14 flex flex-wrap gap-2 pt-1">
-                           {cat.brands.slice(0, 3).map(brand => (
+                        <div className="pl-5 flex flex-wrap gap-x-3 gap-y-1.5 pt-1 pb-2">
+                           {cat.brands.slice(0, 4).map(brand => (
                              <Link
                                 key={brand}
                                 href={`/${cat.slug}?brand=${encodeURIComponent(brand)}`}
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className="text-[10px] font-bold text-gray-600 hover:text-indigo-600 uppercase tracking-tighter"
+                                className="text-xs text-gray-500 hover:text-[#3b5998] transition-colors"
                              >
                                {brand}
                              </Link>

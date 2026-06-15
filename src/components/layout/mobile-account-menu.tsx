@@ -6,13 +6,11 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Package,
-  MapPin,
-  Settings,
   LogOut,
   X,
-  LayoutDashboard,
   BadgeCheck,
   Shield,
+  User as UserIcon,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import { authClient } from "@/lib/auth-client";
@@ -33,7 +31,7 @@ export default function MobileAccountMenu({
   // Close menu when route changes
   useEffect(() => {
     onClose();
-  }, [pathname, onClose]); // Only trigger when the route actually changes
+  }, [pathname, onClose]);
 
   // Prevent body scroll when menu is open
   useEffect(() => {
@@ -63,8 +61,8 @@ export default function MobileAccountMenu({
 
   const menuItems = [
     {
-      label: "Account Overview",
-      icon: LayoutDashboard,
+      label: "My Account",
+      icon: UserIcon,
       href: "/account",
       color: "text-indigo-600",
       bg: "bg-indigo-50",
@@ -75,20 +73,6 @@ export default function MobileAccountMenu({
       href: "/account/orders",
       color: "text-blue-600",
       bg: "bg-blue-50",
-    },
-    {
-      label: "Addresses",
-      icon: MapPin,
-      href: "/account/addresses",
-      color: "text-green-600",
-      bg: "bg-green-50",
-    },
-    {
-      label: "Profile Settings",
-      icon: Settings,
-      href: "/account/profile",
-      color: "text-gray-600",
-      bg: "bg-gray-50",
     },
   ];
 
@@ -107,7 +91,7 @@ export default function MobileAccountMenu({
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-999 transition-opacity duration-300 lg:hidden ${
+        className={`fixed inset-0 bg-black/50 backdrop-blur-xs z-999 transition-opacity duration-300 lg:hidden ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
@@ -115,80 +99,68 @@ export default function MobileAccountMenu({
 
       {/* Drop-up Menu */}
       <div
-        className={`fixed bottom-0 left-0 right-0 z-1000 bg-white rounded-t-[32px] shadow-2xl transition-transform duration-500 ease-out lg:hidden ${
+        className={`fixed bottom-0 left-0 right-0 z-1000 bg-white rounded-t-[24px] shadow-2xl transition-transform duration-500 ease-out lg:hidden ${
           isOpen ? "translate-y-0" : "translate-y-full"
         }`}
-        style={{ maxHeight: "85vh" }}
       >
         {/* Handle Bar */}
-        <div className="flex justify-center pt-3 pb-2">
-          <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
+        <div className="flex justify-center pt-2.5 pb-1">
+          <div className="w-10 h-1 bg-gray-200 rounded-full" />
         </div>
 
         {/* Header with User Info */}
-        <div className="px-6 py-6 border-b border-gray-100 bg-linear-to-br from-indigo-50/30 to-white">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-black text-gray-900 tracking-tight">
-              Your Account
-            </h2>
-            <button
-              onClick={onClose}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all active:scale-95"
-              aria-label="Close menu"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          {/* User Profile Summary */}
-          <div className="flex items-center gap-4">
+        <div className="px-5 py-4 flex items-center justify-between border-b border-gray-100">
+          <div className="flex items-center gap-3">
             <div className="relative shrink-0">
-              <div className="h-16 w-16 rounded-2xl border-2 border-white shadow-md overflow-hidden bg-gray-100">
+              <div className="h-11 w-11 rounded-xl border border-gray-100 overflow-hidden bg-gray-50">
                 {user.image ? (
                   <Image
                     src={user.image}
                     alt={user.name}
-                    width={64}
-                    height={64}
+                    width={44}
+                    height={44}
                     className="object-cover h-full w-full"
                   />
                 ) : (
-                  <div className="h-full w-full flex items-center justify-center text-2xl font-black text-indigo-600 bg-indigo-50">
+                  <div className="h-full w-full flex items-center justify-center text-lg font-black text-indigo-600 bg-indigo-50">
                     {user.name.charAt(0)}
                   </div>
                 )}
               </div>
               {isAdmin && (
-                <div className="absolute -bottom-1 -right-1 bg-indigo-600 text-white p-1 rounded-full border-2 border-white shadow-sm">
-                  <BadgeCheck size={12} />
+                <div className="absolute -bottom-1 -right-1 bg-indigo-600 text-white p-0.5 rounded-full border border-white shadow-sm">
+                  <BadgeCheck size={10} />
                 </div>
               )}
             </div>
-
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 mb-0.5">
-                <h3 className="font-black text-lg text-gray-900 truncate">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <h3 className="font-bold text-sm text-gray-900 truncate max-w-[140px]">
                   {user.name}
                 </h3>
                 {isAdmin && (
-                  <span className="px-2 py-0.5 rounded-full bg-indigo-600 text-white text-[8px] font-black uppercase tracking-widest shrink-0">
+                  <span className="px-1.5 py-0.5 bg-indigo-600 text-white text-[8px] font-black uppercase tracking-wider rounded-md">
                     Admin
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-500 font-medium truncate">
+              <p className="text-xs text-gray-400 truncate max-w-[170px]">
                 {user.email}
               </p>
             </div>
           </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all"
+            aria-label="Close menu"
+          >
+            <X size={18} />
+          </button>
         </div>
 
         {/* Menu Items */}
-        <div
-          className="px-4 py-4 overflow-y-auto"
-          style={{ maxHeight: "50vh" }}
-        >
-          <div className="space-y-2">
+        <div className="px-4 py-4">
+          <div className="space-y-1.5">
             {menuItems.map((item) => {
               const isActive =
                 item.href === "/account"
@@ -199,24 +171,24 @@ export default function MobileAccountMenu({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-4 p-4 rounded-2xl transition-all active:scale-[0.98] ${
+                  className={`flex items-center gap-3 p-2.5 rounded-xl transition-all active:scale-[0.99] group ${
                     isActive
-                      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
-                      : "bg-white hover:bg-gray-50 border border-gray-100"
+                      ? "bg-[#EEF2FF] text-[#312E81] font-bold"
+                      : "bg-white hover:bg-gray-50"
                   }`}
                 >
                   <div
-                    className={`p-3 rounded-xl transition-all ${
+                    className={`p-2 rounded-lg transition-all ${
                       isActive
-                        ? "bg-white/20 text-white"
+                        ? "bg-white/80 text-[#312E81]"
                         : `${item.bg} ${item.color}`
                     }`}
                   >
-                    <item.icon size={20} />
+                    <item.icon size={18} />
                   </div>
                   <span
-                    className={`font-bold text-base ${
-                      isActive ? "text-white" : "text-gray-900"
+                    className={`text-sm ${
+                      isActive ? "text-[#312E81]" : "text-gray-700 font-semibold group-hover:text-gray-900"
                     }`}
                   >
                     {item.label}
@@ -227,19 +199,19 @@ export default function MobileAccountMenu({
           </div>
 
           {/* Sign Out Button */}
-          <div className="mt-6 pt-4 border-t border-gray-100">
+          <div className="mt-4 pt-3 border-t border-gray-100">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-3 p-4 text-sm font-black text-red-600 bg-red-50/50 rounded-2xl border border-red-100 hover:bg-red-50 transition-all active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-bold text-red-600 bg-red-50/50 hover:bg-red-50 rounded-xl transition-all active:scale-[0.98]"
             >
-              <LogOut size={20} />
-              SIGN OUT FROM ACCOUNT
+              <LogOut size={16} />
+              Sign Out
             </button>
           </div>
         </div>
 
-        {/* Bottom Padding for safe area */}
-        <div className="h-20" />
+        {/* Bottom safe spacing */}
+        <div className="h-6 pb-safe" />
       </div>
     </>
   );

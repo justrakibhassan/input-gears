@@ -140,20 +140,12 @@ export default function UserNav({ session }: UserNavProps) {
             <div className="h-px bg-gray-50 my-1.5 mx-2" />
 
             <Link
-              href="/account/profile"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3 px-3.5 py-2.5 text-sm font-semibold text-gray-700 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 transition-all group"
-            >
-              <Settings className="w-4 h-4 text-gray-400 group-hover:text-indigo-600" />
-              Profile Settings
-            </Link>
-            <Link
               href="/account"
               onClick={() => setIsOpen(false)}
               className="flex items-center gap-3 px-3.5 py-2.5 text-sm font-semibold text-gray-700 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 transition-all group"
             >
               <User className="w-4 h-4 text-gray-400 group-hover:text-indigo-600" />
-              Account Overview
+              My Account
             </Link>
 
             <div className="h-px bg-gray-50 my-1.5 mx-2" />
