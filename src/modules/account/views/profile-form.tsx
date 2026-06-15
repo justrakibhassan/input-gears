@@ -42,9 +42,11 @@ interface ProfileFormProps {
 
 export default function ProfileForm({ user }: ProfileFormProps) {
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="space-y-12 divide-y divide-gray-100">
       <GeneralInfoForm user={user} />
-      <PasswordChangeForm />
+      <div className="pt-12">
+        <PasswordChangeForm />
+      </div>
     </div>
   );
 }
@@ -83,216 +85,214 @@ function GeneralInfoForm({ user }: ProfileFormProps) {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/30 flex justify-between items-center">
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="grid grid-cols-1 lg:grid-cols-12 gap-8"
+    >
+      {/* Left Column: Description & Avatar */}
+      <div className="lg:col-span-4 space-y-6">
         <div>
-          <h3 className="text-lg font-black text-gray-900 tracking-tight">
-            General Information
+          <h3 className="text-lg font-bold text-gray-900 tracking-tight">
+            General Details
           </h3>
-          <p className="text-sm text-gray-500 font-medium">
-            Update your photo and personal details.
+          <p className="text-xs text-gray-400 font-semibold mt-1">
+            Update your profile photo and personal details.
           </p>
+        </div>
+
+        {/* --- Avatar Upload Widget --- */}
+        <div className="flex flex-col items-center sm:items-start gap-4">
+          {isCloudinaryConfigured ? (
+            <CldUploadWidget
+              uploadPreset={uploadPreset}
+              onSuccess={(result: unknown) => {
+                if (
+                  result &&
+                  typeof result === "object" &&
+                  "info" in result &&
+                  typeof result.info === "object" &&
+                  result.info !== null &&
+                  "secure_url" in result.info
+                ) {
+                  const info = result.info as CloudinaryResult["info"];
+                  form.setValue("image", info.secure_url, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  });
+                  toast.success("Image uploaded!");
+                }
+              }}
+              options={{
+                maxFiles: 1,
+                resourceType: "image",
+                clientAllowedFormats: ["png", "jpeg", "jpg", "webp"],
+                sources: ["local", "camera", "url"],
+              }}
+            >
+              {({ open }) => {
+                function handleOnClick(e: React.MouseEvent) {
+                  e.preventDefault();
+                  open();
+                }
+
+                return (
+                  <div
+                    onClick={handleOnClick}
+                    className="relative group cursor-pointer w-24 h-24 sm:w-28 sm:h-28 rounded-full border border-gray-200 shadow-sm overflow-hidden bg-gray-50 flex items-center justify-center shrink-0"
+                  >
+                    {form.watch("image") ? (
+                      <Image
+                        src={form.watch("image") || ""}
+                        alt="Profile"
+                        fill
+                        sizes="112px"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <User size={36} className="text-gray-300" />
+                    )}
+
+                    <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <Camera className="text-white w-5 h-5 mb-1" />
+                      <span className="text-white text-[9px] font-black uppercase tracking-wider">
+                        Upload
+                      </span>
+                    </div>
+                  </div>
+                );
+              }}
+            </CldUploadWidget>
+          ) : (
+            <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full border border-gray-200 shadow-sm overflow-hidden bg-gray-50 flex items-center justify-center shrink-0">
+              {form.watch("image") ? (
+                <Image
+                  src={form.watch("image") || ""}
+                  alt="Profile"
+                  fill
+                  sizes="112px"
+                  className="object-cover"
+                />
+              ) : (
+                <User size={36} className="text-gray-300" />
+              )}
+            </div>
+          )}
+          
+          <div className="text-center sm:text-left space-y-1">
+            <h4 className="text-xs font-bold text-gray-700 tracking-tight">
+              Profile Photo
+            </h4>
+            <p className="text-[10px] text-gray-400 font-semibold max-w-[200px]">
+              {isCloudinaryConfigured
+                ? "Click on the photo to choose a new image."
+                : "Cloudinary upload is not configured."}
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="p-6 md:p-8">
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-6 md:space-y-8"
-        >
-          {/* --- Avatar Section --- */}
-          <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-gray-100 border-dashed">
-            {isCloudinaryConfigured ? (
-              <CldUploadWidget
-                uploadPreset={uploadPreset}
-                onSuccess={(result: unknown) => {
-                  if (
-                    result &&
-                    typeof result === "object" &&
-                    "info" in result &&
-                    typeof result.info === "object" &&
-                    result.info !== null &&
-                    "secure_url" in result.info
-                  ) {
-                    const info = result.info as CloudinaryResult["info"];
-                    form.setValue("image", info.secure_url, {
-                      shouldValidate: true,
-                      shouldDirty: true,
-                    });
-                    toast.success("Image uploaded!");
-                  }
-                }}
-                options={{
-                  maxFiles: 1,
-                  resourceType: "image",
-                  clientAllowedFormats: ["png", "jpeg", "jpg", "webp"],
-                  sources: ["local", "camera", "url"],
-                }}
-              >
-                {({ open }) => {
-                  function handleOnClick(e: React.MouseEvent) {
-                    e.preventDefault();
-                    open();
-                  }
-
-                  return (
-                    <div
-                      onClick={handleOnClick}
-                      className="relative group cursor-pointer shrink-0"
-                    >
-                      <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border-4 border-white shadow-xl overflow-hidden bg-gray-100 relative z-0 ring-1 ring-gray-100">
-                        {form.watch("image") ? (
-                          <Image
-                            src={form.watch("image") || ""}
-                            alt="Profile"
-                            fill
-                            sizes="112px"
-                            className="object-cover transition-transform duration-500 group-hover:scale-110"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
-                            <User size={40} className="sm:size-[48px]" />
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="absolute inset-0 bg-black/60 rounded-2xl flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-                        <Camera className="text-white w-6 h-6 sm:w-8 sm:h-8 mb-1" />
-                        <span className="text-white text-[10px] font-black uppercase tracking-wider">
-                          Update
-                        </span>
-                      </div>
-                    </div>
-                  );
-                }}
-              </CldUploadWidget>
-            ) : (
-              <div className="relative group shrink-0">
-                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border-4 border-white shadow-xl overflow-hidden bg-gray-100 relative z-0 ring-1 ring-gray-100">
-                  {form.watch("image") ? (
-                    <Image
-                      src={form.watch("image") || ""}
-                      alt="Profile"
-                      fill
-                      sizes="112px"
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
-                      <User size={40} className="sm:size-[48px]" />
-                    </div>
-                  )}
-                </div>
+      {/* Right Column: Inputs */}
+      <div className="lg:col-span-8 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Full Name */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1.5">
+              Full Name
+            </label>
+            <div className="relative">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                <User size={18} />
               </div>
-            )}
-
-            <div className="text-center sm:text-left space-y-2">
-              <h4 className="text-base font-black text-gray-900 tracking-tight">
-                Profile Photo
-              </h4>
-              <p className="text-xs text-gray-500 font-medium max-w-[200px]">
-                {isCloudinaryConfigured
-                  ? "Tap the image to change your profile picture."
-                  : "Cloudinary upload is unconfigured."}
+              <input
+                {...form.register("name")}
+                className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl text-sm font-semibold transition-all duration-200 bg-gray-50/30 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none"
+                placeholder="Your Name"
+              />
+            </div>
+            {form.formState.errors.name && (
+              <p className="text-red-500 text-[10px] font-black uppercase tracking-wider ml-1 mt-1">
+                {form.formState.errors.name.message}
               </p>
-            </div>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
-            <div className="space-y-1.5">
-              <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">
-                Full Name
-              </label>
-              <div className="relative group">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors">
-                  <User size={18} />
-                </div>
-                <input
-                  {...form.register("name")}
-                  className="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-gray-100 bg-gray-50/30 text-sm font-bold text-gray-900 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-50 focus:bg-white outline-none transition-all placeholder:text-gray-400"
-                  placeholder="Your Name"
-                />
+          {/* Phone Number */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1.5">
+              Phone Number
+            </label>
+            <div className="relative">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                <Smartphone size={18} />
               </div>
-              {form.formState.errors.name && (
-                <p className="text-red-500 text-[10px] font-black uppercase tracking-wider ml-1">
-                  {form.formState.errors.name.message}
-                </p>
-              )}
+              <input
+                {...form.register("phone")}
+                type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                onInput={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  target.value = target.value.replace(/\D/g, "");
+                }}
+                className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl text-sm font-semibold transition-all duration-200 bg-gray-50/30 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none"
+                placeholder="017xxxxxxxx"
+              />
             </div>
+            {form.formState.errors.phone && (
+              <p className="text-red-500 text-[10px] font-black uppercase tracking-wider ml-1 mt-1">
+                {form.formState.errors.phone.message}
+              </p>
+            )}
+          </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">
-                Phone Number
-              </label>
-              <div className="relative group">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors">
-                  <Smartphone size={18} />
-                </div>
-                <input
-                  {...form.register("phone")}
-                  type="tel"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  onInput={(e) => {
-                    const target = e.target as HTMLInputElement;
-                    target.value = target.value.replace(/\D/g, "");
-                  }}
-                  className="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-gray-100 bg-gray-50/30 text-sm font-bold text-gray-900 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-50 focus:bg-white outline-none transition-all placeholder:text-gray-400"
-                  placeholder="017xxxxxxxx"
-                />
+          {/* Email (Disabled/ReadOnly) */}
+          <div className="space-y-1.5 md:col-span-2">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1.5">
+              Email Address
+            </label>
+            <div className="relative">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                <Mail size={18} />
               </div>
-              {form.formState.errors.phone && (
-                <p className="text-red-500 text-[10px] font-black uppercase tracking-wider ml-1">
-                  {form.formState.errors.phone.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-1.5 md:col-span-2">
-              <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">
-                Email Address
-              </label>
-              <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                  <Mail size={18} />
-                </div>
-                <input
-                  type="email"
-                  disabled
-                  value={user.email || ""}
-                  className="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-gray-100 bg-gray-50 text-gray-400 text-sm font-bold cursor-not-allowed select-none"
-                />
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-green-600 bg-green-50 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
-                  <ShieldCheck size={12} /> Verified
-                </div>
+              <input
+                type="email"
+                disabled
+                value={user.email || ""}
+                className="w-full pl-12 pr-32 py-3 border border-gray-200 rounded-xl text-sm font-semibold bg-gray-50 text-gray-400 cursor-not-allowed select-none"
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <ShieldCheck size={12} /> Verified
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="flex justify-end pt-2">
-            <button
-              type="submit"
-              disabled={isSubmitting || !form.formState.isDirty}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-gray-900 text-white rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-xl shadow-gray-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
-            >
-              {isSubmitting ? (
-                <Loader2 className="animate-spin" size={18} />
-              ) : (
-                <Save size={18} />
-              )}
-              Save Changes
-            </button>
-          </div>
-        </form>
+        {/* Submit */}
+        <div className="flex justify-end pt-2">
+          <button
+            type="submit"
+            disabled={isSubmitting || !form.formState.isDirty}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-gray-900 hover:bg-indigo-600 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] w-full sm:w-auto"
+          >
+            {isSubmitting ? (
+              <Loader2 className="animate-spin" size={16} />
+            ) : (
+              <Save size={16} />
+            )}
+            Save Changes
+          </button>
+        </div>
       </div>
-    </div>
+    </form>
   );
 }
 
 // --- SUB COMPONENT 2: Password Change ---
 function PasswordChangeForm() {
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  
   const form = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordSchema),
   });
@@ -315,89 +315,100 @@ function PasswordChangeForm() {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/30 flex justify-between items-center">
-        <div>
-          <h3 className="text-lg font-black text-gray-900 tracking-tight">
-            Security
-          </h3>
-          <p className="text-sm text-gray-500 font-medium">
-            Update your account password.
-          </p>
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="grid grid-cols-1 lg:grid-cols-12 gap-8"
+    >
+      {/* Left Column: Description */}
+      <div className="lg:col-span-4">
+        <h3 className="text-lg font-bold text-gray-900 tracking-tight">
+          Security Settings
+        </h3>
+        <p className="text-xs text-gray-400 font-semibold mt-1 max-w-[280px]">
+          Update your account password regularly to ensure security.
+        </p>
+      </div>
+
+      {/* Right Column: Inputs */}
+      <div className="lg:col-span-8 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Current Password */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1.5">
+              Current Password
+            </label>
+            <div className="relative group">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                <Lock size={18} />
+              </div>
+              <input
+                type={showCurrentPassword ? "text" : "password"}
+                {...form.register("currentPassword")}
+                className="w-full pl-12 pr-12 py-3 border border-gray-200 rounded-xl text-sm font-semibold transition-all duration-200 bg-gray-50/30 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+              >
+                {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+            {form.formState.errors.currentPassword && (
+              <p className="text-red-500 text-[10px] font-black uppercase tracking-wider ml-1 mt-1">
+                {form.formState.errors.currentPassword.message}
+              </p>
+            )}
+          </div>
+
+          {/* New Password */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1.5">
+              New Password
+            </label>
+            <div className="relative group">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                <Lock size={18} />
+              </div>
+              <input
+                type={showNewPassword ? "text" : "password"}
+                {...form.register("newPassword")}
+                className="w-full pl-12 pr-12 py-3 border border-gray-200 rounded-xl text-sm font-semibold transition-all duration-200 bg-gray-50/30 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none"
+                placeholder="Minimum 8 characters"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+              >
+                {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+            {form.formState.errors.newPassword && (
+              <p className="text-red-500 text-[10px] font-black uppercase tracking-wider ml-1 mt-1">
+                {form.formState.errors.newPassword.message}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Submit */}
+        <div className="flex justify-end pt-2">
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 text-gray-700 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 shadow-sm disabled:opacity-50 w-full sm:w-auto"
+          >
+            {loading ? (
+              <Loader2 className="animate-spin" size={16} />
+            ) : (
+              <ShieldCheck size={16} />
+            )}
+            Update Password
+          </button>
         </div>
       </div>
-
-      <div className="p-6 md:p-8">
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-1.5">
-              <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">
-                Current Password
-              </label>
-              <div className="relative group">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors">
-                  <Lock size={18} />
-                </div>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  {...form.register("currentPassword")}
-                  className="w-full pl-12 pr-12 py-3.5 rounded-2xl border border-gray-100 bg-gray-50/30 text-sm font-bold text-gray-900 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-50 focus:bg-white outline-none transition-all placeholder:text-gray-400"
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-              {form.formState.errors.currentPassword && (
-                <p className="text-red-500 text-[10px] font-black uppercase tracking-wider ml-1">
-                  {form.formState.errors.currentPassword.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">
-                New Password
-              </label>
-              <div className="relative group">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors">
-                  <Lock size={18} />
-                </div>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  {...form.register("newPassword")}
-                  className="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-gray-100 bg-gray-50/30 text-sm font-bold text-gray-900 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-50 focus:bg-white outline-none transition-all placeholder:text-gray-400"
-                  placeholder="Minimum 8 characters"
-                />
-              </div>
-              {form.formState.errors.newPassword && (
-                <p className="text-red-500 text-[10px] font-black uppercase tracking-wider ml-1">
-                  {form.formState.errors.newPassword.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-2">
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-white text-gray-900 border-2 border-gray-900 rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-gray-900 hover:text-white transition-all active:scale-95 disabled:opacity-50"
-            >
-              {loading ? (
-                <Loader2 className="animate-spin" size={18} />
-              ) : (
-                <ShieldCheck size={18} />
-              )}
-              Update Password
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    </form>
   );
 }

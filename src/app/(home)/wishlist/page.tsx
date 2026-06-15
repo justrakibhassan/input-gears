@@ -1,10 +1,5 @@
-import WishlistView from "@/modules/products/views/wishlist-view";
-
-export const metadata = {
-  title: "Wishlist | InputGears",
-  description: "View and manage your favorite gadgets and gears.",
-};
+import { redirect } from "next/navigation";
 
 export default function WishlistPage() {
-  return <WishlistView />;
+  redirect("/account/wishlist");
 }

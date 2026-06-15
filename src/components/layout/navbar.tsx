@@ -314,7 +314,7 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
               </Link>
 
               <Link
-                href="/wishlist"
+                href="/account/wishlist"
                 className="hidden md:flex p-2.5 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-xl transition-all relative group"
               >
                 <Heart

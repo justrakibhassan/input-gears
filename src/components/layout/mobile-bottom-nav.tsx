@@ -65,8 +65,8 @@ export default function MobileBottomNav() {
     {
       name: "Wishlist",
       icon: Heart,
-      href: "/wishlist",
-      isActive: pathname === "/wishlist",
+      href: "/account/wishlist",
+      isActive: pathname === "/account/wishlist",
       badge: wishlistCount,
     },
     {

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   User,
@@ -10,10 +9,13 @@ import {
   LayoutDashboard,
   ShieldCheck,
   MapPin,
+  Heart,
+  Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
+import { useWishlist } from "@/modules/products/hooks/use-wishlist";
 
 interface UserProps {
   id: string;
@@ -39,7 +41,13 @@ const menuItems = [
     icon: Package,
   },
   {
-    title: "Shipping Addresses",
+    title: "Wishlist",
+    href: "/account/wishlist",
+    icon: Heart,
+    badge: true,
+  },
+  {
+    title: "Addresses",
     href: "/account/addresses",
     icon: MapPin,
   },
@@ -48,18 +56,23 @@ const menuItems = [
     href: "/account/profile",
     icon: User,
   },
+  {
+    title: "Reviews",
+    href: "/account/reviews",
+    icon: Star,
+  },
 ];
 
 export default function AccountSidebar({ user }: AccountSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const wishlist = useWishlist();
+  const wishlistCount = wishlist.items.length;
 
   const isAdmin = user?.role === "SUPER_ADMIN";
   const isManager = user?.role === "MANAGER";
   const isEditor = user?.role === "CONTENT_EDITOR";
   const canAccessAdmin = isAdmin || isManager || isEditor;
-
-  const isOverviewPage = pathname === "/account";
 
   const handleSignOut = async () => {
     await authClient.signOut();
@@ -70,45 +83,20 @@ export default function AccountSidebar({ user }: AccountSidebarProps) {
   if (!user) return null;
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-200 shadow-sm h-full overflow-hidden flex flex-col transition-all duration-300">
-      {!isOverviewPage ? (
-        <div className="p-6 border-b border-gray-100 bg-gray-50/50 animate-in slide-in-from-top-2 duration-300">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full border-2 border-white shadow-sm overflow-hidden bg-gray-200 shrink-0">
-              {user.image ? (
-                <Image
-                  src={user.image}
-                  alt={user.name}
-                  width={48}
-                  height={48}
-                  className="object-cover h-full w-full"
-                />
-              ) : (
-                <div className="h-full w-full flex items-center justify-center font-bold text-gray-500 bg-gray-100">
-                  {user.name?.charAt(0)}
-                </div>
-              )}
-            </div>
-            <div className="min-w-0">
-              <h3 className="font-bold text-gray-900 truncate">{user.name}</h3>
-              <p className="text-xs text-gray-500 truncate">{user.email}</p>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="px-6 pt-6 pb-2 animate-in fade-in duration-300">
-          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-            Dashboard Menu
-          </h3>
-        </div>
-      )}
+    <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm h-full overflow-hidden flex flex-col transition-all duration-300">
+      {/* 1. Header Title */}
+      <div className="px-6 pt-8 pb-4">
+        <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">
+          My Account
+        </h3>
+      </div>
 
       {/* 2. Admin Switcher */}
       {canAccessAdmin && (
-        <div className="px-4 pt-4 pb-2">
+        <div className="px-4 pb-3">
           <Link
             href="/admin"
-            className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-white bg-indigo-600 rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:shadow-indigo-300 transition-all group"
+            className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-white bg-indigo-600 rounded-2xl shadow-md shadow-indigo-100 hover:bg-indigo-700 transition-all group"
           >
             <ShieldCheck
               size={18}
@@ -120,7 +108,7 @@ export default function AccountSidebar({ user }: AccountSidebarProps) {
       )}
 
       {/* 3. Main Navigation */}
-      <nav className="flex-1 px-4 py-2 space-y-1.5">
+      <nav className="flex-1 px-4 py-2 space-y-1">
         {menuItems.map((item) => {
           const isActive =
             item.href === "/account"
@@ -129,20 +117,34 @@ export default function AccountSidebar({ user }: AccountSidebarProps) {
 
           return (
             <Link
-              key={item.href}
+              key={item.title}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200",
+                "flex items-center justify-between px-4 py-3 text-sm font-semibold rounded-2xl transition-all duration-200 group",
                 isActive
-                  ? "bg-gray-900 text-white shadow-md shadow-gray-900/10 font-semibold"
+                  ? "bg-[#EEF2FF] text-[#312E81] shadow-sm font-bold"
                   : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
               )}
             >
-              <item.icon
-                size={18}
-                className={cn(isActive ? "text-white" : "text-gray-400")}
-              />
-              {item.title}
+              <div className="flex items-center gap-3">
+                <item.icon
+                  size={18}
+                  className={cn(
+                    isActive ? "text-[#312E81]" : "text-gray-400 group-hover:text-gray-600"
+                  )}
+                />
+                <span>{item.title}</span>
+              </div>
+              {item.badge && wishlistCount > 0 && (
+                <span className={cn(
+                  "h-5 min-w-5 px-1.5 flex items-center justify-center text-[10px] font-black rounded-full",
+                  isActive
+                    ? "bg-[#312E81] text-white"
+                    : "bg-gray-100 text-gray-500"
+                )}>
+                  {wishlistCount}
+                </span>
+              )}
             </Link>
           );
         })}
@@ -152,7 +154,7 @@ export default function AccountSidebar({ user }: AccountSidebarProps) {
       <div className="p-4 mt-auto border-t border-gray-100">
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 bg-red-50/50 rounded-xl hover:bg-red-50 hover:text-red-700 transition-all"
+          className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 rounded-2xl transition-all"
         >
           <LogOut size={18} />
           Sign Out
