@@ -33,6 +33,7 @@ export default async function RootLayout({
     id: cat.id,
     name: cat.name,
     slug: cat.slug,
+    parentId: cat.parentId,
     brands: Array.from(
       new Set(cat.products.map((p) => p.brand).filter((b): b is string => typeof b === "string")),
     ),

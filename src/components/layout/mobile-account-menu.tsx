@@ -210,8 +210,8 @@ export default function MobileAccountMenu({
           </div>
         </div>
 
-        {/* Bottom safe spacing */}
-        <div className="h-6 pb-safe" />
+        {/* Bottom safe spacing to clear the mobile bottom navigation bar */}
+        <div className="h-24" />
       </div>
     </>
   );

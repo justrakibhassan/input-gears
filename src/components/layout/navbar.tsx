@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import NextImage from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Search,
   User,
@@ -20,6 +20,8 @@ import {
   ArrowLeftRight,
   ChevronDown,
   LucideIcon,
+  Plus,
+  Minus,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import UserNav from "../../modules/auth/components/user-nav";
@@ -29,6 +31,7 @@ import { useCompare } from "@/modules/products/hooks/use-compare";
 import MobileBottomNav from "./mobile-bottom-nav";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 // Dynamically import CartNav with SSR disabled
 const CartNav = dynamic(
@@ -48,6 +51,16 @@ interface CategoryWithBrands {
   name: string;
   slug: string;
   brands: string[];
+  parentId: string | null;
+}
+
+interface CategoryNode {
+  id: string;
+  name: string;
+  slug: string;
+  brands: string[];
+  parentId: string | null;
+  children: CategoryNode[];
 }
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
@@ -85,6 +98,23 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+
+  const categoryTree = useMemo(() => {
+    const map: Record<string, CategoryNode> = {};
+    categories.forEach(cat => {
+      map[cat.id] = { ...cat, children: [] };
+    });
+    const roots: CategoryNode[] = [];
+    categories.forEach(cat => {
+      const node = map[cat.id];
+      if (cat.parentId && map[cat.parentId]) {
+        map[cat.parentId].children.push(node);
+      } else {
+        roots.push(node);
+      }
+    });
+    return roots;
+  }, [categories]);
 
   // Sync search query from URL
   const currentQuery = searchParams.get("q") || "";
@@ -567,37 +597,16 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
 
                 <div className="flex-1 overflow-y-auto p-6 space-y-4">
                   <p className="text-[11px] font-bold text-gray-600 uppercase tracking-widest">Categories</p>
-                  {categories.map((cat) => {
-                    const isActive = pathname === `/${cat.slug}` || pathname.startsWith(`/${cat.slug}/`);
-                    return (
-                      <div key={cat.id} className="space-y-1">
-                        <Link
-                          href={`/${cat.slug}`}
-                          className={`group flex items-center py-2 px-3 rounded-lg transition-all border-l-2 ${
-                            isActive
-                              ? "bg-[#3b5998]/5 text-[#3b5998] border-[#3b5998] font-bold"
-                              : "text-gray-700 border-transparent hover:text-[#3b5998] hover:bg-gray-50/50 font-semibold"
-                          }`}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          <span className="text-[15px]">{cat.name}</span>
-                        </Link>
-                        {/* Mobile Brands Shortcut */}
-                        <div className="pl-5 flex flex-wrap gap-x-3 gap-y-1.5 pt-1 pb-2">
-                           {cat.brands.slice(0, 4).map(brand => (
-                             <Link
-                                key={brand}
-                                href={`/${cat.slug}?brand=${encodeURIComponent(brand)}`}
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className="text-xs text-gray-500 hover:text-[#3b5998] transition-colors"
-                             >
-                               {brand}
-                             </Link>
-                           ))}
-                        </div>
-                      </div>
-                    );
-                  })}
+                  <div className="space-y-1">
+                    {categoryTree.map((node) => (
+                      <MobileCategoryItem
+                        key={node.id}
+                        node={node}
+                        pathname={pathname}
+                        onClose={() => setIsMobileMenuOpen(false)}
+                      />
+                    ))}
+                  </div>
                 </div>
 
                 <div className="p-6 border-t bg-gray-50/50">
@@ -648,5 +657,92 @@ export function NavbarSkeleton() {
         </div>
       </nav>
     </header>
+  );
+}
+
+function MobileCategoryItem({
+  node,
+  pathname,
+  onClose,
+  depth = 0,
+}: {
+  node: CategoryNode;
+  pathname: string;
+  onClose: () => void;
+  depth?: number;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const hasChildren = node.children && node.children.length > 0;
+  const hasBrands = node.brands && node.brands.length > 0;
+  const isExpandable = hasChildren || hasBrands;
+
+  const isActive = pathname === `/${node.slug}` || pathname.startsWith(`/${node.slug}/`);
+
+  return (
+    <div className="space-y-1">
+      <div
+        className={cn(
+          "flex items-center justify-between rounded-xl transition-all border-l-2",
+          isActive
+            ? "bg-[#3b5998]/5 text-[#3b5998] border-[#3b5998] font-bold"
+            : "text-gray-700 border-transparent hover:text-[#3b5998] hover:bg-gray-50/50 font-semibold"
+        )}
+        style={{ paddingLeft: `${depth * 12 + 12}px` }}
+      >
+        <Link
+          href={`/${node.slug}`}
+          className="flex-1 py-2 text-[15px]"
+          onClick={onClose}
+        >
+          {node.name}
+        </Link>
+        {isExpandable && (
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="p-2 text-gray-400 hover:text-[#3b5998] transition-colors"
+          >
+            {isOpen ? (
+              <Minus size={16} strokeWidth={2.5} />
+            ) : (
+              <Plus size={16} strokeWidth={2.5} />
+            )}
+          </button>
+        )}
+      </div>
+
+      {isOpen && isExpandable && (
+        <div className="space-y-1">
+          {/* Subcategories (if any) */}
+          {hasChildren && node.children.map(child => (
+            <MobileCategoryItem
+              key={child.id}
+              node={child}
+              pathname={pathname}
+              onClose={onClose}
+              depth={depth + 1}
+            />
+          ))}
+          
+          {/* Brands list */}
+          {hasBrands && (
+            <div 
+              className="flex flex-col gap-y-1 pt-1 pb-2 border-l border-gray-100"
+              style={{ marginLeft: `${(depth + 1) * 12 + 12}px` }}
+            >
+              {node.brands.map(brand => (
+                <Link
+                  key={brand}
+                  href={`/${node.slug}?brand=${encodeURIComponent(brand)}`}
+                  onClick={onClose}
+                  className="text-xs text-gray-500 hover:text-[#3b5998] transition-colors font-medium py-1 pl-3 block"
+                >
+                  {brand}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

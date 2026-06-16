@@ -77,7 +77,7 @@ export default function MobileBottomNav() {
       badge: compareCount,
     },
     {
-      name: "You",
+      name: "Account",
       icon: User,
       href: (isMounted && session) ? "/account" : "/sign-in",
       isActive: pathname.startsWith("/account") || pathname === "/sign-in",
