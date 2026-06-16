@@ -36,7 +36,6 @@ export const useWishlist = create<WishlistStore>()(
 
         if (!exists) {
           set({ items: [...currentItems, item] });
-          toast.success("Added to wishlist ❤️");
 
           if (authenticated) {
             try {
@@ -54,7 +53,6 @@ export const useWishlist = create<WishlistStore>()(
 
       removeItem: async (id, authenticated) => {
         set({ items: get().items.filter((item) => item.id !== id) });
-        toast.info("Removed from wishlist");
 
         if (authenticated) {
           try {

@@ -36,7 +36,6 @@ export default function CartView() {
 
   const handleClearCart = () => {
     cart.clearCart();
-    toast.success("Cart cleared successfully");
   };
 
   if (cart.items.length === 0) {

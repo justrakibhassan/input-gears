@@ -44,7 +44,6 @@ export const useCart = create<CartStore>()(
                 : item
             ),
           });
-          toast.success("Quantity updated in cart");
 
           if (authenticated) {
             try {
@@ -104,7 +103,6 @@ export const useCart = create<CartStore>()(
 
       removeItem: async (id, authenticated) => {
         set({ items: get().items.filter((item) => item.id !== id) });
-        toast.error("Item removed from cart");
 
         if (authenticated) {
           try {

@@ -40,9 +40,6 @@ export const useCompare = create<CompareStore>()(
 
         if (!exists) {
           set({ items: [...currentItems, item] });
-          toast.success("Added to comparison", {
-            description: `${item.name} added to compare list.`
-          });
         } else {
           toast.info("Item already in comparison");
         }
@@ -50,7 +47,6 @@ export const useCompare = create<CompareStore>()(
 
       removeItem: (id) => {
         set({ items: get().items.filter((item) => item.id !== id) });
-        toast.info("Removed from comparison");
       },
 
       isInCompare: (id) => {

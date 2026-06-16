@@ -39,6 +39,16 @@ interface SpecGroup {
   keys: { key: string; label: string }[];
 }
 
+interface SearchResult {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  image: string | null;
+  categoryName?: string | null;
+  category?: { name: string } | null;
+}
+
 const STATIC_GROUPS: SpecGroup[] = [
   {
     id: "connectivity",
@@ -109,7 +119,7 @@ export default function CompareView() {
     if (slotIdx === 3) setQ3(value || null);
   };
 
-  const [searchResults, setSearchResults] = useState<any[][]>([[], [], [], []]);
+  const [searchResults, setSearchResults] = useState<SearchResult[][]>([[], [], [], []]);
   const [loadingSlots, setLoadingSlots] = useState<boolean[]>([false, false, false, false]);
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
 
@@ -163,13 +173,12 @@ export default function CompareView() {
     setSearchResults(newResults);
 
     try {
-      toast.loading("Fetching product details...", { id: "fetch-product" });
       const res = await getProductById(productId);
       if (res.success && res.data) {
         const newItem: CompareItem = {
           ...res.data,
           image: res.data.image || "",
-          specs: (res.data.specs as any) || null,
+          specs: (res.data.specs as Record<string, string | number | boolean | null>) || null,
         };
 
         const currentItems = [...compare.items];
@@ -177,7 +186,7 @@ export default function CompareView() {
         // Check if item already exists in another slot
         const existsIdx = currentItems.findIndex((i) => i.id === newItem.id);
         if (existsIdx !== -1 && existsIdx !== slotIdx) {
-          toast.error(`${newItem.name} is already in comparison`, { id: "fetch-product" });
+          toast.error(`${newItem.name} is already in comparison`);
           return;
         }
 
@@ -185,17 +194,16 @@ export default function CompareView() {
           // Override existing slot
           currentItems[slotIdx] = newItem;
           compare.updateItems(currentItems);
-          toast.success(`Replaced with ${newItem.name}`, { id: "fetch-product" });
         } else {
           // Append to items
           compare.addItem(newItem);
         }
       } else {
-        toast.error("Failed to load details", { id: "fetch-product" });
+        toast.error("Failed to load details");
       }
     } catch (err) {
       console.error(err);
-      toast.error("Error loading product details", { id: "fetch-product" });
+      toast.error("Error loading product details");
     }
   };
 
@@ -652,14 +660,8 @@ export default function CompareView() {
 
           {/* View Comparison Button */}
           <button
-            onClick={() => {
-              if (compare.items.length > 0) {
-                // Will automatically re-render view with compare elements
-              } else {
-                toast.error("Please select at least 1 product to compare");
-              }
-            }}
-            className="w-full h-11 border border-indigo-700 text-indigo-900 bg-transparent rounded-xl text-xs font-bold transition-all hover:bg-indigo-700 hover:text-white cursor-pointer flex items-center justify-center active:scale-[0.98]"
+            disabled
+            className="w-full h-11 border border-indigo-200 text-indigo-400 bg-transparent rounded-xl text-xs font-bold flex items-center justify-center cursor-not-allowed"
           >
             View Comparison
           </button>
