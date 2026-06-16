@@ -18,6 +18,7 @@ interface CompareStore {
   removeItem: (id: string) => void;
   clearCompare: () => void;
   isInCompare: (id: string) => boolean;
+  updateItems: (items: CompareItem[]) => void;
 }
 
 export const useCompare = create<CompareStore>()(
@@ -58,6 +59,10 @@ export const useCompare = create<CompareStore>()(
 
       clearCompare: () => {
         set({ items: [] });
+      },
+
+      updateItems: (items) => {
+        set({ items });
       },
     }),
     {

@@ -36,10 +36,58 @@ export async function GET(request: Request) {
 
     return NextResponse.json(products);
   } catch (error) {
-    logger.error("Product search failed", error, { query });
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 },
-    );
+    logger.warn("Product search raw trigram query failed, trying standard Prisma fallback search", { error: String(error), query });
+    try {
+      const fallbackProducts = await prisma.product.findMany({
+        where: {
+          AND: [
+            { isActive: true },
+            {
+              OR: [
+                { scheduledAt: null },
+                { scheduledAt: { lte: new Date() } }
+              ]
+            },
+            {
+              OR: [
+                { name: { contains: query, mode: "insensitive" } },
+                { description: { contains: query, mode: "insensitive" } }
+              ]
+            }
+          ]
+        },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          price: true,
+          image: true,
+          category: {
+            select: {
+              name: true
+            }
+          }
+        },
+        take: 8
+      });
+
+      const formattedProducts = fallbackProducts.map(p => ({
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        price: p.price,
+        image: p.image,
+        categoryName: p.category?.name || null,
+        category: p.category ? { name: p.category.name } : null
+      }));
+
+      return NextResponse.json(formattedProducts);
+    } catch (fallbackError) {
+      logger.error("Fallback product search failed", fallbackError, { query });
+      return NextResponse.json(
+        { error: "Internal Server Error" },
+        { status: 500 }
+      );
+    }
   }
 }
