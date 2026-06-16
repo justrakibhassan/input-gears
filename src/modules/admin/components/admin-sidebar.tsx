@@ -2,6 +2,7 @@
 
 import { useState, useSyncExternalStore, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -175,7 +176,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
     <aside
       style={{ backgroundColor: currentSidebarColor }}
       className={cn(
-        "h-screen text-white transition-all duration-300 flex flex-col border-r border-white/10 z-50",
+        "h-screen h-dvh text-white transition-all duration-300 flex flex-col border-r border-white/10 z-[9999] lg:z-50",
         isCollapsed ? "w-20" : "w-72",
         "fixed lg:sticky top-0 left-0",
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
@@ -282,7 +283,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       </nav>
 
       {/* 3. Footer / Logout */}
-      <div className="p-4 border-t border-white/10 shrink-0">
+      <div className="p-4 pb-safe border-t border-white/10 shrink-0 bg-transparent">
         <button
           onClick={handleSignOut}
           disabled={isLoggingOut}

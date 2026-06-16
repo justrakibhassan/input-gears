@@ -110,7 +110,7 @@ export default function AdminLayoutWrapper({
       {/* Mobile Backdrop */}
       <div
         className={cn(
-          "fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300 lg:hidden",
+          "fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998] transition-opacity duration-300 lg:hidden",
           isSidebarOpen ? "opacity-100 visible" : "opacity-0 invisible"
         )}
         onClick={() => setIsSidebarOpen(false)}

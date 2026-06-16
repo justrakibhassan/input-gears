@@ -480,6 +480,44 @@ export async function deleteProducts(productIds: string[]) {
     return { success: false, message: "Failed to delete products" };
   }
 }
+
+// --- 5b. Update Product Status (Active / Paused / Draft) ---
+export type ProductStatus = "active" | "paused" | "draft";
+
+export async function updateProductStatus(id: string, status: ProductStatus) {
+  try {
+    const session = await requireRole(["SUPER_ADMIN", "MANAGER"]);
+
+    const data =
+      status === "active"
+        ? { isActive: true, scheduledAt: null }
+        : status === "paused"
+        ? { isActive: false, scheduledAt: null }
+        : { isActive: false, scheduledAt: null }; // draft: same as paused for now
+
+    await prisma.product.update({
+      where: { id },
+      data,
+    });
+
+    revalidatePath("/admin/products");
+    revalidatePath("/products");
+
+    await createAuditLog({
+      adminId: session.user.id,
+      action: "UPDATE_PRODUCT",
+      entityType: "PRODUCT",
+      entityId: id,
+      details: `Set product status to "${status}"`,
+    });
+
+    return { success: true, message: `Product set to ${status}` };
+  } catch (error) {
+    logger.error("Update Product Status Error:", error);
+    return { success: false, message: "Failed to update product status" };
+  }
+}
+
 // --- 6. Bulk Delete Users ---
 export async function deleteUsers(userIds: string[]) {
   try {

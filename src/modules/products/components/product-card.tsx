@@ -101,6 +101,7 @@ const ProductCard = memo(({ data }: ProductCardProps) => {
         slug: data.slug,
         price: data.price,
         image: data.image || "",
+        category: data.category,
         colors: data.colors,
         switchType: data.switchType || undefined,
         specs: data.specs,

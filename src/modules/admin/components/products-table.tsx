@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -20,10 +20,13 @@ import {
   Calendar,
   Layers,
   History,
+  PauseCircle,
+  FileEdit,
+  CheckCircle2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { deleteProducts } from "@/modules/admin/actions";
+import { deleteProducts, updateProductStatus, type ProductStatus } from "@/modules/admin/actions";
 import { cn } from "@/lib/utils";
 import { useQueryState } from "nuqs";
 
@@ -54,6 +57,15 @@ export default function ProductsTable({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isStockModalOpen, setIsStockModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClose = () => setOpenDropdownId(null);
+    window.addEventListener("click", handleClose);
+    return () => window.removeEventListener("click", handleClose);
+  }, []);
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -108,13 +120,18 @@ export default function ProductsTable({
     );
   };
 
-  // Bulk Actions
+  // Bulk/Single Actions
   const handleDeleteConfirm = () => {
     startTransition(async () => {
-      const res = await deleteProducts(selectedIds);
+      const idsToDelete = productToDelete ? [productToDelete] : selectedIds;
+      const res = await deleteProducts(idsToDelete);
       if (res.success) {
         toast.success(res.message);
-        setSelectedIds([]);
+        if (productToDelete) {
+          setProductToDelete(null);
+        } else {
+          setSelectedIds([]);
+        }
         setIsDeleteModalOpen(false);
         router.refresh();
       } else {
@@ -127,11 +144,18 @@ export default function ProductsTable({
     <div className="relative">
       <AlertModal
         isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setProductToDelete(null);
+        }}
         onConfirm={handleDeleteConfirm}
         loading={isPending}
-        title="Delete Selected Products?"
-        description={`This action is permanent and cannot be undone. You are about to delete ${selectedIds.length} products.`}
+        title={productToDelete ? "Delete Product?" : "Delete Selected Products?"}
+        description={
+          productToDelete
+            ? "This action is permanent and cannot be undone. You are about to delete this product."
+            : `This action is permanent and cannot be undone. You are about to delete ${selectedIds.length} products.`
+        }
       />
 
       <ProductEditModal
@@ -228,8 +252,8 @@ export default function ProductsTable({
             exit={{ y: 20, opacity: 0 }}
             className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-6 border border-white/10"
           >
-            <div className="flex items-center gap-2 pr-6 border-r border-white/10 text-sm font-black uppercase tracking-widest">
-              <span className="bg-indigo-600 w-6 h-6 flex items-center justify-center rounded-full text-[10px]">
+            <div className="flex items-center gap-2 pr-6 border-r border-white/10 text-sm font-semibold">
+              <span className="bg-indigo-600 w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-bold">
                 {selectedIds.length}
               </span>
               Selected
@@ -239,7 +263,7 @@ export default function ProductsTable({
               <button
                 disabled={isPending}
                 onClick={() => setIsDeleteModalOpen(true)}
-                className="flex items-center gap-2 hover:bg-red-500/10 hover:text-red-400 p-2 rounded-xl transition-colors text-xs font-black uppercase tracking-widest disabled:opacity-50"
+                className="flex items-center gap-2 hover:bg-red-500/10 hover:text-red-400 p-2 rounded-xl transition-colors text-xs font-semibold disabled:opacity-50"
               >
                 {isPending ? (
                   <Loader2 size={16} className="animate-spin" />
@@ -252,7 +276,7 @@ export default function ProductsTable({
               <button
                 disabled={isPending}
                 onClick={() => setIsStockModalOpen(true)}
-                className="flex items-center gap-2 hover:bg-indigo-500/10 hover:text-indigo-400 p-2 rounded-xl transition-colors text-xs font-black uppercase tracking-widest disabled:opacity-50"
+                className="flex items-center gap-2 hover:bg-indigo-500/10 hover:text-indigo-400 p-2 rounded-xl transition-colors text-xs font-semibold disabled:opacity-50"
               >
                 <Layers size={16} className="text-indigo-400" />
                 Update Stock
@@ -260,7 +284,7 @@ export default function ProductsTable({
 
               <button
                 onClick={() => setSelectedIds([])}
-                className="flex items-center gap-2 hover:bg-white dark:hover:bg-gray-900/10 p-2 rounded-xl transition-colors text-xs font-black uppercase tracking-widest"
+                className="flex items-center gap-2 hover:bg-white/10 p-2 rounded-xl transition-colors text-xs font-semibold"
               >
                 <X size={16} />
                 Cancel
@@ -386,7 +410,7 @@ export default function ProductsTable({
                       <div className="flex flex-col gap-0.5">
                         <Link
                           href={`/admin/products/edit/${product.id}`}
-                          className="font-bold text-gray-900 dark:text-white hover:text-indigo-600 transition-colors uppercase tracking-tight"
+                          className="font-bold text-gray-900 dark:text-white hover:text-indigo-600 transition-colors"
                         >
                           {product.name}
                         </Link>
@@ -478,9 +502,106 @@ export default function ProductsTable({
                         >
                           <Edit size={18} />
                         </button>
-                        <button className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all">
-                          <MoreHorizontal size={18} />
-                        </button>
+                        <div className="relative">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenDropdownId(openDropdownId === product.id ? null : product.id);
+                            }}
+                            className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-gray-900 hover:shadow-sm dark:shadow-none rounded-xl transition-all"
+                            title="Set Status"
+                          >
+                            <MoreHorizontal size={18} />
+                          </button>
+
+                          {openDropdownId === product.id && (
+                            <div
+                              onClick={(e) => e.stopPropagation()}
+                              className="absolute right-0 mt-1.5 w-44 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-xl z-50 py-1.5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+                            >
+                              <p className="px-3 py-1.5 text-[9px] font-black uppercase tracking-widest text-gray-400">Set Status</p>
+
+                              {/* Active */}
+                              <button
+                                disabled={isPending}
+                                onClick={() => {
+                                  setOpenDropdownId(null);
+                                  startTransition(async () => {
+                                    const res = await updateProductStatus(product.id, "active");
+                                    if (res.success) toast.success(res.message);
+                                    else toast.error(res.message);
+                                    router.refresh();
+                                  });
+                                }}
+                                className={`flex items-center gap-2 px-3 py-2 text-xs w-full text-left font-semibold transition-colors ${
+                                  product.isActive
+                                    ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600"
+                                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                                }`}
+                              >
+                                <CheckCircle2 size={14} className={product.isActive ? "text-emerald-500" : "text-gray-300"} />
+                                Active
+                                {product.isActive && <span className="ml-auto text-[9px] font-black text-emerald-500 uppercase tracking-wide">Now</span>}
+                              </button>
+
+                              {/* Paused */}
+                              <button
+                                disabled={isPending}
+                                onClick={() => {
+                                  setOpenDropdownId(null);
+                                  startTransition(async () => {
+                                    const res = await updateProductStatus(product.id, "paused");
+                                    if (res.success) toast.success(res.message);
+                                    else toast.error(res.message);
+                                    router.refresh();
+                                  });
+                                }}
+                                className={`flex items-center gap-2 px-3 py-2 text-xs w-full text-left font-semibold transition-colors ${
+                                  !product.isActive && !product.scheduledAt
+                                    ? "bg-amber-50 dark:bg-amber-900/20 text-amber-600"
+                                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                                }`}
+                              >
+                                <PauseCircle size={14} className={!product.isActive && !product.scheduledAt ? "text-amber-500" : "text-gray-300"} />
+                                Paused
+                                {!product.isActive && !product.scheduledAt && <span className="ml-auto text-[9px] font-black text-amber-500 uppercase tracking-wide">Now</span>}
+                              </button>
+
+                              {/* Draft */}
+                              <button
+                                disabled={isPending}
+                                onClick={() => {
+                                  setOpenDropdownId(null);
+                                  startTransition(async () => {
+                                    const res = await updateProductStatus(product.id, "draft");
+                                    if (res.success) toast.success(res.message);
+                                    else toast.error(res.message);
+                                    router.refresh();
+                                  });
+                                }}
+                                className="flex items-center gap-2 px-3 py-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors w-full text-left font-semibold"
+                              >
+                                <FileEdit size={14} className="text-gray-300" />
+                                Draft
+                              </button>
+
+                              <div className="border-t border-gray-100 dark:border-gray-800 my-1" />
+
+                              {/* Delete */}
+                              <button
+                                onClick={() => {
+                                  setProductToDelete(product.id);
+                                  setIsDeleteModalOpen(true);
+                                  setOpenDropdownId(null);
+                                }}
+                                className="flex items-center gap-2 px-3 py-2 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors w-full text-left font-semibold"
+                              >
+                                <Trash2 size={14} className="text-red-500" />
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </td>
                   </tr>

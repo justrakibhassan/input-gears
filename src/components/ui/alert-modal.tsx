@@ -85,10 +85,10 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                   </button>
                 </div>
 
-                <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tight mb-2">
+                <h2 className="text-2xl font-black text-gray-900 tracking-tight mb-2">
                   {title}
                 </h2>
-                <p className="text-sm font-bold text-gray-400 uppercase tracking-widest leading-relaxed">
+                <p className="text-sm font-medium text-gray-500 leading-relaxed">
                   {description}
                 </p>
 
@@ -96,14 +96,14 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                   <button
                     disabled={loading}
                     onClick={onClose}
-                    className="flex-1 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-gray-400 bg-gray-50 hover:bg-gray-100 hover:text-gray-900 transition-all active:scale-95 disabled:opacity-50"
+                    className="flex-1 px-6 py-4 rounded-2xl text-sm font-semibold text-gray-500 bg-gray-50 hover:bg-gray-100 hover:text-gray-900 transition-all active:scale-95 disabled:opacity-50"
                   >
                     Cancel
                   </button>
                   <button
                     disabled={loading}
                     onClick={onConfirm}
-                    className={`flex-1 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-white shadow-lg transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 ${confirmBtnStyles[variant]}`}
+                    className={`flex-1 px-6 py-4 rounded-2xl text-sm font-semibold text-white shadow-lg transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 ${confirmBtnStyles[variant]}`}
                   >
                     {loading && <Loader2 size={16} className="animate-spin" />}
                     Confirm
