@@ -20,16 +20,18 @@ import {
   Heart,
   Search,
   Loader2,
+  CheckCircle,
 } from "lucide-react";
 import { useCompare, CompareItem } from "@/modules/products/hooks/use-compare";
 import { useCart } from "@/modules/cart/hooks/use-cart";
 import { useWishlist } from "@/modules/products/hooks/use-wishlist";
 import { useSession } from "@/lib/auth-client";
 import { getReviewStats } from "@/modules/reviews/actions";
-import { getProductById } from "@/modules/products/actions";
+import { getProductById, getProductsByIds } from "@/modules/products/actions";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useQueryState, parseAsString } from "nuqs";
+import { useSearchParams } from "next/navigation";
 
 // --- Configuration ---
 interface SpecGroup {
@@ -96,6 +98,9 @@ export default function CompareView() {
   const { data: session } = useSession();
 
   const [isMounted, setIsMounted] = useState(false);
+  const [showCopiedTooltip, setShowCopiedTooltip] = useState(false);
+  const searchParams = useSearchParams();
+  const urlItems = searchParams.get("items");
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [isScrolledPast, setIsScrolledPast] = useState(false);
   const hideIdentical = false;
@@ -214,6 +219,36 @@ export default function CompareView() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    async function loadSharedProducts() {
+      if (!urlItems) return;
+      
+      const idsArray = urlItems.split(",").filter(Boolean);
+      if (idsArray.length === 0) return;
+
+      try {
+        const res = await getProductsByIds(idsArray);
+        if (res.success && res.data) {
+          const fetchedItems = res.data.map((prod) => ({
+            ...prod,
+            image: prod.image || "",
+            specs: (prod.specs as Record<string, string | number | boolean | null>) || null,
+          }));
+          
+          compare.updateItems(fetchedItems);
+        } else {
+          toast.error("Failed to load shared products");
+        }
+      } catch (err) {
+        console.error("Error fetching shared products:", err);
+      }
+    }
+
+    if (isMounted) {
+      loadSharedProducts();
+    }
+  }, [urlItems, isMounted]);
 
   // Click outside to close dropdowns
   useEffect(() => {
@@ -344,7 +379,8 @@ export default function CompareView() {
     return isMobile ? compare.items.slice(0, 2) : compare.items;
   }, [compare.items, isMobile]);
 
-  const totalSlots = isMobile ? 2 : 4;
+  const maxSlots = isMobile ? 2 : 4;
+  const totalSlots = Math.min(compare.items.length + 1, maxSlots);
 
   const slotItems = useMemo(() => {
     const items = [];
@@ -363,10 +399,14 @@ export default function CompareView() {
 
   const handleShare = () => {
     if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success("Comparison link copied", {
-        description: "You can now share this comparison page with others."
-      });
+      const productIds = compare.items.map((item) => item.id).join(",");
+      const shareUrl = `${window.location.origin}${window.location.pathname}?items=${productIds}`;
+      
+      navigator.clipboard.writeText(shareUrl);
+      setShowCopiedTooltip(true);
+      setTimeout(() => {
+        setShowCopiedTooltip(false);
+      }, 2000);
     }
   };
 
@@ -696,13 +736,56 @@ export default function CompareView() {
             </button>
 
             {/* Share Button */}
-            <button
-              onClick={handleShare}
-              className="inline-flex items-center gap-1.5 px-4 py-2 border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer"
-            >
-              <Share2 size={13} />
-              Share
-            </button>
+            <div className="relative">
+              <AnimatePresence>
+                {showCopiedTooltip && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.85 }}
+                    animate={{ opacity: 1, y: 0, scale: [0.85, 1.08, 1] }}
+                    exit={{ opacity: 0, y: -6, scale: 0.85 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-zinc-900 text-white text-[10px] font-bold rounded-lg whitespace-nowrap shadow-lg z-50 pointer-events-none flex items-center gap-1.5"
+                  >
+                    {/* Pulsing green ring behind the check icon */}
+                    <span className="relative flex items-center justify-center shrink-0">
+                      <motion.span
+                        initial={{ scale: 0.5, opacity: 0.8 }}
+                        animate={{ scale: 2, opacity: 0 }}
+                        transition={{ duration: 0.6, ease: "easeOut" }}
+                        className="absolute w-3 h-3 rounded-full bg-emerald-400"
+                      />
+                      <motion.span
+                        initial={{ rotate: -90, scale: 0.3, opacity: 0 }}
+                        animate={{ rotate: 0, scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.25, ease: "easeOut" }}
+                      >
+                        <CheckCircle size={11} className="text-emerald-400" />
+                      </motion.span>
+                    </span>
+
+                    {/* Staggered text characters sliding in */}
+                    <motion.span
+                      initial={{ opacity: 0, x: -4 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1, duration: 0.2 }}
+                    >
+                      Copied to clipboard
+                    </motion.span>
+
+                    {/* Arrow caret */}
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-zinc-900" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <button
+                onClick={handleShare}
+                className="inline-flex items-center gap-1.5 px-4 py-2 border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer"
+              >
+                <Share2 size={13} />
+                Share
+              </button>
+            </div>
 
             {/* Clear All Button */}
             <button
@@ -763,8 +846,8 @@ export default function CompareView() {
                             hoveredColIndex === idx && "bg-indigo-50/5"
                           )}
                           style={{
-                            width: isMobile ? `calc((100% - 90px) / ${totalSlots})` : `calc((100% - 200px) / 4)`,
-                            minWidth: isMobile ? `calc((100% - 90px) / ${totalSlots})` : `calc((100% - 200px) / 4)`
+                            width: isMobile ? `calc((100% - 90px) / ${totalSlots})` : `calc((100% - 200px) / ${totalSlots})`,
+                            minWidth: isMobile ? `calc((100% - 90px) / ${totalSlots})` : `calc((100% - 200px) / ${totalSlots})`
                           }}
                         >
                           <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -798,8 +881,8 @@ export default function CompareView() {
                           key={`sticky-empty-${idx}`}
                           className="p-3 border-l border-zinc-100 flex-1 flex items-center justify-center bg-zinc-50/20 text-zinc-400"
                           style={{
-                            width: isMobile ? `calc((100% - 90px) / ${totalSlots})` : `calc((100% - 200px) / 4)`,
-                            minWidth: isMobile ? `calc((100% - 90px) / ${totalSlots})` : `calc((100% - 200px) / 4)`
+                            width: isMobile ? `calc((100% - 90px) / ${totalSlots})` : `calc((100% - 200px) / ${totalSlots})`,
+                            minWidth: isMobile ? `calc((100% - 90px) / ${totalSlots})` : `calc((100% - 200px) / ${totalSlots})`
                           }}
                         >
                           <span className="text-[10px] font-bold text-zinc-400">Empty Slot</span>
@@ -819,14 +902,16 @@ export default function CompareView() {
             <table className="w-full table-fixed border-collapse">
               <colgroup>
                 <col style={{ width: isMobile ? '90px' : '200px' }} />
-                <col style={{ width: isMobile ? `calc((100% - 90px) / 2)` : `calc((100% - 200px) / 4)` }} />
-                <col style={{ width: isMobile ? `calc((100% - 90px) / 2)` : `calc((100% - 200px) / 4)` }} />
-                {!isMobile && (
-                  <>
-                    <col style={{ width: `calc((100% - 200px) / 4)` }} />
-                    <col style={{ width: `calc((100% - 200px) / 4)` }} />
-                  </>
-                )}
+                {Array.from({ length: totalSlots }).map((_, i) => (
+                  <col
+                    key={`col-${i}`}
+                    style={{
+                      width: isMobile
+                        ? `calc((100% - 90px) / ${totalSlots})`
+                        : `calc((100% - 200px) / ${totalSlots})`,
+                    }}
+                  />
+                ))}
               </colgroup>
               <tbody>
                 {/* Product Header Row */}

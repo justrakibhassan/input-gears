@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import CompareView from "@/modules/products/views/compare-view";
 
 export const metadata = {
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function ComparePage() {
-  return <CompareView />;
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-slate-500">Loading Comparison...</div>}>
+      <CompareView />
+    </Suspense>
+  );
 }
