@@ -51,17 +51,17 @@ export default async function BrandTicker() {
               key={`${brand.id}-${index}`}
               className="flex items-center gap-3 mx-6 md:mx-10 group/item cursor-pointer"
             >
-              <div className="text-gray-400 group-hover/item:text-indigo-600 transition-colors duration-300 w-8 h-8 md:w-10 md:h-10 relative flex items-center justify-center">
+              <div className="text-gray-600 group-hover/item:text-indigo-600 transition-colors duration-300 w-8 h-8 md:w-10 md:h-10 relative flex items-center justify-center">
                 {brand.image ? (
-                  <img src={brand.image} alt={brand.name} className="max-w-full max-h-full object-contain grayscale opacity-50 group-hover/item:grayscale-0 group-hover/item:opacity-100 transition-all duration-300" />
+                  <img src={brand.image} alt={brand.name} className="max-w-full max-h-full object-contain grayscale opacity-80 group-hover/item:grayscale-0 group-hover/item:opacity-100 transition-all duration-300" />
                 ) : (
                   (() => {
                     const FallbackIcon = fallbackIcons[brand.name.toUpperCase()] || Package;
-                    return <FallbackIcon size={24} className="opacity-50 group-hover/item:opacity-100 transition-all duration-300" />;
+                    return <FallbackIcon size={24} className="opacity-80 group-hover/item:opacity-100 transition-all duration-300" />;
                   })()
                 )}
               </div>
-              <span className="text-xs md:text-sm font-bold text-gray-400 group-hover/item:text-gray-900 transition-colors duration-300 tracking-widest uppercase">
+              <span className="text-xs md:text-sm font-bold text-gray-600 group-hover/item:text-gray-900 transition-colors duration-300 tracking-widest uppercase">
                 {brand.name}
               </span>
             </div>

@@ -4,6 +4,8 @@ import AccountSidebar from "@/modules/account/components/account-sidebar";
 import { useSession } from "@/lib/auth-client";
 import { usePathname } from "next/navigation";
 import { Suspense } from "react";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function AccountLayout({
   children,
@@ -76,6 +78,20 @@ export default function AccountLayout({
 
           {/* Right Side: Dynamic Content */}
           <main className="flex-1 min-w-0">
+            {!isOverview && (
+              <div className="md:hidden mb-4">
+                <Link
+                  href="/account"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-gray-600 hover:text-indigo-600 bg-white border border-gray-100 hover:border-gray-200 rounded-2xl shadow-xs transition-all duration-200 active:scale-95 group"
+                >
+                  <ArrowLeft
+                    size={14}
+                    className="transition-transform group-hover:-translate-x-0.5 text-gray-400 group-hover:text-indigo-600"
+                  />
+                  <span>Back to Account</span>
+                </Link>
+              </div>
+            )}
             <div
               className={
                 isOverview

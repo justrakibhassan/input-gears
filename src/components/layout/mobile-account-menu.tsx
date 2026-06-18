@@ -11,11 +11,13 @@ import {
   BadgeCheck,
   Shield,
   User as UserIcon,
+  ArrowLeftRight,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { User } from "@prisma/client";
+import { useCompare } from "@/modules/products/hooks/use-compare";
 
 export default function MobileAccountMenu({
   isOpen,
@@ -27,6 +29,8 @@ export default function MobileAccountMenu({
   const { data: session } = useSession();
   const pathname = usePathname();
   const router = useRouter();
+  const compare = useCompare();
+  const compareCount = compare.items.length;
 
   // Close menu when route changes
   useEffect(() => {
@@ -73,6 +77,14 @@ export default function MobileAccountMenu({
       href: "/account/orders",
       color: "text-blue-600",
       bg: "bg-blue-50",
+    },
+    {
+      label: "Compare",
+      icon: ArrowLeftRight,
+      href: "/compare",
+      color: "text-amber-600",
+      bg: "bg-amber-50",
+      badge: compareCount,
     },
   ];
 
@@ -171,28 +183,39 @@ export default function MobileAccountMenu({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 p-2.5 rounded-xl transition-all active:scale-[0.99] group ${
+                  className={`flex items-center justify-between p-2.5 rounded-xl transition-all active:scale-[0.99] group ${
                     isActive
                       ? "bg-[#EEF2FF] text-[#312E81] font-bold"
                       : "bg-white hover:bg-gray-50"
                   }`}
                 >
-                  <div
-                    className={`p-2 rounded-lg transition-all ${
-                      isActive
-                        ? "bg-white/80 text-[#312E81]"
-                        : `${item.bg} ${item.color}`
-                    }`}
-                  >
-                    <item.icon size={18} />
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`p-2 rounded-lg transition-all ${
+                        isActive
+                          ? "bg-white/80 text-[#312E81]"
+                          : `${item.bg} ${item.color}`
+                      }`}
+                    >
+                      <item.icon size={18} />
+                    </div>
+                    <span
+                      className={`text-sm ${
+                        isActive ? "text-[#312E81]" : "text-gray-700 font-semibold group-hover:text-gray-900"
+                      }`}
+                    >
+                      {item.label}
+                    </span>
                   </div>
-                  <span
-                    className={`text-sm ${
-                      isActive ? "text-[#312E81]" : "text-gray-700 font-semibold group-hover:text-gray-900"
-                    }`}
-                  >
-                    {item.label}
-                  </span>
+                  {item.badge !== undefined && item.badge > 0 && (
+                    <span className={`h-5 min-w-5 px-1.5 flex items-center justify-center text-[10px] font-black rounded-full transition-all ${
+                      isActive
+                        ? "bg-[#312E81] text-white"
+                        : "bg-gray-100 text-gray-500"
+                    }`}>
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
               );
             })}

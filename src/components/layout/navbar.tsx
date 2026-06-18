@@ -352,7 +352,7 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
                   size={22}
                   className={`transition-all duration-300 ${
                     hasWishlistItems
-                      ? "fill-indigo-600 text-indigo-600 scale-110"
+                      ? "text-indigo-600 scale-110"
                       : "group-hover:scale-110"
                   }`}
                 />

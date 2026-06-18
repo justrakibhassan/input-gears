@@ -181,7 +181,7 @@ const ProductCard = memo(({ data }: ProductCardProps) => {
           <button
             onClick={onToggleCompare}
             aria-label={isComparing ? "Remove from compare" : "Add to compare"}
-            className={`group/btn relative h-10 w-10 rounded-full flex items-center justify-center shadow-lg backdrop-blur-md transition-all ${
+            className={`hidden md:flex group/btn relative h-10 w-10 rounded-full items-center justify-center shadow-lg backdrop-blur-md transition-all ${
               isComparing
                 ? "bg-amber-500 text-white"
                 : "bg-white/90 text-gray-900 hover:bg-amber-500 hover:text-white"
@@ -201,7 +201,7 @@ const ProductCard = memo(({ data }: ProductCardProps) => {
               setIsQuickViewOpen(true);
             }}
             aria-label="Quick view product"
-            className="group/btn relative h-10 w-10 bg-white/90 backdrop-blur-md text-gray-900 rounded-full flex items-center justify-center shadow-lg hover:bg-indigo-600 hover:text-white transition-all cursor-pointer"
+            className="hidden md:flex group/btn relative h-10 w-10 bg-white/90 backdrop-blur-md text-gray-900 rounded-full items-center justify-center shadow-lg hover:bg-indigo-600 hover:text-white transition-all cursor-pointer"
           >
             <Search size={18} />
             <div className="absolute right-full mr-3 px-2 py-1 bg-gray-900 text-white text-[10px] rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">

@@ -4,11 +4,10 @@ import { useState, useSyncExternalStore, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Home, Tag, Heart, ArrowLeftRight, User, LayoutDashboard } from "lucide-react";
+import { Home, Tag, Heart, User, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSession } from "@/lib/auth-client";
 import { useWishlist } from "@/modules/products/hooks/use-wishlist";
-import { useCompare } from "@/modules/products/hooks/use-compare";
 import MobileAccountMenu from "./mobile-account-menu";
 
 const emptySubscribe = () => () => {};
@@ -26,12 +25,10 @@ export default function MobileBottomNav() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const wishlist = useWishlist();
-  const compare = useCompare();
   const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
 
   const wishlistCount = isMounted ? wishlist.items.length : 0;
-  const compareCount = isMounted ? compare.items.length : 0;
 
   const handleToggleAccountMenu = useCallback(() => {
     setIsAccountMenuOpen((prev: boolean) => !prev);
@@ -68,13 +65,6 @@ export default function MobileBottomNav() {
       href: "/account/wishlist",
       isActive: pathname === "/account/wishlist",
       badge: wishlistCount,
-    },
-    {
-      name: "Comp",
-      icon: ArrowLeftRight,
-      href: "/compare",
-      isActive: pathname === "/compare",
-      badge: compareCount,
     },
     {
       name: "Account",
@@ -140,7 +130,7 @@ export default function MobileBottomNav() {
                   </div>
 
                   <span
-                    className={`text-[10px] font-black tracking-widest uppercase transition-colors duration-300 ${
+                    className={`text-[10px] font-black tracking-wide transition-colors duration-300 ${
                       tab.isActive ? "text-indigo-600" : "text-gray-600"
                     }`}
                   >
@@ -169,7 +159,7 @@ export default function MobileBottomNav() {
                 </div>
 
                 <span
-                  className={`text-[10px] font-black tracking-widest uppercase transition-colors duration-300 ${
+                  className={`text-[10px] font-black tracking-wide transition-colors duration-300 ${
                     tab.isActive ? "text-indigo-600" : "text-gray-600"
                   }`}
                 >
