@@ -141,7 +141,7 @@ const ProductCard = memo(({ data }: ProductCardProps) => {
         }}
       />
       <div className="relative block aspect-4/5 bg-gray-50 overflow-hidden">
-        <Link href={`/products/${data.slug}`} className="block w-full h-full">
+        <Link href={`/products/${data.slug}`} className="relative block w-full h-full">
           {data.image ? (
             <Image
               src={data.image}

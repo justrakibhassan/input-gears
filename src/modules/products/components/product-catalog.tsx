@@ -23,7 +23,12 @@ const ProductCatalog = memo(({ products, showFilters = true }: ProductCatalogPro
     setIsMounted(true);
     const savedMode = localStorage.getItem("input-gears-view-mode");
     if (savedMode && ["grid", "compact-grid", "list", "table"].includes(savedMode)) {
-      setViewMode(savedMode as ViewMode);
+      const isMobile = window.innerWidth < 640;
+      if (isMobile) {
+        setViewMode(savedMode === "compact-grid" || savedMode === "grid" ? "grid" : "list");
+      } else {
+        setViewMode(savedMode as ViewMode);
+      }
     }
   }, []);
 
@@ -82,7 +87,7 @@ const ProductCatalog = memo(({ products, showFilters = true }: ProductCatalogPro
           <button
             onClick={() => handleViewModeChange("compact-grid")}
             className={cn(
-              "flex-1 sm:flex-none h-9 px-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all duration-300",
+              "hidden sm:flex flex-1 sm:flex-none h-9 px-3 rounded-xl text-xs font-black uppercase tracking-wider items-center justify-center gap-1.5 transition-all duration-300",
               viewMode === "compact-grid"
                 ? "bg-white text-indigo-600 shadow-sm border border-gray-200/20"
                 : "text-gray-500 hover:text-gray-900 hover:bg-white/40"
@@ -112,7 +117,7 @@ const ProductCatalog = memo(({ products, showFilters = true }: ProductCatalogPro
           <button
             onClick={() => handleViewModeChange("table")}
             className={cn(
-              "flex-1 sm:flex-none h-9 px-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all duration-300",
+              "hidden sm:flex flex-1 sm:flex-none h-9 px-3 rounded-xl text-xs font-black uppercase tracking-wider items-center justify-center gap-1.5 transition-all duration-300",
               viewMode === "table"
                 ? "bg-white text-indigo-600 shadow-sm border border-gray-200/20"
                 : "text-gray-500 hover:text-gray-900 hover:bg-white/40"

@@ -120,7 +120,7 @@ const ProductRowCard = memo(({ data }: ProductRowCardProps) => {
     <motion.div
       whileHover={{ y: -2, scale: 1.005 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      className="group relative bg-white rounded-3xl border border-gray-100 shadow-sm transition-all duration-300 md:hover:shadow-[0_15px_35px_rgba(79,70,229,0.08)] md:hover:border-indigo-100 overflow-hidden flex flex-col sm:flex-row p-4 gap-6 items-center"
+      className="group relative bg-white rounded-3xl border border-gray-100 shadow-sm transition-all duration-300 md:hover:shadow-[0_15px_35px_rgba(79,70,229,0.08)] md:hover:border-indigo-100 overflow-hidden flex flex-row p-3 sm:p-4 gap-4 sm:gap-6 items-center"
     >
       <QuickViewModal
         isOpen={isQuickViewOpen}
@@ -140,8 +140,8 @@ const ProductRowCard = memo(({ data }: ProductRowCardProps) => {
       />
 
       {/* Image */}
-      <div className="relative w-full sm:w-48 aspect-square sm:aspect-4/3 bg-gray-50 rounded-2xl overflow-hidden flex-shrink-0">
-        <Link href={`/products/${data.slug}`} className="block w-full h-full">
+      <div className="relative w-24 h-24 sm:w-48 sm:aspect-4/3 bg-gray-50 rounded-xl sm:rounded-2xl overflow-hidden flex-shrink-0">
+        <Link href={`/products/${data.slug}`} className="relative block w-full h-full">
           {data.image ? (
             <Image
               src={data.image}
@@ -160,14 +160,14 @@ const ProductRowCard = memo(({ data }: ProductRowCardProps) => {
         </Link>
 
         {/* Category Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
+        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
           {data.category && (
-            <div className="bg-gray-900/90 backdrop-blur-md text-white px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider shadow-sm">
+            <div className="bg-gray-900/90 backdrop-blur-md text-white px-2 py-0.5 rounded-full text-[8px] sm:text-[9px] font-bold uppercase tracking-wider shadow-sm">
               {data.category.name}
             </div>
           )}
           {isOutOfStock && (
-            <div className="bg-red-500/95 backdrop-blur-md text-white px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider shadow-md">
+            <div className="bg-red-500/95 backdrop-blur-md text-white px-2 py-0.5 rounded-full text-[8px] sm:text-[9px] font-bold uppercase tracking-wider shadow-md">
               Sold Out
             </div>
           )}
@@ -175,21 +175,21 @@ const ProductRowCard = memo(({ data }: ProductRowCardProps) => {
       </div>
 
       {/* Content Details */}
-      <div className="flex-1 flex flex-col w-full text-center sm:text-left">
+      <div className="flex-1 flex flex-col min-w-0 text-left">
         <div className="flex-1">
           <Link href={`/products/${data.slug}`} className="inline-block">
-            <h3 className="font-bold text-gray-900 text-base sm:text-xl group-hover:text-indigo-600 transition-colors tracking-tight line-clamp-1">
+            <h3 className="font-bold text-gray-900 text-sm sm:text-xl group-hover:text-indigo-600 transition-colors tracking-tight line-clamp-1">
               {data.name}
             </h3>
           </Link>
           
-          <p className="text-xs sm:text-sm text-gray-500 font-medium mt-1.5 sm:mt-2 line-clamp-2 max-w-xl">
+          <p className="hidden sm:block text-xs sm:text-sm text-gray-500 font-medium mt-1.5 sm:mt-2 line-clamp-2 max-w-xl">
             {data.description || "Premium gadget for enthusiasts."}
           </p>
 
           {/* Key specs row */}
           {(data.brand || data.connectionType || data.switchType) && (
-            <div className="flex flex-wrap justify-center sm:justify-start gap-x-4 gap-y-1.5 mt-3 sm:mt-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+            <div className="hidden sm:flex flex-wrap justify-center sm:justify-start gap-x-4 gap-y-1.5 mt-3 sm:mt-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
               {data.brand && (
                 <span>
                   Brand: <span className="text-gray-700">{data.brand}</span>
@@ -210,35 +210,35 @@ const ProductRowCard = memo(({ data }: ProductRowCardProps) => {
         </div>
 
         {/* Footer Actions */}
-        <div className="flex flex-col sm:flex-row items-center justify-between mt-4 pt-4 border-t border-gray-50 gap-4">
-          <div className="flex flex-col items-center sm:items-start">
-            <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">
+        <div className="flex flex-row items-center justify-between mt-2 pt-2 border-t border-gray-100 gap-2 w-full sm:mt-4 sm:pt-4">
+          <div className="flex flex-col items-start">
+            <span className="text-[8px] sm:text-[9px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">
               Price
             </span>
-            <span className="font-black text-lg sm:text-2xl text-indigo-600 tabular-nums">
+            <span className="font-black text-sm sm:text-2xl text-indigo-600 tabular-nums">
               {formattedPrice}
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             {/* Wishlist */}
             <button
               onClick={onToggleWishlist}
               aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-              className={`h-10 w-10 rounded-2xl flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.06)] border border-gray-100 backdrop-blur-md transition-all ${
+              className={`h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.06)] border border-gray-100 backdrop-blur-md transition-all ${
                 isWishlisted
                   ? "bg-indigo-600 text-white border-indigo-600"
                   : "bg-white text-gray-900 hover:bg-indigo-600 hover:text-white hover:border-indigo-600"
               }`}
             >
-              <Heart size={16} fill={isWishlisted ? "currentColor" : "none"} />
+              <Heart size={14} fill={isWishlisted ? "currentColor" : "none"} className="sm:w-[16px] sm:h-[16px]" />
             </button>
 
             {/* Compare */}
             <button
               onClick={onToggleCompare}
               aria-label={isComparing ? "Remove from compare" : "Add to compare"}
-              className={`h-10 w-10 rounded-2xl flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.06)] border border-gray-100 backdrop-blur-md transition-all ${
+              className={`hidden sm:flex h-10 w-10 rounded-2xl items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.06)] border border-gray-100 backdrop-blur-md transition-all ${
                 isComparing
                   ? "bg-amber-500 text-white border-amber-500"
                   : "bg-white text-gray-900 hover:bg-amber-500 hover:text-white hover:border-amber-500"
@@ -256,7 +256,7 @@ const ProductRowCard = memo(({ data }: ProductRowCardProps) => {
                 setIsQuickViewOpen(true);
               }}
               aria-label="Quick view product"
-              className="h-10 w-10 bg-white text-gray-900 rounded-2xl flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.06)] border border-gray-100 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all cursor-pointer"
+              className="hidden sm:flex h-10 w-10 bg-white text-gray-900 rounded-2xl items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.06)] border border-gray-100 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all cursor-pointer"
             >
               <Search size={16} />
             </button>
@@ -266,7 +266,7 @@ const ProductRowCard = memo(({ data }: ProductRowCardProps) => {
               onClick={onAddToCart}
               disabled={isOutOfStock}
               className={`
-                h-10 px-5 rounded-2xl flex items-center justify-center gap-2 font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-sm active:scale-95 z-10
+                h-8 w-8 sm:h-10 sm:px-5 rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-sm active:scale-95 z-10 shrink-0
                 ${
                   isOutOfStock
                     ? "bg-gray-50 text-gray-300 cursor-not-allowed shadow-none border border-gray-100"
@@ -279,12 +279,12 @@ const ProductRowCard = memo(({ data }: ProductRowCardProps) => {
               {isAdded ? (
                 <>
                   <Check size={14} strokeWidth={3} className="animate-in zoom-in duration-500" />
-                  <span>Added</span>
+                  <span className="hidden sm:inline">Added</span>
                 </>
               ) : (
                 <>
                   <ShoppingCart size={14} strokeWidth={2} className="transition-transform" />
-                  <span>Add to Cart</span>
+                  <span className="hidden sm:inline">Add to Cart</span>
                 </>
               )}
             </button>

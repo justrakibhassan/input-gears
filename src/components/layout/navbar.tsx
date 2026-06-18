@@ -214,7 +214,7 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
               : "bg-white py-4 border-gray-200/50"
           }`}
         >
-          <div className="max-w-[1440px] mx-auto px-4 sm:px-8 flex items-center justify-between gap-4 md:gap-8">
+          <div className="relative max-w-[1440px] mx-auto px-4 sm:px-8 flex items-center justify-between gap-4 md:gap-8">
             <div className="flex items-center gap-4 flex-1">
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
