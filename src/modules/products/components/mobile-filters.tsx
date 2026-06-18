@@ -42,8 +42,8 @@ export default function MobileFilters({
           <div className="h-full flex flex-col">
             <SheetHeader className="p-6 border-b">
               <div className="flex items-center justify-between">
-                <SheetTitle className="text-xl font-black uppercase tracking-tighter">
-                  Filter <span className="text-gray-400">Inventory</span>
+                <SheetTitle className="text-xl font-bold text-gray-950">
+                  Filter <span className="text-gray-500">inventory</span>
                 </SheetTitle>
               </div>
             </SheetHeader>

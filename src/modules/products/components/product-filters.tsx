@@ -1,6 +1,6 @@
 "use client";
 
-import { useQueryState, parseAsString, parseAsFloat } from "nuqs";
+import { useQueryState, useQueryStates, parseAsString, parseAsFloat } from "nuqs";
 import { Search, X, SlidersHorizontal, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { 
@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface ProductFiltersProps {
   categories: { id: string; name: string }[];
@@ -25,12 +25,30 @@ export default function ProductFilters({ categories, brands }: ProductFiltersPro
   const [q, setQ] = useQueryState("q", parseAsString.withDefault("").withOptions({ shallow: false, throttleMs: 500 }));
   const [category, setCategory] = useQueryState("category", parseAsString.withDefault("").withOptions({ shallow: false }));
   const [brand, setBrand] = useQueryState("brand", parseAsString.withDefault("").withOptions({ shallow: false }));
-  const [minPrice, setMinPrice] = useQueryState("minPrice", parseAsFloat.withOptions({ shallow: false }));
-  const [maxPrice, setMaxPrice] = useQueryState("maxPrice", parseAsFloat.withOptions({ shallow: false }));
+  
+  const [priceQuery, setPriceQuery] = useQueryStates(
+    {
+      minPrice: parseAsFloat,
+      maxPrice: parseAsFloat,
+    },
+    {
+      shallow: false,
+      throttleMs: 300,
+    }
+  );
+  
   const [sort, setSort] = useQueryState("sort", parseAsString.withDefault("newest").withOptions({ shallow: false }));
 
-  // Local state for price slider to avoid excessive URL updates
+  const minPrice = priceQuery.minPrice;
+  const maxPrice = priceQuery.maxPrice;
+
+  // Local state for price slider to keep slider handle movements buttery smooth
   const [priceRange, setPriceRange] = useState<[number, number]>([minPrice ?? 0, maxPrice ?? 2000]);
+
+  // Sync local state when url query params change (e.g. on reset or direct navigation)
+  useEffect(() => {
+    setPriceRange([minPrice ?? 0, maxPrice ?? 2000]);
+  }, [minPrice, maxPrice]);
 
   const activeFiltersCount = [category, brand, minPrice, maxPrice, sort !== "newest" ? sort : null].filter(Boolean).length;
 
@@ -38,19 +56,14 @@ export default function ProductFilters({ categories, brands }: ProductFiltersPro
     setQ("");
     setCategory("");
     setBrand("");
-    setMinPrice(null);
-    setMaxPrice(null);
+    setPriceQuery({ minPrice: null, maxPrice: null });
     setSort("newest");
     setPriceRange([0, 2000]);
   };
 
   const handlePriceChange = (value: number[]) => {
     setPriceRange([value[0], value[1]]);
-  };
-
-  const handlePriceCommit = (value: number[]) => {
-    setMinPrice(value[0]);
-    setMaxPrice(value[1]);
+    setPriceQuery({ minPrice: value[0], maxPrice: value[1] });
   };
 
   return (
@@ -59,7 +72,7 @@ export default function ProductFilters({ categories, brands }: ProductFiltersPro
       <div className="flex items-center justify-between pb-4 border-b">
         <div className="flex items-center gap-2">
           <SlidersHorizontal size={18} className="text-gray-950" />
-          <h3 className="text-sm font-bold uppercase tracking-widest text-gray-950">Filters</h3>
+          <h3 className="text-sm font-bold text-gray-950">Filters</h3>
           {activeFiltersCount > 0 && (
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gray-950 text-[10px] font-bold text-white">
               {activeFiltersCount}
@@ -70,7 +83,7 @@ export default function ProductFilters({ categories, brands }: ProductFiltersPro
           variant="ghost"
           size="sm"
           onClick={handleReset}
-          className="h-8 px-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-gray-950 transition-colors gap-2"
+          className="h-8 px-2 text-xs font-semibold text-gray-400 hover:text-gray-950 transition-colors gap-2"
         >
           <RotateCcw size={12} />
           Reset
@@ -96,10 +109,34 @@ export default function ProductFilters({ categories, brands }: ProductFiltersPro
         )}
       </div>
 
-      <Accordion type="multiple" defaultValue={["categories", "brands", "price"]} className="w-full">
+      {/* Price Range (directly below search) */}
+      <div className="space-y-4 pt-2 pb-4 border-b">
+        <h4 className="text-xs font-bold text-gray-700">Price range</h4>
+        <div className="space-y-5 px-1">
+          <Slider
+            value={priceRange}
+            max={2000}
+            step={50}
+            onValueChange={handlePriceChange}
+            className="[&_.relative]:h-1.5 **:data-[slot=slider-range]:bg-gray-950 **:data-[slot=slider-thumb]:bg-white **:data-[slot=slider-thumb]:border-gray-950"
+          />
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1 text-center bg-gray-50 border border-gray-100 rounded-xl py-2">
+              <span className="text-[10px] font-bold text-gray-400 block mb-0.5">Min price</span>
+              <span className="text-xs font-black text-gray-950">${priceRange[0]}</span>
+            </div>
+            <div className="flex-1 text-center bg-gray-50 border border-gray-100 rounded-xl py-2">
+              <span className="text-[10px] font-bold text-gray-400 block mb-0.5">Max price</span>
+              <span className="text-xs font-black text-gray-950">${priceRange[1]}+</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Accordion type="multiple" defaultValue={["categories", "brands"]} className="w-full">
         {/* Categories */}
         <AccordionItem value="categories" className="border-b-0 py-2">
-          <AccordionTrigger className="hover:no-underline py-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
+          <AccordionTrigger className="hover:no-underline py-2 text-xs font-bold text-gray-700">
             Categories
           </AccordionTrigger>
           <AccordionContent className="pt-2">
@@ -124,8 +161,8 @@ export default function ProductFilters({ categories, brands }: ProductFiltersPro
 
         {/* Brands */}
         <AccordionItem value="brands" className="border-b-0 py-2">
-          <AccordionTrigger className="hover:no-underline py-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
-            Featured Brands
+          <AccordionTrigger className="hover:no-underline py-2 text-xs font-bold text-gray-700">
+            Featured brands
           </AccordionTrigger>
           <AccordionContent className="pt-2">
             <div className="grid grid-cols-1 gap-1">
@@ -151,40 +188,11 @@ export default function ProductFilters({ categories, brands }: ProductFiltersPro
             </div>
           </AccordionContent>
         </AccordionItem>
-
-        {/* Price Range */}
-        <AccordionItem value="price" className="border-b-0 py-2">
-          <AccordionTrigger className="hover:no-underline py-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
-            Price Range
-          </AccordionTrigger>
-          <AccordionContent className="pt-6 px-1">
-            <div className="space-y-6">
-              <Slider
-                value={priceRange}
-                max={2000}
-                step={50}
-                onValueChange={handlePriceChange}
-                onValueCommit={handlePriceCommit}
-                className="[&_.relative]:h-1.5 **:data-[slot=slider-range]:bg-gray-950 **:data-[slot=slider-thumb]:bg-white **:data-[slot=slider-thumb]:border-gray-950"
-              />
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex-1 text-center bg-gray-50 border border-gray-100 rounded-xl py-2">
-                  <span className="text-[9px] font-black text-gray-400 block uppercase mb-0.5">Min</span>
-                  <span className="text-xs font-black text-gray-950">${priceRange[0]}</span>
-                </div>
-                <div className="flex-1 text-center bg-gray-50 border border-gray-100 rounded-xl py-2">
-                  <span className="text-[9px] font-black text-gray-400 block uppercase mb-0.5">Max</span>
-                  <span className="text-xs font-black text-gray-950">${priceRange[1]}+</span>
-                </div>
-              </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
       </Accordion>
 
       {/* Sorting */}
       <div className="space-y-4 pt-4 border-t">
-        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Sort Inventory</h4>
+        <h4 className="text-xs font-bold text-gray-700">Sort inventory</h4>
         <div className="grid grid-cols-1 gap-2">
           {[
             { id: "newest", label: "Newest Arrivals" },
