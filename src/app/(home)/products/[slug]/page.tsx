@@ -59,6 +59,9 @@ export default async function ProductDetailsPage(props: PageProps) {
   // 3. Fetch product from DB
   const productFromDb = await prisma.product.findUnique({
     where: { slug },
+    include: {
+      category: true,
+    },
   });
 
   if (!productFromDb) {
@@ -102,20 +105,12 @@ export default async function ProductDetailsPage(props: PageProps) {
     description: productFromDb.description || "",
     image: productFromDb.image,
     images: productFromDb.image ? [productFromDb.image] : ["/placeholder.png"],
-    category: {
-      id: productFromDb.categoryId || "",
-      name: "General",
-      slug: "general",
-      description: null,
-      image: null,
-      parentId: null,
-      isActive: true,
-      isFeatured: false,
-      seoTitle: null,
-      seoDescription: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
+    category: productFromDb.category
+      ? {
+          ...productFromDb.category,
+          products: [],
+        }
+      : null,
     specs: (productFromDb.specs as Record<string, string | number | boolean | null>) || {},
   };
 
