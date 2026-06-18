@@ -166,10 +166,10 @@ const ProductCard = memo(({ data }: ProductCardProps) => {
           <button
             onClick={onToggleWishlist}
             aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-            className={`group/btn relative h-10 w-10 rounded-full flex items-center justify-center shadow-lg backdrop-blur-md transition-all ${
+            className={`group/btn relative h-10 w-10 rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.12)] border border-gray-100 backdrop-blur-md transition-all ${
               isWishlisted
-                ? "bg-indigo-600 text-white"
-                : "bg-white/90 text-gray-900 hover:bg-indigo-600 hover:text-white"
+                ? "bg-indigo-600 text-white border-indigo-600"
+                : "bg-white/90 text-gray-900 hover:bg-indigo-600 hover:text-white hover:border-indigo-600"
             }`}
           >
             <Heart size={18} fill={isWishlisted ? "currentColor" : "none"} />
@@ -181,10 +181,10 @@ const ProductCard = memo(({ data }: ProductCardProps) => {
           <button
             onClick={onToggleCompare}
             aria-label={isComparing ? "Remove from compare" : "Add to compare"}
-            className={`hidden md:flex group/btn relative h-10 w-10 rounded-full items-center justify-center shadow-lg backdrop-blur-md transition-all ${
+            className={`hidden md:flex group/btn relative h-10 w-10 rounded-full items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.12)] border border-gray-100 backdrop-blur-md transition-all ${
               isComparing
-                ? "bg-amber-500 text-white"
-                : "bg-white/90 text-gray-900 hover:bg-amber-500 hover:text-white"
+                ? "bg-amber-500 text-white border-amber-500"
+                : "bg-white/90 text-gray-900 hover:bg-amber-500 hover:text-white hover:border-amber-500"
             }`}
           >
             <ArrowLeftRight size={18} />
@@ -201,7 +201,7 @@ const ProductCard = memo(({ data }: ProductCardProps) => {
               setIsQuickViewOpen(true);
             }}
             aria-label="Quick view product"
-            className="hidden md:flex group/btn relative h-10 w-10 bg-white/90 backdrop-blur-md text-gray-900 rounded-full items-center justify-center shadow-lg hover:bg-indigo-600 hover:text-white transition-all cursor-pointer"
+            className="hidden md:flex group/btn relative h-10 w-10 bg-white/90 backdrop-blur-md text-gray-900 rounded-full items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.12)] border border-gray-100 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all cursor-pointer"
           >
             <Search size={18} />
             <div className="absolute right-full mr-3 px-2 py-1 bg-gray-900 text-white text-[10px] rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
@@ -226,21 +226,18 @@ const ProductCard = memo(({ data }: ProductCardProps) => {
       </div>
 
       {/* Content */}
-      <div className="p-3.5 sm:p-5 flex flex-col flex-1">
-        <div className="grow mb-3 sm:mb-4">
+      <div className="p-3 sm:p-4 flex flex-col flex-1">
+        <div className="grow mb-2">
           <Link href={`/products/${data.slug}`} className="block">
             <h3 className="font-bold text-gray-900 text-sm sm:text-lg group-hover:text-indigo-600 transition-colors line-clamp-1 tracking-tight">
               {data.name}
             </h3>
           </Link>
-          <p className="text-[10px] sm:text-sm text-gray-600 line-clamp-2 mt-1 sm:mt-1.5 leading-relaxed font-medium">
-            {data.description || "Premium gadget for enthusiasts."}
-          </p>
         </div>
 
-        <div className="pt-3 sm:pt-4 border-t border-gray-50 flex items-center justify-between mt-auto">
+        <div className="pt-2.5 sm:pt-3 border-t border-gray-50 flex items-center justify-between mt-auto">
           <div className="flex flex-col">
-            <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-gray-600 font-bold mb-0.5">
+            <span className="text-[8px] sm:text-[10px] text-gray-600 font-bold mb-0.5">
               Price
             </span>
             <span className="font-black text-base sm:text-xl text-indigo-600 tabular-nums">

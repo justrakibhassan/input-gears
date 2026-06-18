@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Product } from "@/types/product";
-import ProductCard from "../components/product-card";
+import ProductCatalog from "../components/product-catalog";
 import { Prisma } from "@prisma/client";
 import ProductFilters from "../components/product-filters";
 import MobileFilters from "../components/mobile-filters";
@@ -138,50 +138,6 @@ export default async function ProductView({
 
           {/* --- MAIN CONTENT: GRID --- */}
           <main className={cn("flex-1 w-full", !showFilters && "mx-auto")}>
-            {/* Header Content */}
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-6">
-              <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-1.5 bg-indigo-600 rounded-full shadow-[0_0_15px_rgba(79,70,229,0.4)]" />
-                  <h1 className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight uppercase">
-                    {q ? (
-                      <>
-                        Results:{" "}
-                        <span className="text-indigo-600">&quot;{q}&quot;</span>
-                      </>
-                    ) : !showFilters ? (
-                      <>
-                        Featured <span className="text-indigo-600">Gears</span>
-                      </>
-                    ) : (
-                      <>
-                        Advanced <span className="text-indigo-600">Search</span>
-                      </>
-                    )}
-                  </h1>
-                </div>
-                <p className="text-sm sm:text-base text-gray-400 font-bold ml-4.5">
-                  {!showFilters
-                    ? "Explore our latest high-performance gadgets."
-                    : `Showing ${products.length} products with current filters`}
-                </p>
-              </div>
-
-              {/* Status Badges */}
-              <div className="flex flex-wrap gap-2">
-                {category && (
-                  <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-indigo-100">
-                    {category}
-                  </span>
-                )}
-                {brand && (
-                  <span className="px-3 py-1 bg-violet-50 text-violet-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-violet-100">
-                    {brand}
-                  </span>
-                )}
-              </div>
-            </div>
-
             {/* Grid */}
             {products.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-32 px-4 bg-white rounded-[3rem] border-2 border-dashed border-gray-100 text-center animate-in zoom-in duration-500">
@@ -203,18 +159,7 @@ export default async function ProductView({
                 </Link>
               </div>
             ) : (
-              <div
-                className={cn(
-                  "grid grid-cols-2 gap-4 lg:gap-8",
-                  showFilters
-                    ? "lg:grid-cols-2 xl:grid-cols-3 mini:grid-cols-3"
-                    : "lg:grid-cols-3 xl:grid-cols-4 mini:grid-cols-4",
-                )}
-              >
-                {products.map((product: Product) => (
-                  <ProductCard key={product.id} data={product} />
-                ))}
-              </div>
+              <ProductCatalog products={products} showFilters={showFilters} />
             )}
           </main>
         </div>

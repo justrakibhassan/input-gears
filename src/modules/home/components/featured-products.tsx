@@ -51,7 +51,7 @@ export default async function FeaturedProducts() {
         </div>
 
         {/* Product Grid - 2 columns on mobile */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6 lg:gap-8">
           {products.map((product) => (
             <ProductCard key={product.id} data={product as unknown as Product} />
           ))}
