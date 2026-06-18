@@ -202,16 +202,20 @@ export default function MobileAccountMenu({
           <div className="mt-4 pt-3 border-t border-gray-100">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-bold text-red-600 bg-red-50/50 hover:bg-red-50 rounded-xl transition-all active:scale-[0.98]"
+              className="w-full flex items-center gap-3 p-2.5 rounded-xl transition-all active:scale-[0.99] group bg-white hover:bg-red-50/30 text-left"
             >
-              <LogOut size={16} />
-              Sign Out
+              <div className="p-2 rounded-lg bg-red-50 text-red-600 transition-all group-hover:bg-red-100">
+                <LogOut size={18} />
+              </div>
+              <span className="text-sm text-gray-700 font-semibold group-hover:text-red-600 transition-colors">
+                Sign Out
+              </span>
             </button>
           </div>
         </div>
 
-        {/* Bottom safe spacing to clear the mobile bottom navigation bar */}
-        <div className="h-24" />
+        {/* Bottom spacing to clear the bottom navigation bar and respect safe areas */}
+        <div className="h-16 pb-safe" />
       </div>
     </>
   );

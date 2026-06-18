@@ -565,7 +565,7 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-100"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-1200"
               onClick={() => setIsMobileMenuOpen(false)}
             />
             <motion.div
@@ -573,7 +573,7 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 z-101 w-[85%] max-w-[320px] bg-white shadow-2xl"
+              className="fixed inset-y-0 left-0 z-1201 w-[85%] max-w-[320px] bg-white shadow-2xl"
             >
               <div className="flex flex-col h-full overflow-hidden">
                 <div className="p-6 flex items-center justify-between border-b border-gray-50">
@@ -609,7 +609,7 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
                   </div>
                 </div>
 
-                <div className="p-6 border-t bg-gray-50/50">
+                <div className="p-6 pb-safe border-t bg-gray-50/50">
                   {!isMounted || isPending ? (
                     <div className="w-full h-14 bg-gray-100 animate-pulse rounded-2xl mb-4" />
                   ) : !session ? (
