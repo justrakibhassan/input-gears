@@ -266,7 +266,7 @@ const ProductRowCard = memo(({ data }: ProductRowCardProps) => {
               onClick={onAddToCart}
               disabled={isOutOfStock}
               className={`
-                h-8 w-8 sm:h-10 sm:px-5 rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-sm active:scale-95 z-10 shrink-0
+                h-8 w-8 sm:h-10 sm:w-auto sm:px-4 rounded-xl sm:rounded-2xl flex items-center justify-center gap-1.5 font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-sm active:scale-95 z-10 shrink-0
                 ${
                   isOutOfStock
                     ? "bg-gray-50 text-gray-300 cursor-not-allowed shadow-none border border-gray-100"
@@ -284,7 +284,7 @@ const ProductRowCard = memo(({ data }: ProductRowCardProps) => {
               ) : (
                 <>
                   <ShoppingCart size={14} strokeWidth={2} className="transition-transform" />
-                  <span className="hidden sm:inline">Add to Cart</span>
+                  <span className="hidden sm:inline">Buy</span>
                 </>
               )}
             </button>
