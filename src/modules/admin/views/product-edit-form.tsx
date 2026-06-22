@@ -21,7 +21,8 @@ import {
   Plus,
   X,
   Eye,
-  EyeOff
+  EyeOff,
+  ChevronDown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -72,6 +73,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   // States for Categories
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(
@@ -160,7 +162,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50/50 pb-36">
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 pb-36 transition-colors duration-300">
       <div className="max-w-[1600px] mx-auto">
         {!isModal && (
           <div className="pt-10 pb-8 px-6">
@@ -207,24 +209,25 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
           </div>
         )}
 
-        <div className="px-6 grid grid-cols-1 gap-8">
-          <div className="space-y-8">
-            <form onSubmit={(e) => e.preventDefault()} className="space-y-8">
-              <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                  <Info size={20} className="text-indigo-600" /> General
-                  Information
+        <div className="px-6">
+          <form onSubmit={(e) => e.preventDefault()} className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            {/* --- LEFT COLUMN: Primary Details --- */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* General Info */}
+              <div className="bg-white dark:bg-neutral-900 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-sm transition-colors">
+                <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-6 flex items-center gap-2">
+                  <Info size={20} className="text-indigo-600" /> General Information
                 </h2>
                 <div className="space-y-6">
                   {/* Name */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       Product Name
                     </label>
                     <input
                       {...form.register("name")}
                       onChange={handleNameChange}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none transition-all"
+                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none transition-all font-medium"
                     />
                     {form.formState.errors.name && (
                       <p className="text-red-500 text-xs">
@@ -233,18 +236,19 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                     )}
                   </div>
 
+                  {/* Slug */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                    <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 flex items-center gap-2">
                       Slug <span className="text-red-500">*</span>
                     </label>
                     <div className="relative group flex items-center gap-2">
                       <div className="relative flex-1">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500 text-sm font-medium">
                           /products/
                         </span>
                         <input
                           {...form.register("slug")}
-                          className="w-full pl-24 pr-10 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none font-mono text-sm text-indigo-600"
+                          className="w-full pl-24 pr-10 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-indigo-600 dark:text-indigo-400 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none font-mono text-sm font-semibold"
                         />
                         <button
                           type="button"
@@ -258,7 +262,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                               });
                             }
                           }}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 transition-colors"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-indigo-600 transition-colors"
                           title="Regenerate from Name"
                         >
                           <RefreshCw size={16} />
@@ -269,7 +273,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                         <Link
                           href={`/products/${watchedValues.slug}`}
                           target="_blank"
-                          className="p-3 border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 text-indigo-600 transition-colors"
+                          className="p-3 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-800 text-indigo-600 transition-colors shrink-0"
                         >
                           <ExternalLink size={18} />
                         </Link>
@@ -277,19 +281,20 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                     </div>
                   </div>
 
+                  {/* Category */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       Category <span className="text-red-500">*</span>
                     </label>
                     <div className="flex gap-3">
                       <div className="relative flex-1">
                         <Layers
-                          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
                           size={18}
                         />
                         <select
                           {...form.register("categoryId")}
-                          className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none appearance-none transition-all cursor-pointer"
+                          className="w-full pl-10 pr-10 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none appearance-none transition-all cursor-pointer font-medium"
                         >
                           <option value="">Select a category...</option>
                           {categories.map((cat) => (
@@ -299,13 +304,16 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                           ))}
                         </select>
                         {isLoadingCategories && (
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2">
                             <Loader2
                               className="animate-spin text-indigo-600"
                               size={16}
                             />
                           </div>
                         )}
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400">
+                          <ChevronDown size={16} />
+                        </div>
                       </div>
 
                       <div className="shrink-0">
@@ -315,7 +323,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                       <button
                         type="button"
                         onClick={fetchCategories}
-                        className="p-3 border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-500 dark:text-gray-400 transition-colors"
+                        className="p-3 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-500 dark:text-neutral-400 transition-colors"
                       >
                         <RefreshCw size={18} />
                       </button>
@@ -327,14 +335,16 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                     )}
                   </div>
 
+                  {/* Description */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       Description
                     </label>
                     <textarea
                       {...form.register("description")}
                       rows={5}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none resize-none"
+                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none resize-none font-medium transition-all"
+                      placeholder="Detailed description of the product..."
                     />
                     {form.formState.errors.description && (
                       <p className="text-red-500 text-xs">
@@ -345,11 +355,64 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                 </div>
               </div>
 
-                <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+              {/* Media Card */}
+              <div className="bg-white dark:bg-neutral-900 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-sm transition-colors">
+                <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-6">Media</h2>
+                <div className="space-y-4">
+                  {watchedValues.image ? (
+                    <div className="relative rounded-2xl overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800/30 group h-64 w-full flex items-center justify-center">
+                      <div className="relative h-full w-full">
+                        <Image
+                          src={watchedValues.image}
+                          alt="Product Image"
+                          fill
+                          className="object-contain p-4"
+                        />
+                      </div>
+                      <div className="absolute top-4 right-4">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            form.setValue("image", "", {
+                              shouldValidate: true,
+                              shouldDirty: true,
+                            })
+                          }
+                          className="bg-white dark:bg-neutral-900 text-red-500 p-2.5 rounded-xl shadow-lg border border-neutral-200 dark:border-neutral-800 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <ImageUpload
+                      value={[]}
+                      disabled={isPending}
+                      onChange={(url) =>
+                        form.setValue("image", url, {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        })
+                      }
+                      onRemove={() =>
+                        form.setValue("image", "", { shouldValidate: true })
+                      }
+                    />
+                  )}
+                  {form.formState.errors.image && (
+                    <p className="text-red-500 text-xs mt-2">
+                      {form.formState.errors.image.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Specifications Card */}
+              <div className="bg-white dark:bg-neutral-900 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-sm relative overflow-hidden transition-colors">
+                <div className="absolute top-0 right-0 p-4 opacity-[0.03] dark:opacity-[0.05] pointer-events-none">
                   <Zap size={80} className="text-indigo-600" />
                 </div>
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-6 flex items-center gap-2">
                   <Zap size={20} className="text-indigo-600" /> Technical Specifications
                 </h2>
                 
@@ -357,7 +420,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Switch Type */}
                     <div className="space-y-4">
-                      <label className="text-sm font-black text-indigo-600 uppercase tracking-widest text-[10px] block">
+                      <label className="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest text-[10px] block">
                         Keyboard Switch Type
                       </label>
                       <div className="grid grid-cols-2 gap-2">
@@ -367,10 +430,10 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                             type="button"
                             onClick={() => form.setValue("switchType", type, { shouldDirty: true })}
                             className={cn(
-                              "px-4 py-3 rounded-xl border text-sm font-bold transition-all flex items-center justify-center gap-2",
+                              "px-4 py-3 rounded-xl border text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer",
                               watchedValues.switchType === type
-                                ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200"
-                                : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-500 dark:text-gray-400 hover:border-indigo-200"
+                                ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100 dark:shadow-none"
+                                : "bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400 hover:border-indigo-200 dark:hover:border-indigo-900/30"
                             )}
                           >
                             {watchedValues.switchType === type && <Zap size={14} fill="currentColor" />}
@@ -381,26 +444,26 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                       <input 
                         {...form.register("switchType")}
                         placeholder="Other switch type..."
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                        className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold"
                       />
                     </div>
 
                     {/* Colors */}
                     <div className="space-y-4">
-                      <label className="text-sm font-black text-indigo-600 uppercase tracking-widest text-[10px] block">
+                      <label className="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest text-[10px] block">
                         Available Colors
                       </label>
                       <div className="flex flex-wrap gap-2 mb-3">
                         {watchedValues.colors?.map((color: string, index: number) => (
                           <div 
                             key={index}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-800 rounded-lg group animate-in fade-in zoom-in duration-200"
+                            className="flex items-center gap-2 px-3 py-1.5 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg group animate-in fade-in zoom-in duration-200"
                           >
                             <div 
-                               className="w-3 h-3 rounded-full border border-gray-300"
+                               className="w-3 h-3 rounded-full border border-neutral-300 dark:border-neutral-600"
                                style={{ backgroundColor: color.toLowerCase() }}
                             />
-                            <span className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-tighter">{color}</span>
+                            <span className="text-xs font-bold text-neutral-700 dark:text-neutral-300 uppercase tracking-tighter">{color}</span>
                             <button
                               type="button"
                               onClick={() => {
@@ -408,21 +471,21 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                                 newColors.splice(index, 1);
                                 form.setValue("colors", newColors, { shouldDirty: true });
                               }}
-                              className="text-gray-400 hover:text-red-500 transition-colors"
+                              className="text-neutral-400 hover:text-red-500 transition-colors cursor-pointer"
                             >
                               <X size={14} />
                             </button>
                           </div>
                         ))}
                         {(!watchedValues.colors || watchedValues.colors.length === 0) && (
-                          <p className="text-xs text-gray-400 italic">No colors added yet.</p>
+                          <p className="text-xs text-neutral-400 italic">No colors added yet.</p>
                         )}
                       </div>
                       <div className="flex gap-2">
                         <input 
                           id="color-input-edit"
                           placeholder="Add color (e.g. Red, #FF0000)"
-                          className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                          className="flex-1 px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold"
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
                               e.preventDefault();
@@ -451,7 +514,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                               input.value = "";
                             }
                           }}
-                          className="p-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-indigo-600 transition-all"
+                          className="p-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-indigo-600 transition-all cursor-pointer"
                         >
                           <Plus size={18} />
                         </button>
@@ -459,24 +522,25 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                     </div>
                   </div>
 
-                  <hr className="border-gray-100 dark:border-gray-800" />
+                  <hr className="border-neutral-100 dark:border-neutral-800" />
 
+                  {/* Technical Index Matrix */}
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <label className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter block">
+                        <label className="text-sm font-black text-neutral-900 dark:text-white uppercase tracking-tighter block">
                           Technical Index Matrix
                         </label>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Edit parameters used in the comparison matrix.</p>
+                        <p className="text-xs text-neutral-500 dark:text-neutral-400">Edit parameters used in the comparison matrix.</p>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {Object.entries(watchedValues.specs || {}).map(([key, value]) => (
-                        <div key={key} className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800 group">
+                        <div key={key} className="flex items-center gap-2 p-3 bg-neutral-50 dark:bg-neutral-800/40 rounded-xl border border-neutral-100 dark:border-neutral-800 group">
                            <div className="flex-1 min-w-0">
-                             <div className="text-[10px] font-black text-indigo-600 uppercase tracking-widest truncate">{key}</div>
-                             <div className="text-sm font-bold text-gray-900 dark:text-white truncate">{value as string}</div>
+                             <div className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest truncate">{key}</div>
+                             <div className="text-sm font-bold text-neutral-900 dark:text-white truncate">{value as string}</div>
                            </div>
                            <button
                              type="button"
@@ -485,7 +549,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                                delete currentSpecs[key];
                                form.setValue("specs", currentSpecs, { shouldDirty: true });
                              }}
-                             className="p-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                             className="p-2 text-neutral-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
                            >
                               <X size={16} />
                            </button>
@@ -493,16 +557,16 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                       ))}
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-3 p-4 bg-indigo-50/30 rounded-2xl border border-indigo-100/50">
+                    <div className="flex flex-col sm:flex-row gap-3 p-4 bg-indigo-50/30 dark:bg-indigo-950/10 rounded-2xl border border-indigo-100/50 dark:border-indigo-900/30">
                        <input 
                         id="spec-key-edit"
                         placeholder="Key (e.g. Brand)"
-                        className="flex-1 px-4 py-2 text-sm font-bold rounded-xl border border-gray-200 dark:border-gray-800 outline-none focus:border-indigo-500"
+                        className="flex-1 px-4 py-2 text-sm font-bold rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 outline-none focus:border-indigo-500"
                        />
                        <input 
                         id="spec-value-edit"
                         placeholder="Value (e.g. Logitech)"
-                        className="flex-1 px-4 py-2 text-sm font-bold rounded-xl border border-gray-200 dark:border-gray-800 outline-none focus:border-indigo-500"
+                        className="flex-1 px-4 py-2 text-sm font-bold rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 outline-none focus:border-indigo-500"
                         onKeyDown={(e) => {
                           if (e.key === "Enter") {
                             e.preventDefault();
@@ -537,7 +601,7 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                               keyInput.focus();
                             }
                          }}
-                         className="px-6 py-2 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
+                         className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
                        >
                          <Plus size={16} /> Add
                        </button>
@@ -545,204 +609,19 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                  <Cpu size={20} className="text-indigo-600" /> Advanced Technical Index
-                </h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Brand</label>
-                    <input 
-                      {...form.register("brand")}
-                      placeholder="e.g. Logitech, Razer"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">SKU / Model</label>
-                    <input 
-                      {...form.register("sku")}
-                      placeholder="e.g. G-PRO-WL-01"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Availability Status</label>
-                    <select
-                      {...form.register("availability")}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold appearance-none cursor-pointer"
-                    >
-                      <option value="In Stock">In Stock</option>
-                      <option value="Out of Stock">Out of Stock</option>
-                      <option value="Pre-Order">Pre-Order</option>
-                      <option value="Discontinued">Discontinued</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Sensor Technology</label>
-                    <input 
-                      {...form.register("sensor")}
-                      placeholder="e.g. HERO 25K, Focus Pro"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Max DPI / Sensitivity</label>
-                    <input 
-                      {...form.register("dpi")}
-                      placeholder="e.g. 25,600 DPI"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Product Weight</label>
-                    <input 
-                      {...form.register("weight")}
-                      placeholder="e.g. 63g (Ultra-light)"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Connection Type</label>
-                    <input 
-                      {...form.register("connectionType")}
-                      placeholder="e.g. LIGHTSPEED, Bluetooth"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Polling Rate</label>
-                    <input 
-                      {...form.register("pollingRate")}
-                      placeholder="e.g. 1000Hz, 8000Hz"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Warranty Period</label>
-                    <input 
-                      {...form.register("warranty")}
-                      placeholder="e.g. 2 Year Limited"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Media</h2>
-                <div className="space-y-4">
-                  {watchedValues.image ? (
-                    <div className="relative rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 group h-64 w-full flex items-center justify-center">
-                      <div className="relative h-full w-full">
-                        <Image
-                          src={watchedValues.image}
-                          alt="Product Image"
-                          fill
-                          className="object-contain p-4"
-                        />
-                      </div>
-                      <div className="absolute top-4 right-4">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            form.setValue("image", "", {
-                              shouldValidate: true,
-                              shouldDirty: true,
-                            })
-                          }
-                          className="bg-white dark:bg-gray-900 text-red-500 p-2.5 rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 hover:bg-red-50 transition-colors"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <ImageUpload
-                      value={[]}
-                      disabled={isPending}
-                      onChange={(url) =>
-                        form.setValue("image", url, {
-                          shouldValidate: true,
-                          shouldDirty: true,
-                        })
-                      }
-                      onRemove={() =>
-                        form.setValue("image", "", { shouldValidate: true })
-                      }
-                    />
-                  )}
-                  {form.formState.errors.image && (
-                    <p className="text-red-500 text-xs mt-2">
-                      {form.formState.errors.image.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6">
-                    Pricing
-                  </h2>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 font-bold">
-                      $
-                    </span>
-                    <input
-                      type="number"
-                      step="0.01"
-                      disabled={isContentEditor}
-                      {...form.register("price")}
-                      className={cn(
-                        "w-full pl-10 pr-4 py-3 rounded-xl border font-bold text-lg outline-none transition-all",
-                        isContentEditor
-                          ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-800"
-                          : "bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 focus:border-indigo-500"
-                      )}
-                    />
-                  </div>
-                  {isContentEditor && (
-                    <p className="text-xs text-amber-600 dark:text-amber-500 font-semibold mt-1.5">
-                      ⚠️ Price editing is locked for Content Editors.
-                    </p>
-                  )}
-                  {form.formState.errors.price && (
-                    <p className="text-red-500 text-xs mt-2">
-                      {form.formState.errors.price.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6">
-                    Inventory
-                  </h2>
-                  <input
-                    type="number"
-                    {...form.register("stock")}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+            {/* --- RIGHT COLUMN: Sidebar Metadata & Settings --- */}
+            <div className="lg:col-span-1 space-y-8">
+              {/* Status & Scheduling */}
+              <div className="bg-white dark:bg-neutral-900 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-sm transition-colors">
+                <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-6 flex items-center gap-2">
                   <RefreshCw size={20} className="text-indigo-600" /> Status & Scheduling
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-4">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
+                <div className="space-y-6">
+                  {/* Active Toggle */}
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 block">
                       Product Status
                     </label>
                     <div className="flex items-center gap-4">
@@ -751,42 +630,221 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                         onClick={() => form.setValue("isActive", !watchedValues.isActive, { shouldDirty: true })}
                         className={cn(
                           "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
-                          watchedValues.isActive ? "bg-indigo-600" : "bg-gray-200"
+                          watchedValues.isActive ? "bg-indigo-600" : "bg-neutral-200 dark:bg-neutral-700"
                         )}
                       >
                         <span
                           className={cn(
-                            "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white dark:bg-gray-900 shadow ring-0 transition duration-200 ease-in-out",
+                            "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white dark:bg-neutral-950 shadow ring-0 transition duration-200 ease-in-out",
                             watchedValues.isActive ? "translate-x-5" : "translate-x-0"
                           )}
                         />
                       </button>
-                      <span className="text-sm font-bold text-gray-900 dark:text-white">
+                      <span className="text-sm font-bold text-neutral-900 dark:text-white">
                         {watchedValues.isActive ? "Active" : "Disabled"}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Inactive products won&apos;t be visible to customers.
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                      Inactive products won't be visible to customers.
                     </p>
                   </div>
 
-                  <div className="space-y-4">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block">
+                  {/* Scheduled Date */}
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 block">
                       Scheduled Launch (Optional)
                     </label>
                     <input
                       type="datetime-local"
                       {...form.register("scheduledAt")}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold transition-all"
                     />
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
                       Product will go live automatically at this time.
                     </p>
                   </div>
                 </div>
               </div>
-            </form>
-          </div>
+
+              {/* Pricing & Inventory */}
+              <div className="bg-white dark:bg-neutral-900 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-sm transition-colors">
+                <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-6">
+                  Pricing & Inventory
+                </h2>
+                <div className="space-y-6">
+                  {/* Price */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                      Price (USD)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 dark:text-neutral-400 font-bold">
+                        $
+                      </span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        disabled={isContentEditor}
+                        {...form.register("price")}
+                        className={cn(
+                          "w-full pl-10 pr-4 py-3 rounded-xl border font-bold text-lg outline-none transition-all",
+                          isContentEditor
+                            ? "bg-neutral-100 dark:bg-neutral-800 text-neutral-400 cursor-not-allowed border-neutral-200 dark:border-neutral-700"
+                            : "bg-neutral-50 dark:bg-neutral-800 focus:bg-white dark:focus:bg-neutral-900 border-neutral-200 dark:border-neutral-700 focus:border-indigo-500 text-neutral-900 dark:text-neutral-100"
+                        )}
+                      />
+                    </div>
+                    {isContentEditor && (
+                      <p className="text-xs text-amber-600 dark:text-amber-500 font-semibold mt-1.5">
+                        ⚠️ Price editing is locked for Content Editors.
+                      </p>
+                    )}
+                    {form.formState.errors.price && (
+                      <p className="text-red-500 text-xs mt-2">
+                        {form.formState.errors.price.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Stock */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                      Stock Quantity
+                    </label>
+                    <input
+                      type="number"
+                      {...form.register("stock")}
+                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none font-bold"
+                    />
+                    {form.formState.errors.stock && (
+                      <p className="text-red-500 text-xs mt-2">
+                        {form.formState.errors.stock.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Advanced Technical Specs (Collapsible Accordion) */}
+              <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-sm overflow-hidden transition-colors">
+                <button
+                  type="button"
+                  onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+                  className="w-full p-6 sm:p-8 flex items-center justify-between text-left focus:outline-none transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800/30 cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <Cpu size={20} className="text-indigo-600" />
+                    <h2 className="text-lg font-bold text-neutral-900 dark:text-white">
+                      Advanced Tech Specs
+                    </h2>
+                  </div>
+                  <ChevronDown
+                    size={20}
+                    className={cn(
+                      "text-neutral-500 transition-transform duration-300",
+                      isAdvancedOpen && "transform rotate-180"
+                    )}
+                  />
+                </button>
+
+                {isAdvancedOpen && (
+                  <div className="p-6 sm:p-8 pt-0 border-t border-neutral-100 dark:border-neutral-800 space-y-6">
+                    <div className="grid grid-cols-1 gap-6 pt-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">Brand</label>
+                        <input 
+                          {...form.register("brand")}
+                          placeholder="e.g. Logitech, Razer"
+                          className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">SKU / Model</label>
+                        <input 
+                          {...form.register("sku")}
+                          placeholder="e.g. G-PRO-WL-01"
+                          className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">Availability Status</label>
+                        <div className="relative">
+                          <select
+                            {...form.register("availability")}
+                            className="w-full px-4 py-3 pr-10 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold appearance-none cursor-pointer"
+                          >
+                            <option value="In Stock">In Stock</option>
+                            <option value="Out of Stock">Out of Stock</option>
+                            <option value="Pre-Order">Pre-Order</option>
+                            <option value="Discontinued">Discontinued</option>
+                          </select>
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400">
+                            <ChevronDown size={16} />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">Sensor Technology</label>
+                        <input 
+                          {...form.register("sensor")}
+                          placeholder="e.g. HERO 25K, Focus Pro"
+                          className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">Max DPI / Sensitivity</label>
+                        <input 
+                          {...form.register("dpi")}
+                          placeholder="e.g. 25,600 DPI"
+                          className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">Product Weight</label>
+                        <input 
+                          {...form.register("weight")}
+                          placeholder="e.g. 63g (Ultra-light)"
+                          className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">Connection Type</label>
+                        <input 
+                          {...form.register("connectionType")}
+                          placeholder="e.g. LIGHTSPEED, Bluetooth"
+                          className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">Polling Rate</label>
+                        <input 
+                          {...form.register("pollingRate")}
+                          placeholder="e.g. 1000Hz, 8000Hz"
+                          className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">Warranty Period</label>
+                        <input 
+                          {...form.register("warranty")}
+                          placeholder="e.g. 2 Year Limited"
+                          className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </form>
         </div>
 
         {/* Slide-out Preview Drawer */}
