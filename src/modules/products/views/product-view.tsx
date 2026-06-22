@@ -76,39 +76,50 @@ export default async function ProductView({
   let products: Product[] = [];
 
   if (q) {
-    // Fuzzy matching with Postgres similarity
-    // We use raw SQL to leverage pg_trgm similarity scores for ranking and typo tolerance.
-    products = await prisma.$queryRaw<Product[]>(Prisma.sql`
-      SELECT 
-        p.*,
-        c.id as "categoryId",
-        c.name as "categoryName"
-      FROM products p
-      LEFT JOIN "Category" c ON p."categoryId" = c.id
-      WHERE (
-        similarity(p.name, ${q}) > 0.15
-        OR p.name ILIKE ${"%" + q + "%"}
-        OR p.description ILIKE ${"%" + q + "%"}
-        OR p.sku ILIKE ${"%" + q + "%"}
-      )
-      AND p."isActive" = true
-      AND (p."scheduledAt" IS NULL OR p."scheduledAt" <= NOW())
-      ${category ? Prisma.sql`AND c.name = ${category}` : Prisma.empty}
-      ${brand ? Prisma.sql`AND p.brand = ${brand}` : Prisma.empty}
-      ${minPrice ? Prisma.sql`AND p.price >= ${parseFloat(minPrice)}` : Prisma.empty}
-      ${maxPrice ? Prisma.sql`AND p.price <= ${parseFloat(maxPrice)}` : Prisma.empty}
-      ORDER BY similarity(p.name, ${q}) DESC
-      LIMIT 40
-    `);
-    
-    type RawProductResult = Product & { categoryId?: string; categoryName?: string };
+    try {
+      // Fuzzy matching with Postgres similarity
+      // We use raw SQL to leverage pg_trgm similarity scores for ranking and typo tolerance.
+      products = await prisma.$queryRaw<Product[]>(Prisma.sql`
+        SELECT 
+          p.*,
+          c.id as "categoryId",
+          c.name as "categoryName"
+        FROM products p
+        LEFT JOIN "Category" c ON p."categoryId" = c.id
+        WHERE (
+          similarity(p.name, ${q}) > 0.15
+          OR p.name ILIKE ${"%" + q + "%"}
+          OR p.description ILIKE ${"%" + q + "%"}
+          OR p.sku ILIKE ${"%" + q + "%"}
+        )
+        AND p."isActive" = true
+        AND (p."scheduledAt" IS NULL OR p."scheduledAt" <= NOW())
+        ${category ? Prisma.sql`AND c.name = ${category}` : Prisma.empty}
+        ${brand ? Prisma.sql`AND p.brand = ${brand}` : Prisma.empty}
+        ${minPrice ? Prisma.sql`AND p.price >= ${parseFloat(minPrice)}` : Prisma.empty}
+        ${maxPrice ? Prisma.sql`AND p.price <= ${parseFloat(maxPrice)}` : Prisma.empty}
+        ORDER BY similarity(p.name, ${q}) DESC
+        LIMIT 40
+      `);
+      
+      type RawProductResult = Product & { categoryId?: string; categoryName?: string };
 
-    // Manually attach category object if needed for the ProductCard
-    products = (products as RawProductResult[]).map(p => ({
-      ...p,
-      category: p.categoryName ? { id: p.categoryId!, name: p.categoryName } : null
-    })) as Product[];
-    
+      // Manually attach category object if needed for the ProductCard
+      products = (products as RawProductResult[]).map(p => ({
+        ...p,
+        category: p.categoryName ? { id: p.categoryId!, name: p.categoryName } : null
+      })) as Product[];
+    } catch (rawError) {
+      // Fallback to standard Prisma search query if raw query or similarity extension fails
+      products = (await prisma.product.findMany({
+        where,
+        orderBy,
+        include: {
+          category: true,
+        },
+        take: 40,
+      })) as unknown as Product[];
+    }
   } else {
     products = (await prisma.product.findMany({
       where,

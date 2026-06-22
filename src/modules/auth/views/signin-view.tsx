@@ -73,7 +73,7 @@ export default function SignInView() {
       <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="w-full max-w-md bg-white border border-gray-100 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 relative z-10 animate-in fade-in zoom-in duration-500 -mt-50">
+      <div className="w-full max-w-md bg-white border border-gray-100 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 relative z-10 animate-in fade-in zoom-in duration-500 -mt-20">
         {/* Header */}
         <div className="text-center mb-8 space-y-2">
           <Link href="/" className="inline-flex items-center gap-2 mb-2 group">
