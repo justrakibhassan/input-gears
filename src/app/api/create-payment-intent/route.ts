@@ -27,16 +27,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 export async function POST(req: Request) {
   let userId: string | undefined;
   try {
-    // ✅ SECURITY FIX: Verify user authentication
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    userId = session.user.id;
+    userId = session?.user?.id;
 
     if (!process.env.STRIPE_SECRET_KEY) {
       return NextResponse.json(

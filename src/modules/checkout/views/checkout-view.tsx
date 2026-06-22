@@ -58,7 +58,12 @@ export default function CheckoutForm() {
       fetch("/api/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: cart.items }),
+        body: JSON.stringify({
+          items: cart.items.map((item) => ({
+            id: item.id,
+            quantity: item.quantity,
+          })),
+        }),
       })
         .then(async (res) => {
           const data = await res.json().catch(() => null);
@@ -237,7 +242,7 @@ function CheckoutContent({
           cart.clearCart();
           router.push(`/order-confirmation/${result.orderId}`);
         } else {
-          toast.error("Failed to place order.");
+          toast.error(result.error || "Failed to place order.");
           setIsProcessing(false);
         }
       } else {
@@ -390,7 +395,7 @@ function CheckoutContent({
                     <option value="">Select Shipping Zone (Default)</option>
                     {zones.map((zone) => (
                       <option key={zone.id} value={zone.id}>
-                        {zone.name} (৳{zone.charge})
+                        {zone.name} (${zone.charge.toFixed(2)})
                       </option>
                     ))}
                   </select>
@@ -569,20 +574,20 @@ function CheckoutContent({
 
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span>{shipping === 0 ? "Free" : `৳${shipping}`}</span>
+                  <span>{shipping === 0 ? "Free" : `$${shipping}`}</span>
                 </div>
 
                 {taxRate > 0 && (
                   <div className="flex justify-between text-gray-400">
                     <span>VAT/Tax ({taxRate}%)</span>
-                    <span>৳{taxAmount.toFixed(2)}</span>
+                    <span>${taxAmount.toFixed(2)}</span>
                   </div>
                 )}
 
                 <div className="flex justify-between items-end pt-3 border-t border-gray-100 mt-3">
                   <span className="text-base font-bold">Total</span>
                   <span className="text-2xl font-extrabold text-indigo-600">
-                    ৳{total.toFixed(2)}
+                    ${total.toFixed(2)}
                   </span>
                 </div>
               </div>

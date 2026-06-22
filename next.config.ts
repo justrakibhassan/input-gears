@@ -52,7 +52,7 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://upload-widget.cloudinary.com https://widget.cloudinary.com; style-src 'self' 'unsafe-inline' https://upload-widget.cloudinary.com; img-src 'self' https: data: blob:; font-src 'self' https:; connect-src 'self' https:; frame-src 'self' https://upload-widget.cloudinary.com https://widget.cloudinary.com; frame-ancestors 'none';",
+              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://upload-widget.cloudinary.com https://widget.cloudinary.com https://js.stripe.com; style-src 'self' 'unsafe-inline' https://upload-widget.cloudinary.com; img-src 'self' https: data: blob:; font-src 'self' https:; connect-src 'self' https:; frame-src 'self' https://upload-widget.cloudinary.com https://widget.cloudinary.com https://js.stripe.com https://hooks.stripe.com; frame-ancestors 'none';",
           },
         ],
       },
