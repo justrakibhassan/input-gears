@@ -59,13 +59,13 @@ const sidebarGroups: {
         title: "All Products",
         href: "/admin/products",
         icon: List,
-        roles: ["SUPER_ADMIN", "MANAGER"],
+        roles: ["SUPER_ADMIN", "MANAGER", "CONTENT_EDITOR"],
       },
       {
         title: "Add New",
         href: "/admin/products/create",
         icon: PackagePlus,
-        roles: ["SUPER_ADMIN", "MANAGER"],
+        roles: ["SUPER_ADMIN", "MANAGER", "CONTENT_EDITOR"],
       },
       {
         title: "Categories",

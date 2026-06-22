@@ -56,8 +56,15 @@ export type ProductFormValues = z.infer<typeof productSchema>;
 // --- 2. Create Product (Updated) ---
 export async function createProduct(data: ProductFormValues) {
   try {
-    const session = await requireRole(["SUPER_ADMIN", "MANAGER"]);
+    const session = await requireRole(["SUPER_ADMIN", "MANAGER", "CONTENT_EDITOR"]);
     const validatedData = productSchema.parse(data);
+
+    if (session.user.role === "CONTENT_EDITOR" && validatedData.price !== 1) {
+      return {
+        success: false,
+        message: "Unauthorized: Content Editors cannot set or change product prices. Prices are locked to $1.00 on creation.",
+      };
+    }
 
     // Check if slug exists
     const existingProduct = await prisma.product.findUnique({
@@ -124,7 +131,7 @@ export async function createProduct(data: ProductFormValues) {
 // --- 3. Update Product (Updated) ---
 export async function updateProduct(id: string, data: ProductFormValues) {
   try {
-    const session = await requireRole(["SUPER_ADMIN", "MANAGER"]);
+    const session = await requireRole(["SUPER_ADMIN", "MANAGER", "CONTENT_EDITOR"]);
     // Validation
     const validatedData = productSchema.parse(data);
 
@@ -147,6 +154,20 @@ export async function updateProduct(id: string, data: ProductFormValues) {
     const oldProduct = await prisma.product.findUnique({
       where: { id },
     });
+
+    if (!oldProduct) {
+      return {
+        success: false,
+        message: "Product not found.",
+      };
+    }
+
+    if (session.user.role === "CONTENT_EDITOR" && validatedData.price !== oldProduct.price) {
+      return {
+        success: false,
+        message: "Unauthorized: Content Editors are not allowed to change product prices.",
+      };
+    }
 
     // Update Query
     const updatedProduct = await prisma.product.update({

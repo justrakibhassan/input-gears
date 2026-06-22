@@ -29,6 +29,7 @@ import { createProduct, getCategoriesOptions } from "@/modules/admin/actions";
 import { generateSlug, cn } from "@/lib/utils";
 import ImageUpload from "@/components/ui/image-upload";
 import CategoryModal from "@/modules/admin/components/category-modal";
+import { useSession } from "@/lib/auth-client";
 
 // --- Validation Schema ---
 const formSchema = z.object({
@@ -80,6 +81,8 @@ interface FormValues {
 }
 
 export default function CreateProductPage() {
+  const { data: session } = useSession();
+  const isContentEditor = (session?.user as { role?: string })?.role === "CONTENT_EDITOR";
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(
@@ -95,7 +98,7 @@ export default function CreateProductPage() {
       name: "",
       slug: "",
       description: "",
-      price: 0,
+      price: 1,
       stock: 10,
       image: "",
       categoryId: "",
@@ -758,11 +761,22 @@ export default function CreateProductPage() {
                     <input
                       type="number"
                       step="0.01"
+                      disabled={isContentEditor}
                       {...form.register("price")}
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 focus:border-indigo-500 outline-none font-bold text-lg"
+                      className={cn(
+                        "w-full pl-10 pr-4 py-3 rounded-xl border font-bold text-lg outline-none transition-all",
+                        isContentEditor
+                          ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-700"
+                          : "bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-indigo-500"
+                      )}
                       placeholder="0.00"
                     />
                   </div>
+                  {isContentEditor && (
+                    <p className="text-xs text-amber-600 dark:text-amber-500 font-semibold mt-1.5">
+                      ⚠️ Price editing is locked for Content Editors. Defaulting to $1.00.
+                    </p>
+                  )}
                   {form.formState.errors.price && (
                     <p className="text-red-500 text-xs mt-2">
                       {form.formState.errors.price.message}

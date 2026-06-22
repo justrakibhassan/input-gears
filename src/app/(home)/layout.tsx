@@ -1,6 +1,7 @@
 import { Footer } from "@/components/layout/footer";
 import Navbar, { NavbarSkeleton } from "@/components/layout/navbar";
 import TopAnnouncement from "@/components/layout/top-announcement";
+import AdminFloatingBar from "@/components/layout/admin-floating-bar";
 import { getStoreAppearance } from "@/modules/admin/actions";
 import { Suspense } from "react";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
@@ -42,6 +43,7 @@ export default async function RootLayout({
   return (
     <NuqsAdapter>
       <ThemeReset />
+      <AdminFloatingBar />
       <TopAnnouncement data={settings} />
       <Suspense fallback={<NavbarSkeleton />}>
         <Navbar initialCategories={categoriesWithBrands} />

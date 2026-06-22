@@ -7,6 +7,7 @@ import { submitReview } from "../actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import NextImage from "next/image";
+import { useSession } from "@/lib/auth-client";
 
 interface ReviewFormProps {
   productId: string;
@@ -14,6 +15,7 @@ interface ReviewFormProps {
 }
 
 export default function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
+  const { data: session } = useSession();
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -22,6 +24,21 @@ export default function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   const router = useRouter();
+
+  const userRole = (session?.user as { role?: string })?.role;
+  const isStoreStaff = userRole && ["SUPER_ADMIN", "MANAGER", "CONTENT_EDITOR"].includes(userRole);
+
+  if (isStoreStaff) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 bg-gray-50/50 rounded-2xl border border-gray-100 shadow-xs">
+        <Star className="text-indigo-600/30 mb-3" size={40} />
+        <h3 className="text-sm font-bold text-gray-900">Admin Account</h3>
+        <p className="text-xs text-gray-500 mt-1 text-center max-w-sm">
+          Store administrators and managers cannot submit product reviews.
+        </p>
+      </div>
+    );
+  }
 
   async function handleSubmit() {
     setIsSubmitting(true);

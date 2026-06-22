@@ -24,6 +24,7 @@ import {
   Link2,
   Bookmark,
   ArrowLeftRight,
+  Settings,
 } from "lucide-react";
 
 interface ProductDetailsViewProps {
@@ -39,6 +40,7 @@ const ProductDetailsView = memo(
     const wishlist = useWishlist();
     const compare = useCompare();
     const { data: session } = useSession();
+    const userRole = (session?.user as { role?: string })?.role;
     const router = useRouter();
 
     const [selectedImage, setSelectedImage] = useState(
@@ -163,26 +165,38 @@ const ProductDetailsView = memo(
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
           
           {/* Breadcrumbs */}
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm font-semibold text-gray-500 mb-4 overflow-x-auto no-scrollbar">
-            <Link href="/" className="hover:text-indigo-600 transition-colors flex items-center gap-1">
-              <Home size={16} className="shrink-0" />
-            </Link>
-            <ChevronRight size={14} className="text-gray-400 shrink-0" />
-            {product.category && (
-              <>
-                <Link
-                  href={`/${product.category.slug}`}
-                  className="hover:text-indigo-600 transition-colors"
-                >
-                  {product.category.name}
-                </Link>
-                <ChevronRight size={14} className="text-gray-400 shrink-0" />
-              </>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm font-semibold text-gray-500 overflow-x-auto no-scrollbar">
+              <Link href="/" className="hover:text-indigo-600 transition-colors flex items-center gap-1">
+                <Home size={16} className="shrink-0" />
+              </Link>
+              <ChevronRight size={14} className="text-gray-400 shrink-0" />
+              {product.category && (
+                <>
+                  <Link
+                    href={`/${product.category.slug}`}
+                    className="hover:text-indigo-600 transition-colors"
+                  >
+                    {product.category.name}
+                  </Link>
+                  <ChevronRight size={14} className="text-gray-400 shrink-0" />
+                </>
+              )}
+              <span className="text-gray-900 truncate max-w-[200px] sm:max-w-none">
+                {product.name}
+              </span>
+            </nav>
+
+            {isMounted && userRole && ["SUPER_ADMIN", "MANAGER", "CONTENT_EDITOR"].includes(userRole) && (
+              <Link
+                href={`/admin/products/edit/${product.id}`}
+                className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 hover:text-indigo-800 rounded-full text-xs font-bold transition-all shadow-xs shrink-0 self-start sm:self-auto cursor-pointer"
+              >
+                <Settings size={12} />
+                <span>Edit Product (Admin)</span>
+              </Link>
             )}
-            <span className="text-gray-900 truncate max-w-[200px] sm:max-w-none">
-              {product.name}
-            </span>
-          </nav>
+          </div>
 
           {/* Share & Save/Compare bar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 px-6 bg-white border border-gray-100 rounded-2xl sm:rounded-full shadow-sm mb-8 text-sm font-semibold text-gray-500 gap-4">
