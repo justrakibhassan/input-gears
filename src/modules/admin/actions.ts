@@ -678,6 +678,7 @@ export async function toggleBanUser(
     });
 
     revalidatePath("/admin/customers");
+    revalidatePath("/admin/team");
     revalidatePath(`/admin/customers/${userId}`);
 
     await createAuditLog({
@@ -719,6 +720,7 @@ export async function updateUserRole(userId: string, role: UserRole) {
     });
 
     revalidatePath("/admin/customers");
+    revalidatePath("/admin/team");
     revalidatePath(`/admin/customers/${userId}`);
 
     await createAuditLog({
@@ -733,6 +735,50 @@ export async function updateUserRole(userId: string, role: UserRole) {
   } catch (error) {
     logger.error("Update User Role Error:", error);
     return { success: false, message: "Failed to update user role" };
+  }
+}
+
+export async function addTeamMember(email: string, role: UserRole) {
+  try {
+    const session = await requireRole(["SUPER_ADMIN"]);
+
+    const user = await prisma.user.findUnique({
+      where: { email: email.trim().toLowerCase() },
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        message: "User not found with this email. They must sign up first before they can be added to the team.",
+      };
+    }
+
+    const oldRole = user.role;
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { role },
+    });
+
+    revalidatePath("/admin/customers");
+    revalidatePath("/admin/team");
+    revalidatePath(`/admin/customers/${user.id}`);
+
+    await createAuditLog({
+      adminId: session.user.id,
+      action: "USER_ROLE_UPDATE",
+      entityType: "USER",
+      entityId: user.id,
+      details: `Added user "${user.name}" (${user.email}) to the team, updating role from ${oldRole} to ${role}`,
+    });
+
+    return {
+      success: true,
+      message: `Successfully added ${user.name} to the team as ${role}!`,
+    };
+  } catch (error) {
+    logger.error("Add Team Member Error:", error);
+    return { success: false, message: "Failed to add team member" };
   }
 }
 

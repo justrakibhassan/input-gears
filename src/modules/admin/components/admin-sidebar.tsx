@@ -120,6 +120,12 @@ const sidebarGroups: {
         roles: ["SUPER_ADMIN"],
       },
       {
+        title: "Team",
+        href: "/admin/team",
+        icon: Users,
+        roles: ["SUPER_ADMIN"],
+      },
+      {
         title: "Audit Logs",
         href: "/admin/audit-logs",
         icon: ClipboardList,
