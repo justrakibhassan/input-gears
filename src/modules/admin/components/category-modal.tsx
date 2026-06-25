@@ -5,8 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
-import { Plus, X, Loader2, Save } from "lucide-react";
-import { createCategory } from "@/modules/admin/actions";
+import { Plus, X, Loader2, Save, Edit } from "lucide-react";
+import { createCategory, updateCategory } from "@/modules/admin/actions";
 import ImageUpload from "@/components/ui/image-upload";
 import { generateSlug } from "@/lib/utils";
 
@@ -17,13 +17,29 @@ const formSchema = z.object({
   image: z.string().optional(),
 });
 
-export default function CategoryModal() {
+interface CategoryModalProps {
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    image: string | null;
+  };
+  onSuccess?: () => void;
+}
+
+export default function CategoryModal({ category, onSuccess }: CategoryModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { name: "", slug: "", description: "", image: "" },
+    defaultValues: {
+      name: category?.name || "",
+      slug: category?.slug || "",
+      description: category?.description || "",
+      image: category?.image || "",
+    },
   });
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,20 +49,24 @@ export default function CategoryModal() {
   };
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    // Stop event propagation to prevent parent form submission
     try {
       setIsPending(true);
-      const res = await createCategory(data);
+      const res = category 
+        ? await updateCategory(category.id, data)
+        : await createCategory(data);
 
       if (res.success) {
         toast.success(res.message);
         setIsOpen(false);
-        form.reset();
+        if (!category) {
+          form.reset();
+        }
+        onSuccess?.();
       } else {
         toast.error(res.message);
       }
     } catch {
-      toast.error("Failed to create category");
+      toast.error(category ? "Failed to update category" : "Failed to create category");
     } finally {
       setIsPending(false);
     }
@@ -54,30 +74,42 @@ export default function CategoryModal() {
 
   return (
     <>
-      {/* type="button" to prevent form submission/reload */}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.preventDefault();
-          setIsOpen(true);
-        }}
-        className="p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors shadow-sm dark:shadow-none"
-        title="Quick Add Category"
-      >
-        <Plus size={18} />
-      </button>
+      {category ? (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            setIsOpen(true);
+          }}
+          className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+          title="Edit Category"
+        >
+          <Edit size={16} />
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            setIsOpen(true);
+          }}
+          className="p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors shadow-sm dark:shadow-none"
+          title="Quick Add Category"
+        >
+          <Plus size={18} />
+        </button>
+      )}
 
-      {/* Modal Overlay */}
       {isOpen && (
         <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-100 animate-in fade-in transition-all duration-300" />
           <div className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden animate-in zoom-in-95 duration-200 z-101">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
               <h3 className="font-bold text-lg text-gray-900 dark:text-white">
-                Add New Category
+                {category ? "Edit Category" : "Add New Category"}
               </h3>
               <button
-                type="button" // ✅ Here too
+                type="button"
                 onClick={() => setIsOpen(false)}
                 className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-full transition-colors text-gray-500 dark:text-gray-400"
               >
@@ -85,7 +117,6 @@ export default function CategoryModal() {
               </button>
             </div>
 
-            {/* Note: We are using a div instead of form tag here to avoid nesting issues if parent is a form */}
             <div className="p-6 space-y-4">
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -116,6 +147,17 @@ export default function CategoryModal() {
 
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Description
+                </label>
+                <textarea
+                  {...form.register("description")}
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all resize-none text-sm h-24"
+                  placeholder="Describe this category..."
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Icon / Image
                 </label>
                 <div className="w-full">
@@ -137,7 +179,6 @@ export default function CategoryModal() {
                 Cancel
               </button>
 
-              {/* This button triggers the manual submit handler */}
               <button
                 type="button"
                 onClick={form.handleSubmit(onSubmit)}
@@ -149,7 +190,7 @@ export default function CategoryModal() {
                 ) : (
                   <Save size={16} />
                 )}
-                Create
+                {category ? "Save Changes" : "Create"}
               </button>
             </div>
           </div>

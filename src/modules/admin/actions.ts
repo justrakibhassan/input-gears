@@ -267,6 +267,96 @@ export async function createCategory(data: z.infer<typeof categorySchema>) {
   }
 }
 
+export async function updateCategory(
+  id: string,
+  data: z.infer<typeof categorySchema>
+) {
+  try {
+    const session = await requireRole(["SUPER_ADMIN", "CONTENT_EDITOR"]);
+    const validated = categorySchema.parse(data);
+
+    // Check slug uniqueness excluding this category
+    const existing = await prisma.category.findFirst({
+      where: {
+        slug: validated.slug,
+        id: { not: id },
+      },
+    });
+
+    if (existing) {
+      return { success: false, message: "Slug already exists!" };
+    }
+
+    const oldCategory = await prisma.category.findUnique({ where: { id } });
+
+    await prisma.category.update({
+      where: { id },
+      data: {
+        name: validated.name,
+        slug: validated.slug,
+        description: validated.description,
+        image: validated.image || null,
+      },
+    });
+
+    revalidatePath("/admin/categories");
+    revalidatePath("/admin/products/create");
+
+    if (oldCategory) {
+      await createAuditLog({
+        adminId: session.user.id,
+        action: "UPDATE_CATEGORY",
+        entityType: "CATEGORY",
+        entityId: id,
+        details: `Updated category "${oldCategory.name}" to "${validated.name}"`,
+      });
+    }
+
+    return { success: true, message: "Category updated successfully!" };
+  } catch (error) {
+    logger.error("Failed to update category", error);
+    return { success: false, message: "Failed to update category" };
+  }
+}
+
+export async function deleteCategory(id: string) {
+  try {
+    const session = await requireRole(["SUPER_ADMIN", "CONTENT_EDITOR"]);
+
+    // First check if products are linked to this category
+    const productsCount = await prisma.product.count({
+      where: { categoryId: id },
+    });
+
+    if (productsCount > 0) {
+      return {
+        success: false,
+        message: `Cannot delete category. It is linked to ${productsCount} product(s).`,
+      };
+    }
+
+    const deleted = await prisma.category.delete({
+      where: { id },
+    });
+
+    revalidatePath("/admin/categories");
+    revalidatePath("/admin/products/create");
+
+    await createAuditLog({
+      adminId: session.user.id,
+      action: "DELETE_CATEGORY",
+      entityType: "CATEGORY",
+      entityId: id,
+      details: `Deleted category "${deleted.name}"`,
+    });
+
+    return { success: true, message: "Category deleted successfully!" };
+  } catch (error) {
+    logger.error("Failed to delete category", error);
+    return { success: false, message: "Failed to delete category" };
+  }
+}
+
 export async function getCategoriesOptions() {
   await requireRole(["SUPER_ADMIN", "MANAGER", "CONTENT_EDITOR"]);
   const categories = await prisma.category.findMany({
@@ -567,6 +657,82 @@ export async function deleteUsers(userIds: string[]) {
   } catch (error) {
     logger.error("Bulk Delete Users Error:", error);
     return { success: false, message: "Failed to delete users" };
+  }
+}
+
+export async function toggleBanUser(
+  userId: string,
+  isBanned: boolean,
+  reason?: string
+) {
+  try {
+    const session = await requireRole(["SUPER_ADMIN"]);
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        banned: isBanned,
+        banReason: isBanned ? reason || "No reason provided" : null,
+        banExpires: null,
+      },
+    });
+
+    revalidatePath("/admin/customers");
+    revalidatePath(`/admin/customers/${userId}`);
+
+    await createAuditLog({
+      adminId: session.user.id,
+      action: isBanned ? "USER_BAN" : "USER_UNBAN",
+      entityType: "USER",
+      entityId: userId,
+      details: isBanned 
+        ? `Banned user. Reason: ${reason || "None"}`
+        : `Unbanned user`,
+    });
+
+    return { 
+      success: true, 
+      message: isBanned ? "User banned successfully!" : "User unbanned successfully!" 
+    };
+  } catch (error) {
+    logger.error("Toggle Ban User Error:", error);
+    return { success: false, message: "Failed to update ban status" };
+  }
+}
+
+export async function updateUserRole(userId: string, role: UserRole) {
+  try {
+    const session = await requireRole(["SUPER_ADMIN"]);
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true, role: true }
+    });
+
+    if (!user) {
+      return { success: false, message: "User not found" };
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { role },
+    });
+
+    revalidatePath("/admin/customers");
+    revalidatePath(`/admin/customers/${userId}`);
+
+    await createAuditLog({
+      adminId: session.user.id,
+      action: "USER_ROLE_UPDATE",
+      entityType: "USER",
+      entityId: userId,
+      details: `Updated role of user "${user.name}" from ${user.role} to ${role}`,
+    });
+
+    return { success: true, message: `Role updated to ${role} successfully!` };
+  } catch (error) {
+    logger.error("Update User Role Error:", error);
+    return { success: false, message: "Failed to update user role" };
   }
 }
 
