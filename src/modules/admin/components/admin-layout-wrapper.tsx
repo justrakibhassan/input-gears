@@ -41,7 +41,7 @@ export default function AdminLayoutWrapper({
   const pathname = usePathname();
   const router = useRouter();
   
-  const { theme, setTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   const getPageTitle = (path: string) => {
@@ -175,11 +175,11 @@ export default function AdminLayoutWrapper({
             {/* Theme Toggle */}
             {mounted && (
               <button
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
                 className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors group"
                 aria-label="Toggle Theme"
               >
-                {theme === "dark" ? (
+                {resolvedTheme === "dark" ? (
                   <Sun size={18} className="group-hover:text-amber-500 transition-colors" />
                 ) : (
                   <Moon size={18} className="group-hover:text-indigo-600 transition-colors" />
