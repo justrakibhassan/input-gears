@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useMemo } from "react";
+import { useState, useTransition, useMemo, Fragment } from "react";
 import Image from "next/image";
 import { Tag, Search, X, Percent, Calendar, Package, ChevronDown, Check, Loader2, AlertCircle } from "lucide-react";
 import { updateProductSale, bulkUpdateSale } from "@/modules/admin/actions";
@@ -50,6 +50,9 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
   const [bulkSalePrice, setBulkSalePrice] = useState("");
   const [bulkEndDate, setBulkEndDate] = useState("");
 
+  // Stable timestamp for render — avoids "impure function" warning
+  const now = useMemo(() => Date.now(), []);
+
   // Stats
   const onSaleCount = products.filter(p => p.isOnSale).length;
   const totalSavings = products
@@ -57,7 +60,7 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
     .reduce((acc, p) => acc + (p.price - (p.salePrice ?? p.price)), 0);
   const expiringSoon = products.filter(p => {
     if (!p.saleEndDate) return false;
-    const diff = new Date(p.saleEndDate).getTime() - Date.now();
+    const diff = new Date(p.saleEndDate).getTime() - now;
     return diff > 0 && diff < 1000 * 60 * 60 * 24 * 3; // within 3 days
   }).length;
 
@@ -282,12 +285,11 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
               const isExpanded = expandedRow === product.id;
               const edit = getEdit(product.id, product);
               const discount = product.salePrice ? discountPercent(product.price, product.salePrice) : null;
-              const isExpired = product.saleEndDate && new Date(product.saleEndDate) < new Date();
+              const isExpired = product.saleEndDate && new Date(product.saleEndDate).getTime() < now;
 
               return (
-                <>
+                <Fragment key={product.id}>
                   <tr
-                    key={product.id}
                     className={`transition-colors ${product.isOnSale ? "bg-red-50/30 hover:bg-red-50/50" : "bg-white hover:bg-gray-50/60"} ${isExpanded ? "border-b-0" : ""}`}
                   >
                     <td className="px-4 py-3">
@@ -361,7 +363,7 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
 
                   {/* Expanded edit row */}
                   {isExpanded && (
-                    <tr key={`${product.id}-edit`} className={product.isOnSale ? "bg-red-50/20" : "bg-gray-50/50"}>
+                    <tr className={product.isOnSale ? "bg-red-50/20" : "bg-gray-50/50"}>
                       <td colSpan={8} className="px-6 py-4 border-t border-dashed border-gray-200">
                         <div className="flex flex-wrap items-end gap-4">
                           <div>
@@ -421,7 +423,7 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               );
             })}
           </tbody>
