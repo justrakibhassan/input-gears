@@ -1226,3 +1226,125 @@ export async function updateTaxRate(rate: number) {
     return { success: false, message: "Failed to update tax rate" };
   }
 }
+
+// ─── Sale Manager Actions ────────────────────────────────────────────────────
+
+export async function getSaleProducts() {
+  try {
+    await requireRole(["SUPER_ADMIN", "MANAGER"]);
+    const products = await prisma.product.findMany({
+      where: { isOnSale: true },
+      include: { category: { select: { name: true } } },
+      orderBy: { updatedAt: "desc" },
+    });
+    return { success: true, data: products };
+  } catch (error) {
+    logger.error("Get Sale Products Error:", error);
+    return { success: false, message: "Failed to fetch sale products" };
+  }
+}
+
+export async function getAllProductsForSaleManager() {
+  try {
+    await requireRole(["SUPER_ADMIN", "MANAGER"]);
+    const products = await prisma.product.findMany({
+      where: { isActive: true },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        price: true,
+        image: true,
+        stock: true,
+        brand: true,
+        isOnSale: true,
+        salePrice: true,
+        saleEndDate: true,
+        category: { select: { name: true } },
+      },
+      orderBy: { name: "asc" },
+    });
+    return { success: true, data: products };
+  } catch (error) {
+    logger.error("Get All Products For Sale Manager Error:", error);
+    return { success: false, message: "Failed to fetch products" };
+  }
+}
+
+const saleSchema = z.object({
+  isOnSale: z.boolean(),
+  salePrice: z.coerce.number().min(0).optional().nullable(),
+  saleEndDate: z.string().optional().nullable(),
+});
+
+export async function updateProductSale(
+  productId: string,
+  data: z.infer<typeof saleSchema>
+) {
+  try {
+    const session = await requireRole(["SUPER_ADMIN", "MANAGER"]);
+    const { isOnSale, salePrice, saleEndDate } = saleSchema.parse(data);
+
+    const product = await prisma.product.update({
+      where: { id: productId },
+      data: {
+        isOnSale,
+        salePrice: isOnSale ? (salePrice ?? null) : null,
+        saleEndDate: isOnSale && saleEndDate ? new Date(saleEndDate) : null,
+      },
+    });
+
+    await createAuditLog({
+      adminId: session.user.id,
+      action: isOnSale ? "PRODUCT_ON_SALE" : "PRODUCT_OFF_SALE",
+      entityType: "PRODUCT",
+      entityId: productId,
+      details: isOnSale
+        ? `Marked "${product.name}" on sale${salePrice ? ` at $${salePrice}` : ""}${saleEndDate ? ` until ${saleEndDate}` : ""}`
+        : `Removed "${product.name}" from sale`,
+    });
+
+    revalidatePath("/admin/sale");
+    revalidatePath("/sale");
+    revalidatePath(`/products/${product.slug}`);
+    return { success: true, data: product };
+  } catch (error) {
+    logger.error("Update Product Sale Error:", error);
+    return { success: false, message: "Failed to update product sale status" };
+  }
+}
+
+export async function bulkUpdateSale(
+  productIds: string[],
+  data: z.infer<typeof saleSchema>
+) {
+  try {
+    const session = await requireRole(["SUPER_ADMIN", "MANAGER"]);
+    const { isOnSale, salePrice, saleEndDate } = saleSchema.parse(data);
+
+    await prisma.product.updateMany({
+      where: { id: { in: productIds } },
+      data: {
+        isOnSale,
+        salePrice: isOnSale ? (salePrice ?? null) : null,
+        saleEndDate: isOnSale && saleEndDate ? new Date(saleEndDate) : null,
+      },
+    });
+
+    await createAuditLog({
+      adminId: session.user.id,
+      action: isOnSale ? "BULK_PRODUCTS_ON_SALE" : "BULK_PRODUCTS_OFF_SALE",
+      entityType: "PRODUCT",
+      entityId: productIds.join(","),
+      details: `Bulk ${isOnSale ? "added" : "removed"} ${productIds.length} products ${isOnSale ? "to" : "from"} sale`,
+    });
+
+    revalidatePath("/admin/sale");
+    revalidatePath("/sale");
+    return { success: true };
+  } catch (error) {
+    logger.error("Bulk Update Sale Error:", error);
+    return { success: false, message: "Failed to bulk update sale" };
+  }
+}
+

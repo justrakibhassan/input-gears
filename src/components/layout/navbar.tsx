@@ -500,8 +500,8 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
                     href={`/${cat.slug}`}
                     className={`group flex items-center h-full px-2 text-[15px] font-semibold transition-colors duration-200 border-b-2 ${
                       isActive 
-                        ? "text-[#3b5998] border-[#3b5998]" // Blue text and underline like the image
-                        : "text-gray-700 border-transparent hover:text-[#3b5998]"
+                        ? "text-indigo-600 border-indigo-600"
+                        : "text-gray-700 border-transparent hover:text-indigo-600"
                     }`}
                   >
                     {cat.name}
@@ -525,26 +525,12 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
                                 href={`/${cat.slug}?brand=${encodeURIComponent(brand)}`}
                                 className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors group/item"
                               >
-                                <span className="text-[14px] text-gray-700 font-medium group-hover/item:text-[#3b5998]">{brand}</span>
-                                <ChevronRight size={14} className="text-gray-400 group-hover/item:text-[#3b5998]" />
+                                <span className="text-[14px] text-gray-700 font-medium group-hover/item:text-indigo-600">{brand}</span>
+                                <ChevronRight size={14} className="text-gray-400 group-hover/item:text-indigo-600" />
                               </Link>
                             ))
                           ) : (
                             <div className="px-5 py-3 text-[14px] text-gray-500 italic">No items found</div>
-                          )}
-                          
-                          {/* Dummy items just to show scroll/length if brands are few, mimicking the image */}
-                          {cat.brands.length < 5 && (
-                            <>
-                              <div className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors group/item cursor-pointer">
-                                <span className="text-[14px] text-gray-700 font-medium group-hover/item:text-[#3b5998]">Accessories</span>
-                                <ChevronRight size={14} className="text-gray-400 group-hover/item:text-[#3b5998]" />
-                              </div>
-                              <div className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors group/item cursor-pointer">
-                                <span className="text-[14px] text-gray-700 font-medium group-hover/item:text-[#3b5998]">Components</span>
-                                <ChevronRight size={14} className="text-gray-400 group-hover/item:text-[#3b5998]" />
-                              </div>
-                            </>
                           )}
                         </div>
                       </motion.div>
@@ -684,8 +670,8 @@ function MobileCategoryItem({
         className={cn(
           "flex items-center justify-between rounded-xl transition-all border-l-2",
           isActive
-            ? "bg-[#3b5998]/5 text-[#3b5998] border-[#3b5998] font-bold"
-            : "text-gray-700 border-transparent hover:text-[#3b5998] hover:bg-gray-50/50 font-semibold"
+            ? "bg-indigo-50 text-indigo-600 border-indigo-600 font-bold"
+            : "text-gray-700 border-transparent hover:text-indigo-600 hover:bg-gray-50/50 font-semibold"
         )}
         style={{ paddingLeft: `${depth * 12 + 12}px` }}
       >
@@ -699,7 +685,7 @@ function MobileCategoryItem({
         {isExpandable && (
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="p-2 text-gray-400 hover:text-[#3b5998] transition-colors"
+            className="p-2 text-gray-400 hover:text-indigo-600 transition-colors"
           >
             {isOpen ? (
               <Minus size={16} strokeWidth={2.5} />
@@ -734,7 +720,7 @@ function MobileCategoryItem({
                   key={brand}
                   href={`/${node.slug}?brand=${encodeURIComponent(brand)}`}
                   onClick={onClose}
-                  className="text-xs text-gray-500 hover:text-[#3b5998] transition-colors font-medium py-1 pl-3 block"
+                  className="text-xs text-gray-500 hover:text-indigo-600 transition-colors font-medium py-1 pl-3 block"
                 >
                   {brand}
                 </Link>

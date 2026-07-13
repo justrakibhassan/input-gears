@@ -115,6 +115,15 @@
   --sidebar-ring: oklch(0.6 0.25 270);
 }
 
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-ticker {
+  animation: ticker 50s linear infinite;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

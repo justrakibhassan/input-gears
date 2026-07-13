@@ -7,6 +7,7 @@ import { X, ShoppingCart, Plus, Minus, Star, Zap } from "lucide-react";
 import { useCart } from "@/modules/cart/hooks/use-cart";
 import { useSession } from "@/lib/auth-client";
 import { createPortal } from "react-dom";
+import { getReviewStats } from "../../reviews/actions";
 
 interface QuickViewModalProps {
   isOpen: boolean;
@@ -36,6 +37,19 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
   const { data: session } = useSession();
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [reviewCount, setReviewCount] = useState(0);
+
+  useEffect(() => {
+    if (isOpen && product.id) {
+      getReviewStats(product.id).then((res) => {
+        if (res.success && res.data) {
+          setRating(res.data.averageRating || 0);
+          setReviewCount(res.data.totalReviews || 0);
+        }
+      });
+    }
+  }, [isOpen, product.id]);
 
   // Close on ESC and manage body scroll
   useEffect(() => {
@@ -148,10 +162,15 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                       {formattedPrice}
                     </span>
                     <div className="flex items-center gap-1 text-yellow-400">
-                      <Star size={14} fill="currentColor" />
+                      <Star size={14} fill={reviewCount > 0 ? "currentColor" : "none"} className={reviewCount > 0 ? "text-yellow-400" : "text-gray-300"} />
                       <span className="text-sm font-bold text-gray-900">
-                        4.8
+                        {reviewCount > 0 ? rating.toFixed(1) : "New"}
                       </span>
+                      {reviewCount > 0 && (
+                        <span className="text-xs text-gray-500 font-semibold">
+                          ({reviewCount})
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>

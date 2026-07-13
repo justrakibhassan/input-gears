@@ -909,6 +909,9 @@ export default function ProductEditForm({ product, isModal, onSuccess }: Product
                         createdAt: product.createdAt,
                         updatedAt: new Date(),
                         categoryId: watchedValues.categoryId || null,
+                        isOnSale: product.isOnSale ?? false,
+                        salePrice: product.salePrice ?? null,
+                        saleEndDate: product.saleEndDate ?? null,
                         category: {
                           id: watchedValues.categoryId || "temp",
                           name: categories.find((c) => c.id === watchedValues.categoryId)?.name || "Uncategorized",

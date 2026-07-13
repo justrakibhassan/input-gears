@@ -116,6 +116,11 @@ model Product {
   isActive    Boolean   @default(true)
   scheduledAt DateTime?
 
+  // Sale / Discount fields
+  isOnSale    Boolean   @default(false)
+  salePrice   Float?
+  saleEndDate DateTime?
+
   specs Json? @default("{}")
 
   reservations StockReservation[]

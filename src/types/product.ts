@@ -27,6 +27,10 @@ export interface Product extends Omit<PrismaProduct, "specs" | "image"> {
   availability: string | null;
   isActive: boolean;
   scheduledAt: Date | null;
+  // Sale fields
+  isOnSale: boolean;
+  salePrice: number | null;
+  saleEndDate: Date | null;
   
   // Specs is a JSON field in Prisma, we type it for our application use
   specs: Record<string, string | number | boolean | null> | null;

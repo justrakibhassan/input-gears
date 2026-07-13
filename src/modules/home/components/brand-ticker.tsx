@@ -45,7 +45,7 @@ export default async function BrandTicker() {
         <div className="absolute top-0 left-0 w-20 md:w-32 h-full bg-linear-to-r from-white via-white/70 to-transparent z-10 pointer-events-none" />
         <div className="absolute top-0 right-0 w-20 md:w-32 h-full bg-linear-to-l from-white via-white/70 to-transparent z-10 pointer-events-none" />
 
-        <div className="flex whitespace-nowrap animate-ticker group-hover:paused">
+        <div className="flex whitespace-nowrap animate-ticker group-hover:[animation-play-state:paused]">
           {tickerItems.map((brand, index) => (
             <div
               key={`${brand.id}-${index}`}
@@ -68,19 +68,7 @@ export default async function BrandTicker() {
           ))}
         </div>
 
-        <style dangerouslySetInnerHTML={{ __html: `
-          @keyframes ticker {
-            0% {
-              transform: translateX(0);
-            }
-            100% {
-              transform: translateX(-50%);
-            }
-          }
-          .animate-ticker {
-            animation: ticker 50s linear infinite;
-          }
-        `}} />
+
       </div>
     </section>
   );

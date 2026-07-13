@@ -212,6 +212,11 @@ const ProductCard = memo(({ data }: ProductCardProps) => {
 
         {/* Badges */}
         <div className="absolute top-4 left-4 flex flex-col gap-2 z-20">
+          {data.isOnSale && data.salePrice && (
+            <div className="bg-red-500/95 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg">
+              SALE
+            </div>
+          )}
           {data.category && (
             <div className="bg-gray-900/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm">
               {data.category.name}
@@ -237,12 +242,25 @@ const ProductCard = memo(({ data }: ProductCardProps) => {
 
         <div className="pt-2.5 sm:pt-3 border-t border-gray-50 flex items-center justify-between mt-auto">
           <div className="flex flex-col">
-            <span className="text-[8px] sm:text-[10px] text-gray-600 font-bold mb-0.5">
-              Price
-            </span>
-            <span className="font-black text-base sm:text-xl text-indigo-600 tabular-nums">
-              {formattedPrice}
-            </span>
+            {data.isOnSale && data.salePrice ? (
+              <>
+                <span className="text-[8px] sm:text-[10px] text-gray-400 font-bold mb-0.5 line-through">
+                  {formattedPrice}
+                </span>
+                <span className="font-black text-base sm:text-xl text-red-500 tabular-nums">
+                  {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(data.salePrice)}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-[8px] sm:text-[10px] text-gray-600 font-bold mb-0.5">
+                  Price
+                </span>
+                <span className="font-black text-base sm:text-xl text-indigo-600 tabular-nums">
+                  {formattedPrice}
+                </span>
+              </>
+            )}
           </div>
 
           <button

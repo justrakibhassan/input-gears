@@ -919,6 +919,9 @@ export default function CreateProductPage() {
                           createdAt: new Date(),
                           updatedAt: new Date(),
                           categoryId: watchedValues.categoryId || null,
+                          isOnSale: false,
+                          salePrice: null,
+                          saleEndDate: null,
                           // Matching category name
                           category: {
                             id: watchedValues.categoryId || "temp",
