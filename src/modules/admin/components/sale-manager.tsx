@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition, useMemo, Fragment } from "react";
+import { useState, useTransition, useMemo, useEffect, Fragment } from "react";
 import Image from "next/image";
-import { Tag, Search, X, Percent, Calendar, Package, ChevronDown, Check, Loader2, AlertCircle } from "lucide-react";
+import { Search, X, Percent, Calendar, Package, ChevronDown, Check, Loader2, AlertCircle } from "lucide-react";
 import { updateProductSale, bulkUpdateSale } from "@/modules/admin/actions";
 import { toast } from "sonner";
 
@@ -49,9 +49,14 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
   const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
   const [bulkSalePrice, setBulkSalePrice] = useState("");
   const [bulkEndDate, setBulkEndDate] = useState("");
-
-  // Stable timestamp for render — avoids "impure function" warning
-  const now = useMemo(() => Date.now(), []);
+  // Stable timestamp to avoid "impure function during render"
+  const [now, setNow] = useState<number>(0);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setNow(Date.now());
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Stats
   const onSaleCount = products.filter(p => p.isOnSale).length;
@@ -59,7 +64,7 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
     .filter(p => p.isOnSale && p.salePrice)
     .reduce((acc, p) => acc + (p.price - (p.salePrice ?? p.price)), 0);
   const expiringSoon = products.filter(p => {
-    if (!p.saleEndDate) return false;
+    if (!p.saleEndDate || now === 0) return false;
     const diff = new Date(p.saleEndDate).getTime() - now;
     return diff > 0 && diff < 1000 * 60 * 60 * 24 * 3; // within 3 days
   }).length;
@@ -78,7 +83,11 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
   function toggleSelect(id: string) {
     setSelectedIds(prev => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
   }
@@ -285,7 +294,7 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
               const isExpanded = expandedRow === product.id;
               const edit = getEdit(product.id, product);
               const discount = product.salePrice ? discountPercent(product.price, product.salePrice) : null;
-              const isExpired = product.saleEndDate && new Date(product.saleEndDate).getTime() < now;
+              const isExpired = product.saleEndDate && now > 0 && new Date(product.saleEndDate).getTime() < now;
 
               return (
                 <Fragment key={product.id}>

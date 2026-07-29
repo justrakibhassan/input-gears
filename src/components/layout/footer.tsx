@@ -30,30 +30,30 @@ interface SocialLink {
 
 const FOOTER_LINKS: FooterColumn[] = [
   {
-    title: "Product",
+    title: "Shop & Account",
     links: [
-      { label: "Features", href: "/features" },
-      { label: "Integrations", href: "/integrations" },
-      { label: "Pricing", href: "/pricing" },
-      { label: "Changelog", href: "/changelog" },
+      { label: "All Products", href: "/products" },
+      { label: "Sale Deals", href: "/sale" },
+      { label: "Compare Gears", href: "/compare" },
+      { label: "Track Order", href: "/track-order" },
     ],
   },
   {
-    title: "Resources",
+    title: "Customer Service",
     links: [
-      { label: "Documentation", href: "/docs" },
-      { label: "API Reference", href: "/api" },
-      { label: "Community", href: "/community" },
-      { label: "Help Center", href: "/help" },
+      { label: "Contact Us", href: "/contact" },
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Return Policy", href: "/returns" },
+      { label: "My Account", href: "/account" },
     ],
   },
   {
-    title: "Company",
+    title: "InputGears",
     links: [
-      { label: "About", href: "/about" },
-      { label: "Careers", href: "/careers" },
-      { label: "Blog", href: "/blog" },
-      { label: "Contact", href: "/contact" },
+      { label: "Gaming Keyboards", href: "/keyboards" },
+      { label: "High Precision Mice", href: "/mice" },
+      { label: "Pro Audio", href: "/audio" },
+      { label: "Monitors", href: "/monitors" },
     ],
   },
 ];

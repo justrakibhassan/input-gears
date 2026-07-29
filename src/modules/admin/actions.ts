@@ -952,7 +952,7 @@ export async function getRevenueAnalytics() {
   try {
     await requireRole(["SUPER_ADMIN"]);
 
-    // --- DUMMY DATA FOR REVENUE OVERVIEW ---
+    // --- DUMMY DATA FOR REVENUE OVERVIEW (DEMO) ---
     return [
       { name: "Mon", revenue: 4200 },
       { name: "Tue", revenue: 3800 },
@@ -963,7 +963,7 @@ export async function getRevenueAnalytics() {
       { name: "Sun", revenue: 4800 },
     ];
 
-    /* --- REAL DATA FETCHING COMMENTED OUT FOR PRODUCTION ---
+    /* --- REAL DATA FETCHING COMMENTED OUT FOR DEMO ---
     const last7Days = Array.from({ length: 7 }, (_, i) => {
       const d = new Date();
       d.setDate(d.getDate() - (6 - i));
@@ -998,7 +998,7 @@ export async function getRevenueAnalytics() {
       const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
       return {
         name: dayName,
-        revenue: revenueByDay[day] || 0,
+        revenue: Math.round((revenueByDay[day] || 0) * 100) / 100,
       };
     });
 

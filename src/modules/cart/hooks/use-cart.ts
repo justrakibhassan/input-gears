@@ -28,15 +28,21 @@ export const useCart = create<CartStore>()(
       items: [],
 
       addItem: async (data, authenticated) => {
+        if (data.maxStock <= 0) {
+          toast.error("This product is out of stock!");
+          return;
+        }
+
         const currentItems = get().items;
         const existingItem = currentItems.find((item) => item.id === data.id);
+        const addQty = data.quantity && data.quantity > 0 ? data.quantity : 1;
 
         if (existingItem) {
-          if (existingItem.quantity + 1 > existingItem.maxStock) {
+          if (existingItem.quantity + addQty > existingItem.maxStock) {
             toast.error("Out of stock limit reached!");
             return;
           }
-          const newQuantity = existingItem.quantity + 1;
+          const newQuantity = existingItem.quantity + addQty;
           set({
             items: currentItems.map((item) =>
               item.id === data.id
@@ -56,8 +62,13 @@ export const useCart = create<CartStore>()(
               console.error("Failed to sync cart update", error);
             }
           }
+          toast.success("Cart updated 🛒");
         } else {
-          set({ items: [...get().items, { ...data, quantity: 1 }] });
+          if (addQty > data.maxStock) {
+            toast.error(`Only ${data.maxStock} items available in stock`);
+            return;
+          }
+          set({ items: [...get().items, { ...data, quantity: addQty }] });
           toast.success("Product added to cart 🛒");
 
           if (authenticated) {
@@ -65,7 +76,7 @@ export const useCart = create<CartStore>()(
               await fetch("/api/cart", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ productId: data.id, quantity: 1 }),
+                body: JSON.stringify({ productId: data.id, quantity: addQty }),
               });
             } catch (error) {
               console.error("Failed to sync cart add", error);
@@ -80,7 +91,10 @@ export const useCart = create<CartStore>()(
           toast.error(`Only ${item.maxStock} items available in stock`);
           return;
         }
-        if (quantity < 1) return;
+        if (quantity < 1) {
+          get().removeItem(id, authenticated);
+          return;
+        }
 
         set({
           items: get().items.map((item) =>

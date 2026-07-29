@@ -7,6 +7,7 @@ import Stripe from "stripe";
 import { z } from "zod";
 import { randomBytes } from "crypto";
 import { logger } from "@/lib/logger";
+import { sendOrderInvoiceEmail } from "@/lib/email";
 
 interface CartItemInput {
   id: string;
@@ -322,8 +323,24 @@ export async function placeOrder(
         });
       }
 
-      return { orderNumber: order.orderNumber };
+      return { orderNumber: order.orderNumber, totalAmount: order.totalAmount, email: order.email, name: order.name, paymentMethod: dbPaymentMethod };
     });
+
+    // Send order invoice email asynchronously
+    if (result.email) {
+      sendOrderInvoiceEmail({
+        toEmail: result.email,
+        customerName: result.name,
+        orderNumber: result.orderNumber,
+        totalAmount: result.totalAmount,
+        paymentMethod: result.paymentMethod,
+        items: validatedCartItems.map((item) => ({
+          name: String(item.name),
+          quantity: Number(item.quantity),
+          price: Number(item.price),
+        })),
+      }).catch((err) => logger.error("Async invoice email failed", err));
+    }
 
     return { success: true, orderId: result.orderNumber };
   } catch (error) {
