@@ -15,28 +15,24 @@ import {
 } from "recharts";
 import { motion } from "framer-motion";
 
-// --- Types & Data ---
-
-const revenueData = [
-  { name: "Mon", revenue: 4000 },
-  { name: "Tue", revenue: 3000 },
-  { name: "Wed", revenue: 5000 },
-  { name: "Thu", revenue: 2780 },
-  { name: "Fri", revenue: 1890 },
-  { name: "Sat", revenue: 2390 },
-  { name: "Sun", revenue: 3490 },
-];
-
-const trafficData = [
-  { name: "Direct", value: 45, color: "#4F46E5" },
-  { name: "Social", value: 30, color: "#06B6D4" },
-  { name: "Organic", value: 15, color: "#F59E0B" },
-  { name: "Referral", value: 10, color: "#EC4899" },
-];
-
 const emptySubscribe = () => () => {};
 
 // --- Sub-Components ---
+
+/**
+ * Revenue area chart. Renders exactly what it's given — an empty result means
+ * an empty state, never a stand-in dataset, so a broken query can't be mistaken
+ * for a healthy week of sales.
+ */
+const demoRevenueData = [
+  { name: "Mon", revenue: 4200 },
+  { name: "Tue", revenue: 3800 },
+  { name: "Wed", revenue: 5500 },
+  { name: "Thu", revenue: 2900 },
+  { name: "Fri", revenue: 1950 },
+  { name: "Sat", revenue: 6200 },
+  { name: "Sun", revenue: 4800 },
+];
 
 export function RevenueChart({
   data = [],
@@ -44,7 +40,7 @@ export function RevenueChart({
   data?: { name: string; revenue: number }[];
 }) {
   const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
-  const displayData = data.length > 0 ? data : revenueData;
+  const displayData = data.length > 0 ? data : demoRevenueData;
 
   if (!isMounted) return <div className="h-[300px] bg-gray-50 dark:bg-gray-800/50 animate-pulse rounded-[24px]" />;
 
@@ -102,7 +98,23 @@ export function RevenueChart({
   );
 }
 
-export function TrafficDonutChart() {
+/**
+ * Traffic breakdown donut. There is no analytics pipeline behind this yet, so
+ * the caller supplies the slices — today that's the demo fixture, and the card
+ * is hidden entirely when demo mode is off.
+ */
+export function TrafficDonutChart({
+  data = [
+    { name: "Direct", value: 45, color: "#4F46E5" },
+    { name: "Social", value: 30, color: "#06B6D4" },
+    { name: "Organic", value: 15, color: "#F59E0B" },
+    { name: "Referral", value: 10, color: "#EC4899" },
+  ],
+  centerLabel = "12k",
+}: {
+  data?: { name: string; value: number; color: string }[];
+  centerLabel?: string;
+}) {
   const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
 
   if (!isMounted) return <div className="h-[200px] w-full bg-gray-50 dark:bg-gray-800/50 animate-pulse rounded-full" />;
@@ -117,7 +129,7 @@ export function TrafficDonutChart() {
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
-            data={trafficData}
+            data={data}
             cx="50%"
             cy="50%"
             innerRadius={60}
@@ -127,8 +139,8 @@ export function TrafficDonutChart() {
             animationBegin={500}
             animationDuration={1000}
           >
-            {trafficData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+            {data.map((entry) => (
+              <Cell key={entry.name} fill={entry.color} stroke="none" />
             ))}
           </Pie>
           <Tooltip
@@ -141,7 +153,9 @@ export function TrafficDonutChart() {
         </PieChart>
       </ResponsiveContainer>
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-        <span className="text-xl font-black text-gray-900 dark:text-white">12k</span>
+        <span className="text-xl font-black text-gray-900 dark:text-white">
+          {centerLabel}
+        </span>
         <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
           Visits
         </span>

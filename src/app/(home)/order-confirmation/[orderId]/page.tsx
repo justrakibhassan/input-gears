@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 import {
   CheckCircle2,
   ArrowRight,
@@ -38,6 +40,16 @@ export default async function OrderConfirmationPage(props: PageProps) {
 
   if (!order) {
     notFound();
+  }
+
+  // An order that belongs to an account is only viewable by that account —
+  // otherwise the order number alone would expose the customer's contact
+  // details and address. Guest orders have no account to check against.
+  if (order.userId) {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (session?.user?.id !== order.userId) {
+      notFound();
+    }
   }
 
   const formattedDate = new Date(order.createdAt).toLocaleDateString("en-US", {

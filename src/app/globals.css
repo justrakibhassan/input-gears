@@ -124,6 +124,68 @@
   animation: ticker 50s linear infinite;
 }
 
+/* Small-laptop breakpoint. Every `mini:` usage in the product catalog mirrors
+   its sibling `xl:` value, so this has to sit below the 1280px `xl` cutoff to
+   have any effect — it reaches the wide grid a little earlier. */
+@theme {
+  --breakpoint-mini: 1180px;
+}
+
+/* Hides the scrollbar without disabling scrolling. Two names because both are
+   already in use across the codebase. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Slim scrollbar for modal and drawer bodies. */
+@utility custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gray-300) transparent;
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--color-gray-300);
+    border-radius: 9999px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-gray-400);
+  }
+}
+
+.dark .custom-scrollbar {
+  scrollbar-color: var(--color-gray-700) transparent;
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--color-gray-700);
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-gray-600);
+}
+
+/* Clears the home indicator on notched devices. This sets padding-bottom
+   outright, so anything that also needs its own bottom padding should use an
+   explicit `pb-[calc(...+env(safe-area-inset-bottom,0px))]` instead. */
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

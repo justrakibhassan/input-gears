@@ -47,44 +47,138 @@ interface ShippingZone {
   charge: number;
 }
 
+interface AppliedCoupon {
+  id: string;
+  code: string;
+  type: string;
+  value: number;
+}
+
+interface Quote {
+  subtotalCents: number;
+  discountCents: number;
+  shippingCents: number;
+  taxCents: number;
+  totalCents: number;
+  taxRate: number;
+  couponCode: string | null;
+  couponError: string | null;
+}
+
+const money = (cents: number) => (cents / 100).toFixed(2);
+
 export default function CheckoutForm() {
   const cart = useCart();
   const { isPending: sessionPending } = useSession();
   const [clientSecret, setClientSecret] = useState("");
+  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
+  const [intentError, setIntentError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  useEffect(() => {
-    if (cart.items.length > 0) {
-      fetch("/api/create-payment-intent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: cart.items.map((item) => ({
-            id: item.id,
-            quantity: item.quantity,
-          })),
-        }),
-      })
-        .then(async (res) => {
-          const data = await res.json().catch(() => null);
-          if (!res.ok) {
-            toast.error(data?.error || "Failed to start payment");
-            setClientSecret("");
-            return;
-          }
-          setClientSecret(data?.clientSecret || "");
-        })
-        .catch(() => {
-          toast.error("Failed to start payment");
-          setClientSecret("");
-        });
-    }
-  }, [cart.items]);
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "stripe">("cod");
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  const [selectedZoneId, setSelectedZoneId] = useState<string>("");
+  const [zones, setZones] = useState<ShippingZone[]>([]);
+  const [quote, setQuote] = useState<Quote | null>(null);
 
-  const options = {
-    clientSecret,
-    appearance: { theme: "stripe" as const },
-  };
+  useEffect(() => {
+    fetch("/api/checkout-settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.zones) setZones(data.zones);
+      })
+      .catch(() => {
+        /* zone list is optional — the server falls back to flat-rate shipping */
+      });
+  }, []);
+
+  const orderPayload = cart.items.map((item) => ({
+    id: item.id,
+    quantity: item.quantity,
+  }));
+  // Stringified so the effects below re-run on real cart changes, not on every
+  // render's fresh array identity.
+  const cartKey = JSON.stringify(orderPayload);
+
+  // The summary must show server-computed money, or it can disagree with the
+  // amount Stripe actually captures.
+  useEffect(() => {
+    if (cart.items.length === 0) {
+      setQuote(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    fetch("/api/checkout-quote", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: JSON.parse(cartKey),
+        couponCode: appliedCoupon?.code,
+        shippingZoneId: selectedZoneId || undefined,
+      }),
+    })
+      .then(async (res) => {
+        const data = await res.json().catch(() => null);
+        if (cancelled) return;
+        if (!res.ok) {
+          toast.error(data?.error || "Could not price your cart");
+          return;
+        }
+        setQuote(data);
+        if (data.couponError && appliedCoupon) {
+          toast.error(data.couponError);
+          setAppliedCoupon(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) toast.error("Could not price your cart");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [cartKey, appliedCoupon, selectedZoneId, cart.items.length]);
+
+  // Only card payments need an intent, and its amount must track the quote.
+  useEffect(() => {
+    if (paymentMethod !== "stripe" || cart.items.length === 0) return;
+
+    let cancelled = false;
+    setIntentError(null);
+
+    fetch("/api/create-payment-intent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: JSON.parse(cartKey),
+        couponCode: appliedCoupon?.code,
+        shippingZoneId: selectedZoneId || undefined,
+        paymentIntentId: paymentIntentId ?? undefined,
+      }),
+    })
+      .then(async (res) => {
+        const data = await res.json().catch(() => null);
+        if (cancelled) return;
+        if (!res.ok) {
+          setIntentError(data?.error || "Failed to start payment");
+          return;
+        }
+        setClientSecret(data?.clientSecret || "");
+        setPaymentIntentId(data?.paymentIntentId ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setIntentError("Failed to start payment");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+    // paymentIntentId is intentionally omitted: it's an output of this effect,
+    // and including it would loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartKey, appliedCoupon, selectedZoneId, paymentMethod, cart.items.length]);
 
   if (isSuccess) {
     return <CheckoutSkeleton />;
@@ -114,73 +208,78 @@ export default function CheckoutForm() {
     );
   }
 
-  if (sessionPending || !clientSecret) {
+  if (sessionPending || !quote) {
     return <CheckoutSkeleton />;
   }
 
-  return (
-    <Elements options={options} stripe={stripePromise}>
-      <CheckoutContent
-        onPaymentSuccess={() => setIsSuccess(true)}
-      />
-    </Elements>
-  );
+  const shared = {
+    onPaymentSuccess: () => setIsSuccess(true),
+    paymentMethod,
+    setPaymentMethod,
+    appliedCoupon,
+    setAppliedCoupon,
+    zones,
+    selectedZoneId,
+    setSelectedZoneId,
+    quote,
+    paymentIntentId,
+    intentError,
+  };
+
+  // Elements can only mount once a client secret exists, so card payments
+  // render inside the provider and COD renders without it.
+  if (paymentMethod === "stripe" && clientSecret) {
+    return (
+      <Elements
+        options={{ clientSecret, appearance: { theme: "stripe" as const } }}
+        stripe={stripePromise}
+      >
+        <CheckoutContent {...shared} />
+      </Elements>
+    );
+  }
+
+  return <CheckoutContent {...shared} />;
 }
+
+interface CheckoutContentProps {
+  onPaymentSuccess: () => void;
+  paymentMethod: "cod" | "stripe";
+  setPaymentMethod: (method: "cod" | "stripe") => void;
+  appliedCoupon: AppliedCoupon | null;
+  setAppliedCoupon: (coupon: AppliedCoupon | null) => void;
+  zones: ShippingZone[];
+  selectedZoneId: string;
+  setSelectedZoneId: (id: string) => void;
+  quote: Quote;
+  paymentIntentId: string | null;
+  intentError: string | null;
+}
+
 
 function CheckoutContent({
   onPaymentSuccess,
-}: {
-  onPaymentSuccess: () => void;
-}) {
+  paymentMethod,
+  setPaymentMethod,
+  appliedCoupon,
+  setAppliedCoupon,
+  zones,
+  selectedZoneId,
+  setSelectedZoneId,
+  quote,
+  paymentIntentId,
+  intentError,
+}: CheckoutContentProps) {
   const stripe = useStripe();
   const elements = useElements();
   const cart = useCart();
   const { data: session } = useSession();
   const router = useRouter();
 
-  const [paymentMethod, setPaymentMethod] = useState<"cod" | "stripe">("cod");
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // --- Coupon State ---
   const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState<{
-    id: string;
-    code: string;
-    type: string;
-    value: number;
-  } | null>(null);
   const [isValidating, setIsValidating] = useState(false);
-
-  // --- Shipping & Tax State ---
-  const [zones, setZones] = useState<ShippingZone[]>([]);
-  const [selectedZoneId, setSelectedZoneId] = useState<string>("");
-  const [taxRate, setTaxRate] = useState(0);
-
-  useEffect(() => {
-    fetch("/api/checkout-settings")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.zones) setZones(data.zones);
-        if (data.taxRate) setTaxRate(data.taxRate);
-      })
-      .catch(console.error);
-  }, []);
-
-  const subtotal = cart.items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-
-  const discountAmount = appliedCoupon
-    ? appliedCoupon.type === "PERCENTAGE"
-      ? subtotal * (appliedCoupon.value / 100)
-      : appliedCoupon.value
-    : 0;
-
-  const selectedZone = zones.find((z) => z.id === selectedZoneId);
-  const shipping = selectedZone ? selectedZone.charge : (subtotal > 1000 ? 0 : 60);
-  const taxAmount = (subtotal - discountAmount) * (taxRate / 100);
-  const total = Math.max(0, subtotal - discountAmount + shipping + taxAmount);
 
   const handleApplyCoupon = async () => {
     if (!couponCode) return;
@@ -188,7 +287,7 @@ function CheckoutContent({
     try {
       const res = await validateCoupon(couponCode);
       if (res.success && res.coupon) {
-        setAppliedCoupon(res.coupon as { id: string; code: string; type: string; value: number });
+        setAppliedCoupon(res.coupon as AppliedCoupon);
         toast.success(`Coupon "${res.coupon.code}" applied!`);
       } else {
         toast.error(res.message || "Invalid coupon");
@@ -229,10 +328,10 @@ function CheckoutContent({
     try {
       if (paymentMethod === "cod") {
         const result = await placeOrder(
-          data, 
-          cart.items, 
-          "cod", 
-          undefined, 
+          data,
+          cart.items,
+          "cod",
+          undefined,
           appliedCoupon?.code,
           selectedZoneId
         );
@@ -273,21 +372,24 @@ function CheckoutContent({
             cart.clearCart();
             router.push(`/order-confirmation/${result.orderId}`);
           } else {
-            toast.error(
-              `Payment success but order save failed. ID: ${paymentIntent.id}`
-            );
-            setIsProcessing(false);
+            // The payment succeeded, so the Stripe webhook will still create
+            // the order — the customer is not charged without an order.
+            cart.clearCart();
+            onPaymentSuccess();
+            router.push(`/order-confirmation/pending?intent=${paymentIntent.id}`);
           }
         }
       }
-    } catch (_error) {
-      console.error(_error);
+    } catch (error) {
+      console.error(error);
       toast.error("Something went wrong.");
       setIsProcessing(false);
     }
   };
 
   const isFormValid = form.formState.isValid;
+  const canPayByCard = paymentMethod === "stripe" && Boolean(stripe && paymentIntentId);
+
 
   return (
     <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -305,7 +407,10 @@ function CheckoutContent({
               </div>
               <div className="space-y-5">
                 <div className="relative">
-                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+                  <label
+                    htmlFor="checkout-fullName"
+                    className="text-sm font-medium text-gray-700 mb-1.5 block"
+                  >
                     Full Name
                   </label>
                   <div className="relative">
@@ -314,17 +419,34 @@ function CheckoutContent({
                       size={18}
                     />
                     <input
+                      id="checkout-fullName"
                       {...form.register("fullName")}
+                      aria-invalid={Boolean(form.formState.errors.fullName)}
+                      aria-describedby={
+                        form.formState.errors.fullName ? "checkout-fullName-error" : undefined
+                      }
                       className={cn(
-                        "w-full rounded-xl border-gray-200 border bg-gray-50/30 pl-11 pr-4 py-3 text-sm outline-none focus:border-indigo-500 transition-all",
+                        "w-full rounded-xl border-gray-200 border bg-gray-50/30 pl-11 pr-4 py-3 text-sm outline-none focus:border-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 transition-all",
                         form.formState.errors.fullName && "border-red-500"
                       )}
                       placeholder="Enter full name"
                     />
                   </div>
+                  {form.formState.errors.fullName && (
+                    <p
+                      id="checkout-fullName-error"
+                      role="alert"
+                      className="mt-1.5 text-xs font-medium text-red-600"
+                    >
+                      {form.formState.errors.fullName.message}
+                    </p>
+                  )}
                 </div>
                 <div className="relative">
-                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+                  <label
+                    htmlFor="checkout-phone"
+                    className="text-sm font-medium text-gray-700 mb-1.5 block"
+                  >
                     Phone
                   </label>
                   <div className="relative">
@@ -333,17 +455,35 @@ function CheckoutContent({
                       size={18}
                     />
                     <input
+                      id="checkout-phone"
                       {...form.register("phone")}
+                      inputMode="tel"
+                      aria-invalid={Boolean(form.formState.errors.phone)}
+                      aria-describedby={
+                        form.formState.errors.phone ? "checkout-phone-error" : undefined
+                      }
                       className={cn(
-                        "w-full rounded-xl border-gray-200 border bg-gray-50/30 pl-11 pr-4 py-3 text-sm outline-none focus:border-indigo-500 transition-all",
+                        "w-full rounded-xl border-gray-200 border bg-gray-50/30 pl-11 pr-4 py-3 text-sm outline-none focus:border-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 transition-all",
                         form.formState.errors.phone && "border-red-500"
                       )}
                       placeholder="017..."
                     />
                   </div>
+                  {form.formState.errors.phone && (
+                    <p
+                      id="checkout-phone-error"
+                      role="alert"
+                      className="mt-1.5 text-xs font-medium text-red-600"
+                    >
+                      {form.formState.errors.phone.message}
+                    </p>
+                  )}
                 </div>
                 <div className="relative">
-                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+                  <label
+                    htmlFor="checkout-email"
+                    className="text-sm font-medium text-gray-700 mb-1.5 block"
+                  >
                     Email Address
                   </label>
                   <div className="relative">
@@ -352,45 +492,85 @@ function CheckoutContent({
                       size={18}
                     />
                     <input
+                      id="checkout-email"
                       {...form.register("email")}
                       type="email"
+                      autoComplete="email"
+                      aria-invalid={Boolean(form.formState.errors.email)}
+                      aria-describedby={cn(
+                        form.formState.errors.email && "checkout-email-error",
+                        !session && "checkout-email-hint"
+                      ) || undefined}
                       className={cn(
-                        "w-full rounded-xl border-gray-200 border bg-gray-50/30 pl-11 pr-4 py-3 text-sm outline-none focus:border-indigo-500 transition-all",
+                        "w-full rounded-xl border-gray-200 border bg-gray-50/30 pl-11 pr-4 py-3 text-sm outline-none focus:border-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 transition-all",
                         form.formState.errors.email && "border-red-500"
                       )}
                       placeholder="Enter your email"
                     />
                   </div>
+                  {form.formState.errors.email && (
+                    <p
+                      id="checkout-email-error"
+                      role="alert"
+                      className="mt-1.5 text-xs font-medium text-red-600"
+                    >
+                      {form.formState.errors.email.message}
+                    </p>
+                  )}
                   {!session && (
-                    <p className="mt-1.5 text-[10px] text-gray-400 font-medium">
+                    <p
+                      id="checkout-email-hint"
+                      className="mt-1.5 text-[10px] text-gray-500 font-medium"
+                    >
                       Guest checkout. We&apos;ll use this to send your order confirmation.
                     </p>
                   )}
                 </div>
                 <div className="relative">
-                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+                  <label
+                    htmlFor="checkout-address"
+                    className="text-sm font-medium text-gray-700 mb-1.5 block"
+                  >
                     Address
                   </label>
                   <textarea
+                    id="checkout-address"
                     {...form.register("address")}
                     rows={2}
+                    aria-invalid={Boolean(form.formState.errors.address)}
+                    aria-describedby={
+                      form.formState.errors.address ? "checkout-address-error" : undefined
+                    }
                     className={cn(
-                      "w-full rounded-xl border-gray-200 border bg-gray-50/30 px-4 py-3 text-sm outline-none focus:border-indigo-500 transition-all resize-none",
+                      "w-full rounded-xl border-gray-200 border bg-gray-50/30 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 transition-all resize-none",
                       form.formState.errors.address && "border-red-500"
                     )}
                     placeholder="House, Road, City..."
                   />
+                  {form.formState.errors.address && (
+                    <p
+                      id="checkout-address-error"
+                      role="alert"
+                      className="mt-1.5 text-xs font-medium text-red-600"
+                    >
+                      {form.formState.errors.address.message}
+                    </p>
+                  )}
                 </div>
 
                 {/* Shipping Zone Selection */}
                 <div className="relative">
-                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+                  <label
+                    htmlFor="checkout-zone"
+                    className="text-sm font-medium text-gray-700 mb-1.5 block"
+                  >
                     Shipping Zone
                   </label>
                   <select
+                    id="checkout-zone"
                     value={selectedZoneId}
                     onChange={(e) => setSelectedZoneId(e.target.value)}
-                    className="w-full rounded-xl border-gray-200 border bg-gray-50/30 px-4 py-3 text-sm outline-none focus:border-indigo-500 transition-all cursor-pointer"
+                    className="w-full rounded-xl border-gray-200 border bg-gray-50/30 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 transition-all cursor-pointer"
                   >
                     <option value="">Select Shipping Zone (Default)</option>
                     {zones.map((zone) => (
@@ -411,17 +591,27 @@ function CheckoutContent({
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div
-                  onClick={() => setPaymentMethod("cod")}
+              <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <legend className="sr-only">Choose a payment method</legend>
+
+                <label
                   className={cn(
-                    "relative p-5 border-2 rounded-2xl cursor-pointer transition-all flex items-start gap-4 hover:shadow-md",
+                    "relative p-5 border-2 rounded-2xl cursor-pointer transition-all flex items-start gap-4 hover:shadow-md has-focus-visible:ring-2 has-focus-visible:ring-indigo-500 has-focus-visible:ring-offset-2",
                     paymentMethod === "cod"
                       ? "border-gray-900 bg-gray-50/50"
                       : "border-gray-100 bg-white"
                   )}
                 >
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="cod"
+                    checked={paymentMethod === "cod"}
+                    onChange={() => setPaymentMethod("cod")}
+                    className="sr-only"
+                  />
                   <div
+                    aria-hidden="true"
                     className={cn(
                       "h-5 w-5 rounded-full border-2 flex items-center justify-center mt-1 shrink-0",
                       paymentMethod === "cod"
@@ -441,18 +631,26 @@ function CheckoutContent({
                       Pay when you receive
                     </p>
                   </div>
-                </div>
+                </label>
 
-                <div
-                  onClick={() => setPaymentMethod("stripe")}
+                <label
                   className={cn(
-                    "relative p-5 border-2 rounded-2xl cursor-pointer transition-all flex items-start gap-4 hover:shadow-md",
+                    "relative p-5 border-2 rounded-2xl cursor-pointer transition-all flex items-start gap-4 hover:shadow-md has-focus-visible:ring-2 has-focus-visible:ring-indigo-500 has-focus-visible:ring-offset-2",
                     paymentMethod === "stripe"
                       ? "border-indigo-600 bg-indigo-50/50"
                       : "border-gray-100 bg-white"
                   )}
                 >
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="stripe"
+                    checked={paymentMethod === "stripe"}
+                    onChange={() => setPaymentMethod("stripe")}
+                    className="sr-only"
+                  />
                   <div
+                    aria-hidden="true"
                     className={cn(
                       "h-5 w-5 rounded-full border-2 flex items-center justify-center mt-1 shrink-0",
                       paymentMethod === "stripe"
@@ -468,8 +666,8 @@ function CheckoutContent({
                     <h3 className="font-bold text-gray-900">Online Payment</h3>
                     <p className="text-sm text-gray-500">Cards / Stripe</p>
                   </div>
-                </div>
-              </div>
+                </label>
+              </fieldset>
             </div>
           </form>
         </div>
@@ -559,48 +757,74 @@ function CheckoutContent({
               <div className="space-y-3 border-t border-dashed border-gray-200 pt-6 text-sm">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span className="font-medium">${subtotal.toFixed(2)}</span>
+                  <span className="font-medium">${money(quote.subtotalCents)}</span>
                 </div>
 
-                {appliedCoupon && (
+                {quote.discountCents > 0 && (
                   <div className="flex justify-between text-emerald-600 font-medium animate-in slide-in-from-right-2">
                     <div className="flex items-center gap-1">
                       <Tag size={14} />
-                      <span>Discount ({appliedCoupon.code})</span>
+                      <span>Discount ({quote.couponCode})</span>
                     </div>
-                    <span>-${discountAmount.toFixed(2)}</span>
+                    <span>-${money(quote.discountCents)}</span>
                   </div>
                 )}
 
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span>{shipping === 0 ? "Free" : `$${shipping}`}</span>
+                  <span>
+                    {quote.shippingCents === 0 ? "Free" : `$${money(quote.shippingCents)}`}
+                  </span>
                 </div>
 
-                {taxRate > 0 && (
-                  <div className="flex justify-between text-gray-400">
-                    <span>VAT/Tax ({taxRate}%)</span>
-                    <span>${taxAmount.toFixed(2)}</span>
+                {quote.taxRate > 0 && (
+                  <div className="flex justify-between text-gray-500">
+                    <span>VAT/Tax ({quote.taxRate}%)</span>
+                    <span>${money(quote.taxCents)}</span>
                   </div>
                 )}
 
                 <div className="flex justify-between items-end pt-3 border-t border-gray-100 mt-3">
                   <span className="text-base font-bold">Total</span>
                   <span className="text-2xl font-extrabold text-indigo-600">
-                    ${total.toFixed(2)}
+                    ${money(quote.totalCents)}
                   </span>
                 </div>
               </div>
 
-              {paymentMethod === "stripe" && (
+              {paymentMethod === "stripe" && intentError && (
+                <div
+                  role="alert"
+                  className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+                >
+                  <p className="font-semibold">Couldn&apos;t start payment</p>
+                  <p className="mt-1 text-red-600">{intentError}</p>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("stripe")}
+                    className="mt-3 rounded-lg bg-red-600 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-red-700 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                  >
+                    Try again
+                  </button>
+                </div>
+              )}
+
+              {paymentMethod === "stripe" && !intentError && (
                 <div className="mt-6 p-4 bg-white rounded-xl border border-indigo-200 shadow-inner animate-in fade-in">
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3 block">
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3 block">
                     Card Information
-                  </label>
-                  <PaymentElement
-                    id="payment-element"
-                    options={{ layout: "tabs" }}
-                  />
+                  </span>
+                  {canPayByCard ? (
+                    <PaymentElement
+                      id="payment-element"
+                      options={{ layout: "tabs" }}
+                    />
+                  ) : (
+                    <div className="flex items-center gap-2 py-4 text-sm text-gray-500">
+                      <Loader2 size={16} className="animate-spin" />
+                      Preparing secure payment form...
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -610,12 +834,14 @@ function CheckoutContent({
                 disabled={
                   isProcessing ||
                   !isFormValid ||
-                  (!stripe && paymentMethod === "stripe")
+                  (paymentMethod === "stripe" && !canPayByCard)
                 }
                 className={cn(
-                  "w-full mt-6 py-4 rounded-xl font-bold text-lg shadow-lg transition-all flex items-center justify-center",
-                  isProcessing || !isFormValid
-                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  "w-full mt-6 py-4 rounded-xl font-bold text-lg shadow-lg transition-all flex items-center justify-center focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2",
+                  isProcessing ||
+                    !isFormValid ||
+                    (paymentMethod === "stripe" && !canPayByCard)
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                     : "bg-gray-900 text-white hover:bg-indigo-600 hover:shadow-indigo-500/30 active:scale-[0.98]"
                 )}
               >
@@ -626,11 +852,17 @@ function CheckoutContent({
                 ) : paymentMethod === "cod" ? (
                   "Confirm Order"
                 ) : (
-                  `Pay $${total.toFixed(2)}`
+                  `Pay $${money(quote.totalCents)}`
                 )}
               </button>
 
-              <div className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-400 bg-gray-50 py-2 rounded-lg">
+              {!isFormValid && (
+                <p className="mt-3 text-center text-xs text-gray-500">
+                  Complete your delivery details to continue.
+                </p>
+              )}
+
+              <div className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-500 bg-gray-50 py-2 rounded-lg">
                 <ShieldCheck size={14} /> <span>Secure Encrypted Checkout</span>
               </div>
             </div>

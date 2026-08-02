@@ -3,11 +3,13 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import Stripe from "stripe";
 import { z } from "zod";
 import { randomBytes } from "crypto";
 import { logger } from "@/lib/logger";
 import { sendOrderInvoiceEmail } from "@/lib/email";
+import { stripe } from "@/lib/stripe-server";
+import { createPaidOrRequestedOrder } from "./lib/create-order";
+import { computeOrderTotals, TotalsError } from "./lib/totals";
 
 interface CartItemInput {
   id: string;
@@ -20,23 +22,11 @@ interface CartItemInput {
 type PaymentMethodInput = "cod" | "stripe";
 
 export async function generateOrderNumber() {
-  let orderNumber = "";
-  let isUnique = false;
-
-  while (!isUnique) {
-    const year = new Date().getFullYear().toString().slice(-2);
-    const random = randomBytes(6).toString("hex").toUpperCase();
-    orderNumber = `IG${year}${random}`;
-    const existingOrder = await prisma.order.findUnique({
-      where: { orderNumber },
-    });
-    if (!existingOrder) {
-      isUnique = true;
-    }
-  }
-
-  return orderNumber;
+  const year = new Date().getFullYear().toString().slice(-2);
+  const random = randomBytes(6).toString("hex").toUpperCase();
+  return `IG${year}${random}`;
 }
+
 interface PlaceOrderFormData {
   fullName: string;
   phone: string;
@@ -58,9 +48,10 @@ const cartItemsSchema = z
         id: z.string().min(1),
         quantity: z.number().int().positive().max(99),
       })
-      .passthrough()
+      .strip(),
   )
-  .min(1);
+  .min(1)
+  .max(100);
 
 // --- Coupon Validation ---
 export async function validateCoupon(code: string) {
@@ -106,7 +97,7 @@ export async function placeOrder(
   paymentMethod: PaymentMethodInput,
   paymentIntentId?: string,
   couponCode?: string,
-  shippingZoneId?: string
+  shippingZoneId?: string,
 ) {
   try {
     const validatedForm = placeOrderSchema.parse(formData);
@@ -118,67 +109,15 @@ export async function placeOrder(
 
     const user = session?.user;
 
-    const uniqueProductIds = Array.from(
-      new Set(validatedCartItems.map((i) => i.id))
-    );
-
-    const [products, shippingZone, settings] = await Promise.all([
-      prisma.product.findMany({
-        where: { id: { in: uniqueProductIds } },
-        select: { id: true, name: true, price: true, image: true, stock: true },
-      }),
-      shippingZoneId
-        ? prisma.shippingZone.findUnique({ where: { id: shippingZoneId } })
-        : Promise.resolve(null),
-      prisma.siteSettings.findUnique({ where: { id: "general" } }),
-    ]);
-
-    if (products.length !== uniqueProductIds.length) {
-      throw new Error("Invalid cart items");
-    }
-
-    const productById = new Map<
-      string,
-      { id: string; name: string; price: number; image: string | null; stock: number }
-    >(products.map((p) => [p.id, p]));
-    for (const item of validatedCartItems) {
-      const product = productById.get(item.id);
-      if (!product) throw new Error("Invalid cart items");
-      if (item.quantity > product.stock) throw new Error("Out of stock");
-    }
-
-    const subtotalCents = validatedCartItems.reduce((acc, item) => {
-      const product = productById.get(item.id)!;
-      const unitPriceCents = Math.round(product.price * 100);
-      return acc + unitPriceCents * item.quantity;
-    }, 0);
-
-    const shippingCents = shippingZone ? Math.round(shippingZone.charge * 100) : (subtotalCents > 100000 ? 0 : 6000);
-    const taxRate = settings?.taxRate ?? 0;
-    const taxCents = Math.round(subtotalCents * (taxRate / 100));
-
-    // --- Coupon Application ---
-    let discountCents = 0;
-    let couponId: string | null = null;
-    
-    if (couponCode) {
-      const couponRes = await validateCoupon(couponCode);
-      if (couponRes.success && couponRes.coupon) {
-        couponId = couponRes.coupon.id;
-        if (couponRes.coupon.type === "PERCENTAGE") {
-          discountCents = Math.round(subtotalCents * (couponRes.coupon.value / 100));
-        } else {
-          discountCents = Math.round(couponRes.coupon.value * 100);
-        }
-      }
-    }
-
-    const totalCents = Math.max(0, subtotalCents - discountCents + shippingCents + taxCents);
+    const totals = await computeOrderTotals({
+      items: validatedCartItems,
+      couponCode,
+      shippingZoneId,
+    });
 
     const dbPaymentMethod = paymentMethod === "cod" ? "COD" : "STRIPE";
     let isPaid = false;
 
-    // --- 1. Stripe Verification (Outside Transaction) ---
     if (dbPaymentMethod === "STRIPE") {
       if (!paymentIntentId) {
         throw new Error("Missing payment intent");
@@ -187,16 +126,11 @@ export async function placeOrder(
         throw new Error("Stripe is not configured");
       }
 
-      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-        apiVersion: "2025-12-15.clover",
-        typescript: true,
-      });
-
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
       if (
         paymentIntent.status !== "succeeded" ||
-        paymentIntent.amount !== totalCents ||
+        paymentIntent.amount !== totals.totalCents ||
         paymentIntent.currency !== "usd"
       ) {
         throw new Error("Payment verification failed");
@@ -205,145 +139,43 @@ export async function placeOrder(
       isPaid = true;
     }
 
-    // --- 2. Order Number Generation (Outside Transaction) ---
-    const newOrderNumber = await generateOrderNumber();
-
-    // --- 3. Atomic Database Operations (Simplified Transaction) ---
-    // Merge duplicate product items in cart to prevent multiple redundant updates
-    const mergedCartItems = validatedCartItems.reduce((acc, current) => {
-      const existing = acc.find(item => item.id === current.id);
-      if (existing) {
-        existing.quantity += current.quantity;
-      } else {
-        acc.push({ ...current });
-      }
-      return acc;
-    }, [] as typeof validatedCartItems);
-
-    const result = await prisma.$transaction(async (tx) => {
-      // 1. Fetch reservations for this user and these products
-      const reservations = await tx.stockReservation.findMany({
-        where: {
-          userId: user?.id || null,
-          productId: { in: uniqueProductIds },
-        },
-      });
-
-      const reservationMap = new Map(reservations.map(r => [r.productId, r]));
-
-      // 2. Verified Stock Check (Accounting for reservations)
-      for (const item of mergedCartItems) {
-        const product = productById.get(item.id);
-        const reservation = reservationMap.get(item.id);
-        if (!product) throw new Error("Invalid cart items");
-        
-        const effectiveStock = product.stock + (reservation?.quantity || 0);
-        if (item.quantity > effectiveStock) throw new Error(`Out of stock for ${product.name}`);
-      }
-
-      // 3. Create the order and items
-      const order = await tx.order.create({
-        data: {
-          orderNumber: newOrderNumber,
-          userId: user?.id || null,
-          name: validatedForm.fullName,
-          phone: validatedForm.phone,
-          address: validatedForm.address,
-          email:
-            validatedForm.email && validatedForm.email !== ""
-              ? validatedForm.email
-              : null,
-          totalAmount: totalCents / 100,
-          discountAmount: discountCents / 100,
-          shippingAmount: shippingCents / 100,
-          taxAmount: taxCents / 100,
-          status: isPaid ? "PROCESSING" : "PENDING",
-          paymentStatus: isPaid ? "PAID" : "PENDING",
-          paymentMethod: dbPaymentMethod,
-          stripePaymentIntentId: paymentIntentId || null,
-          couponId: couponId,
-          items: {
-            create: mergedCartItems.map((item) => {
-              const product = productById.get(item.id)!;
-              return {
-                productId: product.id,
-                name: product.name,
-                price: product.price,
-                quantity: item.quantity,
-                image: product.image || null,
-              };
-            }),
-          },
-        },
-      });
-
-      // 4. Update product stocks or consume reservations
-      for (const item of mergedCartItems) {
-        const reservation = reservationMap.get(item.id);
-
-        try {
-          if (reservation) {
-            // Stock was already decremented on Add to Cart, just delete reservation
-            // If the reservation quantity is different, adjust the stock
-            const delta = item.quantity - reservation.quantity;
-            if (delta !== 0) {
-              await tx.product.update({
-                where: { id: item.id },
-                data: { stock: { decrement: delta } },
-              });
-            }
-            await tx.stockReservation.delete({
-              where: { id: reservation.id },
-            });
-          } else {
-            // No reservation found (flow bypassed or expired), decrement stock normally
-            await tx.product.update({
-              where: { id: item.id },
-              data: { stock: { decrement: item.quantity } },
-            });
-          }
-        } catch (updateError) {
-          logger.error(`Failed to consume reservation/update stock for product ${item.id}`, updateError);
-          throw updateError; // Rethrow to rollback transaction
-        }
-      }
-
-      // Update coupon usage if applicable
-      if (couponId) {
-        await tx.coupon.update({
-          where: { id: couponId },
-          data: { usageCount: { increment: 1 } },
-        });
-      }
-
-      // 5. Clear the user's cart
-      if (user?.id) {
-        await tx.cartItem.deleteMany({
-          where: { userId: user.id },
-        });
-      }
-
-      return { orderNumber: order.orderNumber, totalAmount: order.totalAmount, email: order.email, name: order.name, paymentMethod: dbPaymentMethod };
+    const result = await createPaidOrRequestedOrder({
+      customer: {
+        name: validatedForm.fullName,
+        phone: validatedForm.phone,
+        address: validatedForm.address,
+        email: validatedForm.email || null,
+      },
+      userId: user?.id ?? null,
+      totals,
+      paymentMethod: dbPaymentMethod,
+      isPaid,
+      paymentIntentId: paymentIntentId ?? null,
     });
 
-    // Send order invoice email asynchronously
-    if (result.email) {
+    if (result.email && result.created) {
       sendOrderInvoiceEmail({
         toEmail: result.email,
         customerName: result.name,
         orderNumber: result.orderNumber,
         totalAmount: result.totalAmount,
-        paymentMethod: result.paymentMethod,
-        items: validatedCartItems.map((item) => ({
-          name: String(item.name),
-          quantity: Number(item.quantity),
-          price: Number(item.price),
+        paymentMethod: dbPaymentMethod,
+        // Built from DB-backed line items, never from the client's cart payload.
+        items: totals.lineItems.map((line) => ({
+          name: line.name,
+          quantity: line.quantity,
+          price: line.unitPriceCents / 100,
         })),
       }).catch((err) => logger.error("Async invoice email failed", err));
     }
 
     return { success: true, orderId: result.orderNumber };
   } catch (error) {
+    if (error instanceof TotalsError) {
+      logger.error("Order totals rejected", error);
+      return { success: false, error: error.message };
+    }
+
     const errorMessage =
       error instanceof Error ? error.message : "Failed to place order";
     logger.error("Order Error", error);

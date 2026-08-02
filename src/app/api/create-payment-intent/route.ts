@@ -1,28 +1,29 @@
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
 import { z } from "zod";
-import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { logger } from "@/lib/logger";
+import { stripe } from "@/lib/stripe-server";
+import { computeOrderTotals, TotalsError } from "@/modules/checkout/lib/totals";
 
-const requestSchema = z.object({
-  items: z
-    .array(
-      z
-        .object({
-          id: z.string().min(1),
-          quantity: z.number().int().positive().max(99),
-        })
-        .strict(), // Reject unknown fields for security
-    )
-    .min(1),
-});
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: "2025-12-15.clover",
-  typescript: true,
-});
+const requestSchema = z
+  .object({
+    items: z
+      .array(
+        z
+          .object({
+            id: z.string().min(1),
+            quantity: z.number().int().positive().max(99),
+          })
+          .strict(),
+      )
+      .min(1)
+      .max(100),
+    couponCode: z.string().trim().min(1).max(64).optional(),
+    shippingZoneId: z.string().min(1).optional(),
+    paymentIntentId: z.string().min(1).optional(),
+  })
+  .strict();
 
 export async function POST(req: Request) {
   let userId: string | undefined;
@@ -50,64 +51,69 @@ export async function POST(req: Request) {
       );
     }
 
-    const items = parsed.data.items;
-    const uniqueProductIds = Array.from(new Set(items.map((i) => i.id)));
-    const products = await prisma.product.findMany({
-      where: { id: { in: uniqueProductIds } },
-      select: { id: true, price: true, stock: true },
+    const { items, couponCode, shippingZoneId, paymentIntentId } = parsed.data;
+
+    const totals = await computeOrderTotals({
+      items,
+      couponCode,
+      shippingZoneId,
     });
 
-    if (products.length !== uniqueProductIds.length) {
-      const foundIds = products.map((p) => p.id);
-      const missingIds = uniqueProductIds.filter(
-        (id) => !foundIds.includes(id),
-      );
-      console.error("Invalid product IDs in cart:", missingIds);
-      return NextResponse.json(
-        { error: "One or more items are invalid" },
-        { status: 400 },
-      );
-    }
+    // The webhook is the authoritative order-creation path, so it needs enough
+    // context to build the order without the browser.
+    const metadata: Record<string, string> = {
+      userId: userId ?? "",
+      couponCode: totals.couponCode ?? "",
+      shippingZoneId: shippingZoneId ?? "",
+      cart: JSON.stringify(
+        totals.lineItems.map((l) => ({ id: l.productId, quantity: l.quantity })),
+      ),
+    };
 
-    const productById = new Map(products.map((p) => [p.id, p]));
-    for (const item of items) {
-      const product = productById.get(item.id);
-      if (!product) {
+    // Reuse the existing intent when the cart changes, so a customer editing
+    // their order doesn't leave a trail of orphaned intents.
+    if (paymentIntentId) {
+      const existing = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+      if (existing.status === "succeeded") {
         return NextResponse.json(
-          { error: "One or more items are invalid" },
-          { status: 400 },
+          { error: "This payment has already been completed" },
+          { status: 409 },
         );
       }
-      if (item.quantity > product.stock) {
-        return NextResponse.json(
-          { error: "One or more items are out of stock" },
-          { status: 400 },
-        );
+
+      if (["requires_payment_method", "requires_confirmation"].includes(existing.status)) {
+        const updated = await stripe.paymentIntents.update(paymentIntentId, {
+          amount: totals.totalCents,
+          metadata,
+        });
+
+        return NextResponse.json({
+          clientSecret: updated.client_secret,
+          paymentIntentId: updated.id,
+          totalCents: totals.totalCents,
+        });
       }
     }
-
-    const subtotalCents = items.reduce((acc, item) => {
-      const product = productById.get(item.id)!;
-      const unitPriceCents = Math.round(product.price * 100);
-      return acc + unitPriceCents * item.quantity;
-    }, 0);
-
-    const shippingCents = subtotalCents > 100000 ? 0 : 6000;
-    const totalCents = subtotalCents + shippingCents;
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: totalCents,
+      amount: totals.totalCents,
       currency: "usd",
-      automatic_payment_methods: {
-        enabled: true,
-      },
+      automatic_payment_methods: { enabled: true },
+      metadata,
     });
 
-    return NextResponse.json({ clientSecret: paymentIntent.client_secret });
-  } catch (error) {
-    logger.error("Failed to create payment intent", error, {
-      userId,
+    return NextResponse.json({
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id,
+      totalCents: totals.totalCents,
     });
+  } catch (error) {
+    if (error instanceof TotalsError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    logger.error("Failed to create payment intent", error, { userId });
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },

@@ -2,6 +2,14 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { logger } from "@/lib/logger";
+import { z } from "zod";
+
+const RESERVATION_DURATION_MS = 15 * 60 * 1000;
+
+const patchSchema = z.object({
+  quantity: z.number().int().min(0).max(99),
+});
 
 export async function PATCH(
   req: Request,
@@ -17,15 +25,15 @@ export async function PATCH(
     }
 
     const { productId } = await params;
-    const { quantity } = await req.json();
+    const parsed = patchSchema.safeParse(await req.json());
 
-    const parsedQuantity = parseInt(quantity, 10);
-    if (isNaN(parsedQuantity)) {
+    if (!parsed.success) {
       return NextResponse.json({ error: "Invalid quantity" }, { status: 400 });
     }
 
+    const targetQuantity = parsed.data.quantity;
+
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Get current cart item
       const existingCartItem = await tx.cartItem.findUnique({
         where: {
           userId_productId: {
@@ -37,10 +45,9 @@ export async function PATCH(
 
       if (!existingCartItem) throw new Error("Item not in cart");
 
-      const delta = parsedQuantity - existingCartItem.quantity;
+      const delta = targetQuantity - existingCartItem.quantity;
 
-      // 2. If quantity is 0 or less, delete
-      if (parsedQuantity < 1) {
+      if (targetQuantity < 1) {
         await tx.cartItem.delete({
           where: { id: existingCartItem.id },
         });
@@ -52,24 +59,25 @@ export async function PATCH(
           data: { stock: { increment: existingCartItem.quantity } },
         });
       } else {
-        // 3. Just update
-        // Check stock if increasing
         if (delta > 0) {
-          const product = await tx.product.findUnique({
-            where: { id: productId },
-            select: { stock: true },
+          // The WHERE clause is the stock guard, so the check and the
+          // decrement can't be interleaved by a concurrent request.
+          const { count } = await tx.product.updateMany({
+            where: { id: productId, stock: { gte: delta } },
+            data: { stock: { decrement: delta } },
           });
-          if (!product || product.stock < delta) throw new Error("Insufficient stock");
+
+          if (count === 0) throw new Error("Insufficient stock");
+        } else if (delta < 0) {
+          await tx.product.update({
+            where: { id: productId },
+            data: { stock: { increment: -delta } },
+          });
         }
 
         await tx.cartItem.update({
           where: { id: existingCartItem.id },
-          data: { quantity: parsedQuantity },
-        });
-
-        await tx.product.update({
-          where: { id: productId },
-          data: { stock: { decrement: delta } },
+          data: { quantity: targetQuantity },
         });
 
         await tx.stockReservation.upsert({
@@ -77,12 +85,12 @@ export async function PATCH(
           create: {
             productId,
             userId: session.user.id,
-            quantity: parsedQuantity,
-            expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+            quantity: targetQuantity,
+            expiresAt: new Date(Date.now() + RESERVATION_DURATION_MS),
           },
           update: {
-            quantity: parsedQuantity,
-            expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+            quantity: targetQuantity,
+            expiresAt: new Date(Date.now() + RESERVATION_DURATION_MS),
           },
         });
       }
@@ -91,8 +99,15 @@ export async function PATCH(
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Cart PATCH Error:", error);
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Internal Server Error" }, { status: 500 });
+    const message = error instanceof Error ? error.message : "";
+    logger.error("Cart PATCH Error", error);
+
+    // Only surface the expected business-rule failures, never internals.
+    if (message === "Item not in cart" || message === "Insufficient stock") {
+      return NextResponse.json({ error: message }, { status: 400 });
+    }
+
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
 

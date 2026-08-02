@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useTransition } from "react";
 import AdminSidebar from "./admin-sidebar";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 import {
   Menu,
   Search,
@@ -15,6 +17,10 @@ import {
   Users,
   Package,
   MoreHorizontal,
+  LogOut,
+  ExternalLink,
+  Settings,
+  Loader2,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -35,11 +41,26 @@ export default function AdminLayoutWrapper({
 }: AdminLayoutWrapperProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [, startTransition] = useTransition();
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const pathname = usePathname();
   const router = useRouter();
+
+  const handleSignOut = async () => {
+    setIsLoggingOut(true);
+    try {
+      await authClient.signOut();
+      toast.success("Logged out successfully");
+      router.replace("/sign-in");
+    } catch (error) {
+      console.error("Logout Error:", error);
+      toast.error("Failed to log out");
+      setIsLoggingOut(false);
+    }
+  };
   
   const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -193,35 +214,106 @@ export default function AdminLayoutWrapper({
               <span className="absolute top-2 right-2 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-900 animate-pulse"></span>
             </button>
 
-            {/* User Profile */}
-            <div className="hidden lg:flex items-center gap-3 pl-2 md:pl-4 border-l border-gray-200 dark:border-gray-800 cursor-pointer group">
-              <div className="relative shrink-0">
-                <div className="h-9 w-9 rounded-full bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 overflow-hidden shadow-sm dark:shadow-none group-hover:ring-2 group-hover:ring-indigo-100 dark:group-hover:ring-indigo-800 transition-all">
-                  {user.image ? (
-                    <Image
-                      src={user.image}
-                      alt=""
-                      width={36}
-                      height={36}
-                      className="object-cover"
+            {/* User Profile Dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="hidden lg:flex items-center gap-3 pl-2 md:pl-4 border-l border-gray-200 dark:border-gray-800 cursor-pointer group focus:outline-none"
+              >
+                <div className="relative shrink-0">
+                  <div className="h-9 w-9 rounded-full bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 overflow-hidden shadow-sm dark:shadow-none group-hover:ring-2 group-hover:ring-indigo-100 dark:group-hover:ring-indigo-800 transition-all">
+                    {user.image ? (
+                      <Image
+                        src={user.image}
+                        alt={user.name}
+                        width={36}
+                        height={36}
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 font-bold text-sm">
+                        {user.name.charAt(0)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 bg-white dark:bg-gray-900 rounded-full p-px shadow-sm dark:shadow-none ring-1 ring-gray-100 dark:ring-gray-800">
+                    <BadgeCheck
+                      size={14}
+                      className="text-blue-600 dark:text-blue-400 fill-blue-50 dark:fill-blue-900/30"
                     />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 font-bold text-sm">
-                      {user.name.charAt(0)}
-                    </div>
+                  </div>
+                </div>
+                <div className="hidden sm:flex flex-col text-left">
+                  <span className="text-xs font-bold text-gray-900 dark:text-white truncate max-w-[120px]">
+                    {user.name}
+                  </span>
+                  <span className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
+                    Admin
+                  </span>
+                </div>
+                <ChevronDown
+                  size={14}
+                  className={cn(
+                    "text-gray-400 transition-transform duration-200",
+                    isProfileOpen && "rotate-180"
                   )}
-                </div>
-                <div className="absolute -bottom-1 -right-1 bg-white dark:bg-gray-900 rounded-full p-px shadow-sm dark:shadow-none ring-1 ring-gray-100 dark:ring-gray-800">
-                  <BadgeCheck
-                    size={14}
-                    className="text-blue-600 dark:text-blue-400 fill-blue-50 dark:fill-blue-900/30"
+                />
+              </button>
+
+              {/* Profile Dropdown Menu */}
+              {isProfileOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setIsProfileOpen(false)}
                   />
-                </div>
-              </div>
-              <ChevronDown
-                size={14}
-                className="text-gray-400 dark:text-gray-400"
-              />
+                  <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+                      <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                        {user.name}
+                      </p>
+                      <p className="text-xs text-gray-400 font-medium truncate">
+                        Signed in as Administrator
+                      </p>
+                    </div>
+
+                    <div className="py-1">
+                      <Link
+                        href="/"
+                        onClick={() => setIsProfileOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-indigo-600 transition-colors"
+                      >
+                        <ExternalLink size={14} />
+                        View Storefront
+                      </Link>
+                      <Link
+                        href="/admin/settings"
+                        onClick={() => setIsProfileOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-indigo-600 transition-colors"
+                      >
+                        <Settings size={14} />
+                        Admin Settings
+                      </Link>
+                    </div>
+
+                    <div className="pt-1 border-t border-gray-100 dark:border-gray-800">
+                      <button
+                        onClick={handleSignOut}
+                        disabled={isLoggingOut}
+                        className="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors disabled:opacity-50"
+                      >
+                        {isLoggingOut ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <LogOut size={14} />
+                        )}
+                        {isLoggingOut ? "Signing out..." : "Sign Out"}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Mobile User Avatar */}

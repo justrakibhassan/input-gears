@@ -3,6 +3,29 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { headers } from "next/headers";
+import { z } from "zod";
+
+const RESERVATION_DURATION_MS = 15 * 60 * 1000;
+
+// quantity is min(0) — never negative. A negative value would invert the
+// `decrement` below and inflate stock instead of consuming it.
+const cartPostSchema = z
+  .object({
+    productId: z.string().min(1).optional(),
+    quantity: z.number().int().min(0).max(99).optional(),
+    items: z
+      .array(
+        z.object({
+          id: z.string().min(1),
+          quantity: z.number().int().min(0).max(99),
+        }),
+      )
+      .max(100)
+      .optional(),
+  })
+  .refine((data) => data.productId !== undefined || data.items !== undefined, {
+    message: "Either productId or items is required",
+  });
 
 export async function GET() {
   try {
@@ -64,23 +87,25 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { productId, quantity, items } = body;
+    const parsed = cartPostSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 },
+      );
+    }
+
+    const { productId, quantity, items } = parsed.data;
 
     // Handle single item add/update with stock reservation
     if (productId) {
-      const reservationDuration = 15 * 60 * 1000; // 15 minutes
-      const expiresAt = new Date(Date.now() + reservationDuration);
-
-      const parsedQuantity = quantity !== undefined ? parseInt(quantity, 10) : undefined;
-      if (parsedQuantity !== undefined && isNaN(parsedQuantity)) {
-        return NextResponse.json({ error: "Invalid quantity" }, { status: 400 });
-      }
+      const expiresAt = new Date(Date.now() + RESERVATION_DURATION_MS);
 
       const result = await prisma.$transaction(async (tx) => {
-        // 1. Get product and current cart item to calculate quantity delta
         const product = await tx.product.findUnique({
           where: { id: productId },
-          select: { id: true, stock: true },
+          select: { id: true },
         });
 
         if (!product) throw new Error("Product not found");
@@ -95,19 +120,41 @@ export async function POST(req: Request) {
         });
 
         const currentQuantity = existingCartItem?.quantity || 0;
-        const targetQuantity = parsedQuantity !== undefined ? parsedQuantity : currentQuantity + 1;
+        const targetQuantity = quantity !== undefined ? quantity : currentQuantity + 1;
         const delta = targetQuantity - currentQuantity;
 
-        // 2. Check stock availability
-        if (delta > 0 && product.stock < delta) {
-          throw new Error("Insufficient stock");
+        if (targetQuantity === 0) {
+          // Emptying the line returns the reserved units to stock.
+          if (currentQuantity > 0) {
+            await tx.product.update({
+              where: { id: productId },
+              data: { stock: { increment: currentQuantity } },
+            });
+          }
+          await tx.cartItem.deleteMany({
+            where: { userId: session.user.id, productId },
+          });
+          await tx.stockReservation.deleteMany({
+            where: { userId: session.user.id, productId },
+          });
+          return { quantity: 0 };
         }
 
-        // 3. Update stock and cart item
-        await tx.product.update({
-          where: { id: productId },
-          data: { stock: { decrement: delta } },
-        });
+        if (delta > 0) {
+          // The WHERE clause is the stock guard, so concurrent adds can't both
+          // pass a separate read-then-write check and drive stock negative.
+          const { count } = await tx.product.updateMany({
+            where: { id: productId, stock: { gte: delta } },
+            data: { stock: { decrement: delta } },
+          });
+
+          if (count === 0) throw new Error("Insufficient stock");
+        } else if (delta < 0) {
+          await tx.product.update({
+            where: { id: productId },
+            data: { stock: { increment: -delta } },
+          });
+        }
 
         const cartItem = await tx.cartItem.upsert({
           where: {
@@ -163,19 +210,17 @@ export async function POST(req: Request) {
     }
 
     // Handle batch sync (for guest to account migration) with stock reservation
-    if (items && Array.isArray(items)) {
-      const reservationDuration = 15 * 60 * 1000;
-      const expiresAt = new Date(Date.now() + reservationDuration);
+    if (items) {
+      const expiresAt = new Date(Date.now() + RESERVATION_DURATION_MS);
 
-      for (const item of items as CartInputItem[]) {
-        const itemQuantity = parseInt(String(item.quantity), 10);
-        if (isNaN(itemQuantity)) continue;
+      for (const item of items) {
+        if (item.quantity === 0) continue;
 
         try {
           await prisma.$transaction(async (tx) => {
             const product = await tx.product.findUnique({
               where: { id: item.id },
-              select: { id: true, stock: true },
+              select: { id: true },
             });
 
             if (!product) return;
@@ -190,7 +235,7 @@ export async function POST(req: Request) {
             });
 
             const currentQuantity = existingCartItem?.quantity || 0;
-            const targetQuantity = itemQuantity;
+            const targetQuantity = item.quantity;
             const delta = targetQuantity - currentQuantity;
 
             // Simple guard: if delta is 0, just touch reservation expiry
@@ -213,16 +258,20 @@ export async function POST(req: Request) {
               return;
             }
 
-            // Check stock availability for increase
-            if (delta > 0 && product.stock < delta) {
-              return;
-            }
+            if (delta > 0) {
+              const { count } = await tx.product.updateMany({
+                where: { id: item.id, stock: { gte: delta } },
+                data: { stock: { decrement: delta } },
+              });
 
-            // Update stock and cart
-            await tx.product.update({
-              where: { id: item.id },
-              data: { stock: { decrement: delta } },
-            });
+              // Not enough stock for this line — skip it and keep syncing the rest.
+              if (count === 0) return;
+            } else {
+              await tx.product.update({
+                where: { id: item.id },
+                data: { stock: { increment: -delta } },
+              });
+            }
 
             await tx.cartItem.upsert({
               where: {

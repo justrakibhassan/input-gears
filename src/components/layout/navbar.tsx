@@ -595,7 +595,7 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
                   </div>
                 </div>
 
-                <div className="p-6 pb-safe border-t bg-gray-50/50">
+                <div className="p-6 pb-6 border-t bg-gray-50/50">
                   {!isMounted || isPending ? (
                     <div className="w-full h-14 bg-gray-100 animate-pulse rounded-2xl mb-4" />
                   ) : !session ? (

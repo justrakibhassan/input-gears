@@ -295,26 +295,6 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       })}
       </nav>
 
-      {/* 3. Footer / Logout */}
-      <div className="p-4 pb-safe border-t border-white/10 shrink-0 bg-transparent">
-        <button
-          onClick={handleSignOut}
-          disabled={isLoggingOut}
-          className={cn(
-            "flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-red-400 hover:bg-red-500/10 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed",
-            isCollapsed && "justify-center px-2"
-          )}
-        >
-          {isLoggingOut ? (
-            <Loader2 size={20} className="animate-spin" />
-          ) : (
-            <LogOut size={20} />
-          )}
-
-          {!isCollapsed && (isLoggingOut ? "Signing out..." : "Sign Out")}
-        </button>
-      </div>
-
       <style jsx global>{`
         .scrollbar-hide::-webkit-scrollbar {
           display: none;

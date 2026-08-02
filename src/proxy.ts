@@ -11,6 +11,12 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Stripe webhooks authenticate by signature, not session, and must never be
+  // rate limited — a 429 makes Stripe retry, compounding the load.
+  if (pathname.startsWith("/api/stripe/webhook")) {
+    return NextResponse.next();
+  }
+
   // ✅ Security Headers
   const response = NextResponse.next();
 

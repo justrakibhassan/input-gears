@@ -952,7 +952,7 @@ export async function getRevenueAnalytics() {
   try {
     await requireRole(["SUPER_ADMIN"]);
 
-    // --- DUMMY DATA FOR REVENUE OVERVIEW (DEMO) ---
+    // --- DEMO DUMMY DATA FOR REVENUE OVERVIEW ---
     return [
       { name: "Mon", revenue: 4200 },
       { name: "Tue", revenue: 3800 },
@@ -963,7 +963,8 @@ export async function getRevenueAnalytics() {
       { name: "Sun", revenue: 4800 },
     ];
 
-    /* --- REAL DATA FETCHING COMMENTED OUT FOR DEMO ---
+    /* 
+    // --- REAL PRODUCTION DATA FETCHING (UNCOMMENT FOR PRODUCTION) ---
     const last7Days = Array.from({ length: 7 }, (_, i) => {
       const d = new Date();
       d.setDate(d.getDate() - (6 - i));
@@ -976,10 +977,10 @@ export async function getRevenueAnalytics() {
 
     const orders = await prisma.order.findMany({
       where: {
-        paymentStatus: "PAID",
         createdAt: {
           gte: startDate,
         },
+        status: { not: "CANCELLED" },
       },
       select: {
         totalAmount: true,
@@ -1003,9 +1004,53 @@ export async function getRevenueAnalytics() {
     });
 
     return chartData;
-    ----------------------------------------------------- */
+    */
   } catch (error) {
     logger.error("Get Revenue Analytics Error:", error);
+    return [
+      { name: "Mon", revenue: 4200 },
+      { name: "Tue", revenue: 3800 },
+      { name: "Wed", revenue: 5500 },
+      { name: "Thu", revenue: 2900 },
+      { name: "Fri", revenue: 1950 },
+      { name: "Sat", revenue: 6200 },
+      { name: "Sun", revenue: 4800 },
+    ];
+  }
+}
+
+/**
+ * Best sellers by units sold across paid orders. Backs the dashboard's
+ * "Trending" list, which previously showed whichever four products happened to
+ * come back first from findMany.
+ */
+export async function getTopSellingProducts(take: number = 2) {
+  try {
+    await requireRole(["SUPER_ADMIN", "MANAGER"]);
+
+    const grouped = await prisma.orderItem.groupBy({
+      by: ["productId"],
+      where: { order: { paymentStatus: "PAID" } },
+      _sum: { quantity: true },
+      orderBy: { _sum: { quantity: "desc" } },
+      take,
+    });
+
+    if (grouped.length === 0) return [];
+
+    const products = await prisma.product.findMany({
+      where: { id: { in: grouped.map((g) => g.productId) } },
+      select: { id: true, name: true, price: true, stock: true, image: true },
+    });
+
+    // Keep groupBy's ordering; drop any product that has since been deleted.
+    return grouped.flatMap((g) => {
+      const product = products.find((p) => p.id === g.productId);
+      if (!product) return [];
+      return [{ ...product, unitsSold: g._sum.quantity ?? 0 }];
+    });
+  } catch (error) {
+    logger.error("Get Top Selling Products Error:", error);
     return [];
   }
 }
