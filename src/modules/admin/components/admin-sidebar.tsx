@@ -23,6 +23,7 @@ import {
   Paintbrush,
   Zap,
   Star,
+  RotateCcw,
   X,
   ClipboardList,
   Image as ImageIcon,
@@ -74,7 +75,6 @@ const sidebarGroups: {
         icon: Layers,
         roles: ["SUPER_ADMIN", "CONTENT_EDITOR"],
       },
-      { title: "Reviews", href: "/admin/reviews", icon: Star, roles: ["SUPER_ADMIN"] },
     ],
   },
   {
@@ -87,6 +87,12 @@ const sidebarGroups: {
         roles: ["SUPER_ADMIN", "MANAGER"],
       },
       {
+        title: "Returns",
+        href: "/admin/returns",
+        icon: RotateCcw,
+        roles: ["SUPER_ADMIN", "MANAGER"],
+      },
+      {
         title: "Abandoned Carts",
         href: "/admin/abandoned-carts",
         icon: ShoppingBag,
@@ -96,6 +102,12 @@ const sidebarGroups: {
         title: "Customers",
         href: "/admin/customers",
         icon: Users,
+        roles: ["SUPER_ADMIN"],
+      },
+      {
+        title: "Reviews",
+        href: "/admin/reviews",
+        icon: Star,
         roles: ["SUPER_ADMIN"],
       },
     ],
@@ -237,7 +249,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       </div>
 
       {/* 2. Navigation Items */}
-      <nav className="flex-1 overflow-y-auto overflow-x-hidden py-6 px-3 space-y-2 scrollbar-hide">
+      <nav className={cn("flex-1 py-6 px-3 space-y-2 scrollbar-hide", isCollapsed ? "overflow-visible" : "overflow-y-auto overflow-x-hidden")}>
         {sidebarGroups.map((group, groupIdx) => {
           const visibleItems = isMounted ? group.items.filter((item) =>
             userRole && item.roles.includes(userRole)
@@ -281,9 +293,9 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                     {!isCollapsed && <span>{item.title}</span>}
 
                     {isCollapsed && (
-                      <div className="absolute left-full ml-6 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-gray-700 pointer-events-none z-[100] shadow-xl">
+                      <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 bg-gray-900 dark:bg-gray-800 text-white text-xs font-bold px-3 py-1.5 rounded-xl opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 whitespace-nowrap border border-gray-700/80 pointer-events-none z-[9999] shadow-2xl flex items-center">
                         {item.title}
-                        <div className="absolute top-1/2 -left-1 -mt-1 border-4 border-transparent border-r-gray-700" />
+                        <div className="absolute top-1/2 -left-1 -mt-1 border-4 border-transparent border-r-gray-900 dark:border-r-gray-800" />
                       </div>
                     )}
                   </Link>

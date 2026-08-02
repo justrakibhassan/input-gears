@@ -69,6 +69,7 @@ export default function AdminLayoutWrapper({
     if (path === "/admin") return "Dashboard";
     if (path.includes("/admin/products")) return "Products";
     if (path.includes("/admin/orders")) return "Orders";
+    if (path.includes("/admin/returns")) return "Returns";
     if (path.includes("/admin/customers")) return "Customers";
     if (path.includes("/admin/categories")) return "Categories";
     if (path.includes("/admin/reviews")) return "Reviews";
