@@ -180,40 +180,40 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
   return (
     <div className="space-y-6">
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-red-50 to-orange-50 border border-red-100 rounded-2xl p-5">
-          <p className="text-xs font-bold text-red-400 uppercase tracking-widest mb-1">On Sale</p>
-          <p className="text-3xl font-black text-red-600">{onSaleCount}</p>
-          <p className="text-xs text-red-400 mt-1">of {products.length} products</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/40 dark:to-orange-950/20 border border-red-100 dark:border-red-900/50 rounded-2xl p-5">
+          <p className="text-xs font-bold text-red-400 dark:text-red-300 uppercase tracking-widest mb-1">On Sale</p>
+          <p className="text-3xl font-black text-red-600 dark:text-red-400">{onSaleCount}</p>
+          <p className="text-xs text-red-400 dark:text-red-300/80 mt-1">of {products.length} products</p>
         </div>
-        <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 rounded-2xl p-5">
-          <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-1">Total Savings</p>
-          <p className="text-3xl font-black text-emerald-600">{formatPrice(totalSavings)}</p>
-          <p className="text-xs text-emerald-400 mt-1">offered to customers</p>
+        <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/20 border border-emerald-100 dark:border-emerald-900/50 rounded-2xl p-5">
+          <p className="text-xs font-bold text-emerald-500 dark:text-emerald-300 uppercase tracking-widest mb-1">Total Savings</p>
+          <p className="text-3xl font-black text-emerald-600 dark:text-emerald-400">{formatPrice(totalSavings)}</p>
+          <p className="text-xs text-emerald-400 dark:text-emerald-300/80 mt-1">offered to customers</p>
         </div>
-        <div className="bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-100 rounded-2xl p-5">
-          <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Expiring Soon</p>
-          <p className="text-3xl font-black text-amber-600">{expiringSoon}</p>
-          <p className="text-xs text-amber-400 mt-1">within 3 days</p>
+        <div className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/40 dark:to-yellow-950/20 border border-amber-100 dark:border-amber-900/50 rounded-2xl p-5">
+          <p className="text-xs font-bold text-amber-500 dark:text-amber-300 uppercase tracking-widest mb-1">Expiring Soon</p>
+          <p className="text-3xl font-black text-amber-600 dark:text-amber-400">{expiringSoon}</p>
+          <p className="text-xs text-amber-400 dark:text-amber-300/80 mt-1">within 3 days</p>
         </div>
       </div>
 
       {/* Bulk action bar */}
       {selectedIds.size > 0 && (
-        <div className="bg-indigo-900 text-white rounded-2xl px-5 py-4 flex flex-wrap items-center gap-4">
+        <div className="bg-indigo-900 dark:bg-gray-900 text-white border border-indigo-800 dark:border-gray-800 rounded-2xl px-5 py-4 flex flex-wrap items-center gap-4">
           <span className="font-bold text-sm">{selectedIds.size} selected</span>
           <input
             type="number"
             placeholder="Sale price (optional)"
             value={bulkSalePrice}
             onChange={e => setBulkSalePrice(e.target.value)}
-            className="bg-white/10 border border-white/20 rounded-xl px-3 py-1.5 text-sm w-44 placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/30"
+            className="bg-white/10 dark:bg-gray-800 border border-white/20 dark:border-gray-700 text-white rounded-xl px-3 py-1.5 text-sm w-44 placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/30"
           />
           <input
             type="date"
             value={bulkEndDate}
             onChange={e => setBulkEndDate(e.target.value)}
-            className="bg-white/10 border border-white/20 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/30"
+            className="bg-white/10 dark:bg-gray-800 border border-white/20 dark:border-gray-700 text-white rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/30"
           />
           <button
             onClick={() => handleBulkSale(true)}
@@ -225,7 +225,7 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
           <button
             onClick={() => handleBulkSale(false)}
             disabled={isPending}
-            className="bg-white/10 hover:bg-white/20 font-bold text-sm px-4 py-1.5 rounded-xl transition-colors disabled:opacity-50"
+            className="bg-white/10 dark:bg-gray-800 hover:bg-white/20 dark:hover:bg-gray-700 font-bold text-sm px-4 py-1.5 rounded-xl transition-colors disabled:opacity-50"
           >
             Remove from Sale
           </button>
@@ -243,7 +243,7 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search products..."
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400"
           />
         </div>
         <div className="flex gap-2">
@@ -253,8 +253,8 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
               onClick={() => setFilterOnSale(f)}
               className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-colors ${
                 filterOnSale === f
-                  ? f === "on" ? "bg-red-500 text-white" : f === "off" ? "bg-gray-900 text-white" : "bg-indigo-600 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? f === "on" ? "bg-red-500 text-white" : f === "off" ? "bg-gray-900 dark:bg-indigo-600 text-white" : "bg-indigo-600 text-white"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
               }`}
             >
               {f === "all" ? "All" : f === "on" ? "On Sale" : "Not on Sale"}
@@ -264,26 +264,26 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
       </div>
 
       {/* Table */}
-      <div className="border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
+      <div className="border border-gray-100 dark:border-gray-800 dark:bg-gray-900 rounded-2xl overflow-hidden shadow-sm dark:shadow-none">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-100">
+          <thead className="bg-gray-50 dark:bg-gray-800/60 border-b border-gray-100 dark:border-gray-800">
             <tr>
               <th className="w-10 px-4 py-3">
                 <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} className="rounded accent-indigo-600 cursor-pointer" />
               </th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">Product</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-widest hidden md:table-cell">Category</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">Price</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">Sale Price</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-widest hidden lg:table-cell">Ends</th>
-              <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-widest">Status</th>
+              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Product</th>
+              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest hidden md:table-cell">Category</th>
+              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Price</th>
+              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Sale Price</th>
+              <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest hidden lg:table-cell">Ends</th>
+              <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Status</th>
               <th className="w-10 px-4 py-3"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-12 text-center text-gray-400">
+                <td colSpan={8} className="px-4 py-12 text-center text-gray-400 dark:text-gray-500">
                   <Package size={40} className="mx-auto mb-3 opacity-30" />
                   <p className="font-semibold">No products found</p>
                 </td>
@@ -299,22 +299,26 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
               return (
                 <Fragment key={product.id}>
                   <tr
-                    className={`transition-colors ${product.isOnSale ? "bg-red-50/30 hover:bg-red-50/50" : "bg-white hover:bg-gray-50/60"} ${isExpanded ? "border-b-0" : ""}`}
+                    className={`transition-colors ${
+                      product.isOnSale
+                        ? "bg-red-50/30 dark:bg-red-950/20 hover:bg-red-50/50 dark:hover:bg-red-950/40"
+                        : "bg-white dark:bg-gray-900 hover:bg-gray-50/60 dark:hover:bg-gray-800/60"
+                    } ${isExpanded ? "border-b-0" : ""}`}
                   >
                     <td className="px-4 py-3">
                       <input type="checkbox" checked={selectedIds.has(product.id)} onChange={() => toggleSelect(product.id)} className="rounded accent-indigo-600 cursor-pointer" />
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0 relative">
+                        <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 overflow-hidden flex-shrink-0 relative">
                           {product.image
                             ? <Image src={product.image} alt={product.name} fill className="object-contain p-1" />
-                            : <Package size={20} className="m-auto text-gray-300" />
+                            : <Package size={20} className="m-auto text-gray-300 dark:text-gray-600" />
                           }
                         </div>
                         <div>
-                          <p className="font-bold text-gray-900 line-clamp-1">{product.name}</p>
-                          {product.brand && <p className="text-xs text-gray-400 font-medium">{product.brand}</p>}
+                          <p className="font-bold text-gray-900 dark:text-white line-clamp-1">{product.name}</p>
+                          {product.brand && <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">{product.brand}</p>}
                         </div>
                         {product.isOnSale && (
                           <span className="ml-1 shrink-0 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">
@@ -322,28 +326,28 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
                           </span>
                         )}
                         {isExpired && (
-                          <span className="shrink-0 flex items-center gap-1 bg-gray-200 text-gray-500 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">
+                          <span className="shrink-0 flex items-center gap-1 bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">
                             <AlertCircle size={10} /> Expired
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3 hidden md:table-cell text-gray-500 text-xs font-medium">{product.category?.name ?? "—"}</td>
-                    <td className="px-4 py-3 font-bold text-gray-700">{formatPrice(product.price)}</td>
+                    <td className="px-4 py-3 hidden md:table-cell text-gray-500 dark:text-gray-400 text-xs font-medium">{product.category?.name ?? "—"}</td>
+                    <td className="px-4 py-3 font-bold text-gray-700 dark:text-gray-300">{formatPrice(product.price)}</td>
                     <td className="px-4 py-3">
                       {product.salePrice ? (
                         <div className="flex items-center gap-2">
-                          <span className="font-black text-red-600">{formatPrice(product.salePrice)}</span>
-                          {discount && <span className="text-[10px] font-bold bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">-{discount}%</span>}
+                          <span className="font-black text-red-600 dark:text-red-400">{formatPrice(product.salePrice)}</span>
+                          {discount && <span className="text-[10px] font-bold bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-300 px-1.5 py-0.5 rounded-full">-{discount}%</span>}
                         </div>
                       ) : (
-                        <span className="text-gray-300 text-xs italic">Not set</span>
+                        <span className="text-gray-300 dark:text-gray-600 text-xs italic">Not set</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 hidden lg:table-cell text-xs text-gray-500">
+                    <td className="px-4 py-3 hidden lg:table-cell text-xs text-gray-500 dark:text-gray-400">
                       {product.saleEndDate
-                        ? <span className={isExpired ? "text-red-400 font-bold" : "text-amber-600 font-semibold"}>{new Date(product.saleEndDate).toLocaleDateString()}</span>
-                        : <span className="text-gray-300 italic">No expiry</span>
+                        ? <span className={isExpired ? "text-red-400 font-bold" : "text-amber-600 dark:text-amber-400 font-semibold"}>{new Date(product.saleEndDate).toLocaleDateString()}</span>
+                        : <span className="text-gray-300 dark:text-gray-600 italic">No expiry</span>
                       }
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -351,7 +355,7 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
                         onClick={() => handleToggle(product, !product.isOnSale)}
                         disabled={isLoading}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
-                          product.isOnSale ? "bg-red-500" : "bg-gray-200"
+                          product.isOnSale ? "bg-red-500" : "bg-gray-200 dark:bg-gray-700"
                         } disabled:opacity-50`}
                       >
                         {isLoading
@@ -363,7 +367,9 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
                     <td className="px-4 py-3 text-center">
                       <button
                         onClick={() => setExpandedRow(isExpanded ? null : product.id)}
-                        className={`p-1.5 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors ${isExpanded ? "rotate-180 text-indigo-600 bg-indigo-50" : ""}`}
+                        className={`p-1.5 rounded-lg text-gray-400 dark:text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-800 transition-colors ${
+                          isExpanded ? "rotate-180 text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-gray-800" : ""
+                        }`}
                       >
                         <ChevronDown size={16} />
                       </button>
@@ -372,13 +378,13 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
 
                   {/* Expanded edit row */}
                   {isExpanded && (
-                    <tr className={product.isOnSale ? "bg-red-50/20" : "bg-gray-50/50"}>
-                      <td colSpan={8} className="px-6 py-4 border-t border-dashed border-gray-200">
+                    <tr className={product.isOnSale ? "bg-red-50/20 dark:bg-red-950/30" : "bg-gray-50/50 dark:bg-gray-800/40"}>
+                      <td colSpan={8} className="px-6 py-4 border-t border-dashed border-gray-200 dark:border-gray-800">
                         <div className="flex flex-wrap items-end gap-4">
                           <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Sale Price ($)</label>
+                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Sale Price ($)</label>
                             <div className="relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm">$</span>
                               <input
                                 type="number"
                                 step="0.01"
@@ -386,24 +392,24 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
                                 value={edit.salePrice}
                                 onChange={e => setEdit(product.id, { salePrice: e.target.value })}
                                 placeholder={product.price.toFixed(2)}
-                                className="pl-7 pr-3 py-2 border border-gray-200 rounded-xl text-sm w-36 focus:outline-none focus:ring-2 focus:ring-red-400/30 focus:border-red-400"
+                                className="pl-7 pr-3 py-2 border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-xl text-sm w-36 focus:outline-none focus:ring-2 focus:ring-red-400/30 focus:border-red-400"
                               />
                             </div>
                             {edit.salePrice && parseFloat(edit.salePrice) < product.price && (
-                              <p className="text-[10px] text-red-500 font-bold mt-1 flex items-center gap-1">
+                              <p className="text-[10px] text-red-500 dark:text-red-400 font-bold mt-1 flex items-center gap-1">
                                 <Percent size={10} /> {discountPercent(product.price, parseFloat(edit.salePrice))}% off
                               </p>
                             )}
                           </div>
                           <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Sale End Date</label>
+                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Sale End Date</label>
                             <div className="relative">
-                              <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                              <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                               <input
                                 type="date"
                                 value={edit.saleEndDate}
                                 onChange={e => setEdit(product.id, { saleEndDate: e.target.value })}
-                                className="pl-8 pr-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-400/30 focus:border-red-400"
+                                className="pl-8 pr-3 py-2 border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-400/30 focus:border-red-400"
                               />
                             </div>
                           </div>
@@ -418,13 +424,13 @@ export default function SaleManager({ products: initialProducts }: SaleManagerPr
                             </button>
                             <button
                               onClick={() => setExpandedRow(null)}
-                              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-sm rounded-xl transition-colors"
+                              className="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold text-sm rounded-xl transition-colors"
                             >
                               Cancel
                             </button>
                           </div>
                           {!product.isOnSale && (
-                            <p className="text-xs text-gray-400 italic flex items-center gap-1 mt-1">
+                            <p className="text-xs text-gray-400 dark:text-gray-500 italic flex items-center gap-1 mt-1">
                               <AlertCircle size={12} /> Toggle the switch to activate the sale
                             </p>
                           )}
