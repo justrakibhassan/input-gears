@@ -34,7 +34,6 @@ const TABS = [
   { id: "appearance", label: "Appearance", icon: Paintbrush },
   { id: "payment", label: "Payment & Currency", icon: CreditCard },
   { id: "shipping", label: "Shipping", icon: Truck }, // New Tab
-  { id: "coupons", label: "Coupons & Discounts", icon: Ticket },
   { id: "notifications", label: "Notifications", icon: Bell },
   { id: "security", label: "Security", icon: ShieldCheck },
 ];
@@ -623,11 +622,6 @@ export default function SettingsForm({ initialData }: SettingsFormProps) {
             </div>
 
           </div>
-        )}
-
-        {/* Coupons Management */}
-        {activeTab === "coupons" && (
-          <CouponManager initialCoupons={initialData.coupons} />
         )}
 
         {/* Save Button for Non-Appearance Tabs */}

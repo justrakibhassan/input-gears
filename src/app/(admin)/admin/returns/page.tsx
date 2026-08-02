@@ -60,7 +60,7 @@ export default function AdminReturnsPage() {
     .reduce((sum, r) => sum + r.amount, 0);
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8">
+    <div className="max-w-7xl mx-auto space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">

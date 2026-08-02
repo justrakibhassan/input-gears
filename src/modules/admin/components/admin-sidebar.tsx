@@ -28,6 +28,7 @@ import {
   ClipboardList,
   Image as ImageIcon,
   Tag,
+  Ticket,
   type LucideIcon,
 } from "lucide-react";
 import { UserRole } from "@prisma/client";
@@ -125,6 +126,12 @@ const sidebarGroups: {
         title: "Sale Manager",
         icon: Tag,
         href: "/admin/sale",
+        roles: ["SUPER_ADMIN", "MANAGER"],
+      },
+      {
+        title: "Coupons",
+        icon: Ticket,
+        href: "/admin/coupons",
         roles: ["SUPER_ADMIN", "MANAGER"],
       },
     ],
