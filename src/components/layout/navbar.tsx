@@ -22,6 +22,8 @@ import {
   LucideIcon,
   Plus,
   Minus,
+  Tag,
+  Truck,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import UserNav from "../../modules/auth/components/user-nav";
@@ -32,6 +34,8 @@ import MobileBottomNav from "./mobile-bottom-nav";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useMobileNav } from "./use-mobile-nav";
+import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 // Dynamically import CartNav with SSR disabled
 const CartNav = dynamic(
@@ -39,7 +43,7 @@ const CartNav = dynamic(
   {
     ssr: false,
     loading: () => (
-      <button className="relative p-2 text-gray-300 bg-gray-50 rounded-full animate-pulse cursor-wait">
+      <button className="relative hidden md:inline-flex p-2 text-gray-300 bg-gray-50 rounded-full animate-pulse cursor-wait">
         <ShoppingBag size={24} />
       </button>
     ),
@@ -83,14 +87,18 @@ interface SearchResult {
 export default function Navbar({ initialCategories = [] }: { initialCategories?: CategoryWithBrands[] }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const {
+    isMobileMenuOpen,
+    setIsMobileMenuOpen,
+    isMobileSearchOpen,
+    toggleMobileSearch,
+  } = useMobileNav();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [categories, setCategories] = useState<CategoryWithBrands[]>(initialCategories);
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
-  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
   const { data: session, isPending } = useSession();
   const wishlist = useWishlist();
@@ -98,6 +106,8 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+
+  const [mobileTab, setMobileTab] = useState<"menu" | "categories">("menu");
 
   const categoryTree = useMemo(() => {
     const map: Record<string, CategoryNode> = {};
@@ -184,13 +194,7 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
     };
   }, []);
 
-  useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-  }, [isMobileMenuOpen]);
+  useScrollLock(isMobileMenuOpen);
 
   const wishlistCount = isMounted ? wishlist.items.length : 0;
   const hasWishlistItems = wishlistCount > 0;
@@ -364,17 +368,17 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
               </Link>
 
               <button
-                onClick={() => setIsMobileSearchOpen((prev) => !prev)}
+                onClick={toggleMobileSearch}
                 className={`md:hidden p-2.5 rounded-xl transition-all relative ${
-                  isMobileSearchOpen 
-                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100" 
+                  isMobileSearchOpen
+                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100"
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
                 aria-label={isMobileSearchOpen ? "Close search" : "Open search"}
+                aria-expanded={isMobileSearchOpen}
               >
                 {isMobileSearchOpen ? <X size={22} /> : <Search size={22} />}
               </button>
-
 
               <CartNav />
 
@@ -400,82 +404,6 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
               )}
             </div>
           </div>
-
-          {/* MOBILE SEARCH EXPANDER */}
-          <AnimatePresence>
-            {isMobileSearchOpen && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="md:hidden border-t border-gray-100 bg-white overflow-hidden"
-              >
-                <div className="p-4 space-y-4">
-                  <div className="relative search-container">
-                    <form onSubmit={handleSearch} className="relative">
-                      <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search gadgets..."
-                        className="w-full bg-gray-50 border border-gray-100 text-gray-900 text-sm rounded-2xl pl-12 pr-4 py-3.5 focus:bg-white focus:border-indigo-200 focus:outline-none focus:ring-4 focus:ring-indigo-50/50 transition-all"
-                        autoFocus
-                      />
-                      <Search
-                        size={18}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                      />
-                    </form>
-
-                    {/* Mobile Live Results */}
-                    {showResults && searchQuery.length >= 2 && (
-                      <div className="mt-3 bg-white border border-gray-100 rounded-2xl shadow-xl overflow-hidden max-h-[60vh] overflow-y-auto no-scrollbar">
-                        <div className="p-3 border-b border-gray-50 flex items-center justify-between">
-                          <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest px-2">
-                             Results
-                          </span>
-                          {isSearchLoading && (
-                            <div className="h-4 w-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-                          )}
-                        </div>
-                        {searchResults.length > 0 ? (
-                          searchResults.map((p) => (
-                            <Link
-                              key={p.id}
-                              href={`/products/${p.slug}`}
-                              onClick={() => {
-                                setShowResults(false);
-                                setIsMobileSearchOpen(false);
-                              }}
-                              className="flex items-center gap-4 p-3 hover:bg-indigo-50/50 transition-all border-b border-gray-50 last:border-0"
-                            >
-                              <div className="relative h-12 w-12 bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-gray-100 p-1">
-                                {p.image ? (
-                                  <NextImage src={p.image} alt={p.name} fill className="object-contain" />
-                                ) : (
-                                  <Zap className="m-auto text-gray-300" size={16} />
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h4 className="text-sm font-black text-gray-900 truncate">
-                                  {p.name}
-                                </h4>
-                                <span className="text-xs font-bold text-indigo-600">${p.price}</span>
-                              </div>
-                            </Link>
-                          ))
-                        ) : !isSearchLoading && (
-                          <div className="p-4 text-center">
-                            <p className="text-[10px] font-bold text-gray-600 italic">No products found</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </nav>
 
         {/* SECONDARY NAVBAR (Desktop Categories Mega Menu Row) */}
@@ -515,7 +443,7 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
                         exit={{ opacity: 0, y: 0 }}
                         transition={{ duration: 0.15 }}
                         className="absolute top-full left-0 w-[260px] z-50 cursor-default shadow-xl border border-gray-200 bg-white"
-                        style={{ marginTop: "1px" }} // flush with the bottom border
+                        style={{ marginTop: "1px" }}
                       >
                         <div className="flex flex-col py-2 overflow-y-auto no-scrollbar bg-white max-h-[400px]">
                           {cat.brands.length > 0 ? (
@@ -551,38 +479,143 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-1200"
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs z-1200"
               onClick={() => setIsMobileMenuOpen(false)}
             />
             <motion.div
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 z-1201 w-[85%] max-w-[320px] bg-white shadow-2xl"
+              transition={{ type: "spring", damping: 25, stiffness: 220 }}
+              className="fixed inset-y-0 left-0 z-1201 w-[85%] max-w-[320px] bg-white shadow-2xl flex flex-col"
             >
-              <div className="flex flex-col h-full overflow-hidden">
-                <div className="p-6 flex items-center justify-between border-b border-gray-50">
-                  <Link
-                    href="/"
-                    className="flex items-center gap-2 group"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <div className="bg-indigo-600 text-white p-2 rounded-xl shadow-lg shadow-indigo-100">
-                      <Zap size={18} fill="currentColor" />
-                    </div>
-                    <span className="text-xl font-black tracking-tight text-gray-900">
-                      Input<span className="text-indigo-600">Gears</span>
-                    </span>
-                  </Link>
-                  <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:bg-gray-100 rounded-xl">
-                    <X size={24} className="text-gray-900" />
-                  </button>
+              {/* Header Card */}
+              <div className="p-4 bg-white border-b border-gray-100 flex items-center justify-between">
+                <Link
+                  href="/"
+                  className="flex items-center gap-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <div className="bg-indigo-600 text-white p-1.5 rounded-lg shadow-sm">
+                    <Zap size={16} fill="currentColor" />
+                  </div>
+                  <span className="text-lg font-black tracking-tight text-gray-900">
+                    Input<span className="text-indigo-600">Gears</span>
+                  </span>
+                </Link>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                  aria-label="Close menu"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* User Account Card */}
+              <div className="mx-3.5 mt-3.5 p-3 bg-[#161c26] text-white rounded-2xl flex items-center justify-between shadow-sm">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white overflow-hidden border border-white/20 shrink-0">
+                    {session?.user?.image ? (
+                      <NextImage
+                        src={session.user.image}
+                        alt={session.user.name || "User"}
+                        width={40}
+                        height={40}
+                        className="object-cover h-full w-full"
+                      />
+                    ) : (
+                      <User size={18} />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-white leading-tight truncate">
+                      {session?.user ? `Hello, ${session.user.name?.split(" ")[0]}!` : "Hello there!"}
+                    </p>
+                    {session ? (
+                      <Link
+                        href="/account"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="text-[11px] text-gray-300 hover:text-white underline block truncate mt-0.5"
+                      >
+                        Manage Account
+                      </Link>
+                    ) : (
+                      <Link
+                        href="/sign-in"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="text-[11px] text-indigo-300 hover:text-white font-medium block truncate mt-0.5"
+                      >
+                        Sign in
+                      </Link>
+                    )}
+                  </div>
                 </div>
+              </div>
 
+              {/* Tab Switcher: MAIN MENU | CATEGORIES */}
+              <div className="grid grid-cols-2 gap-1 mx-3.5 mt-3 p-1 bg-gray-100 rounded-xl">
+                <button
+                  type="button"
+                  onClick={() => setMobileTab("menu")}
+                  className={`py-2 text-[11px] font-bold rounded-lg uppercase tracking-wider transition-all ${
+                    mobileTab === "menu"
+                      ? "bg-[#161c26] text-white shadow-xs"
+                      : "text-gray-600 hover:text-gray-900"
+                  }`}
+                >
+                  Main Menu
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMobileTab("categories")}
+                  className={`py-2 text-[11px] font-bold rounded-lg uppercase tracking-wider transition-all ${
+                    mobileTab === "categories"
+                      ? "bg-[#161c26] text-white shadow-xs"
+                      : "text-gray-600 hover:text-gray-900"
+                  }`}
+                >
+                  Categories
+                </button>
+              </div>
 
-                <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                  <p className="text-[11px] font-bold text-gray-600 uppercase tracking-widest">Categories</p>
+              {/* Tab Content List */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {mobileTab === "menu" ? (
+                  <div className="space-y-1">
+                    {[
+                      { label: "Flash Sale / Offers", href: "/sale", icon: Tag, color: "text-emerald-600", bg: "bg-emerald-50", badge: 0 },
+                      { label: "Wishlist", href: "/account/wishlist", icon: Heart, color: "text-pink-600", bg: "bg-pink-50", badge: wishlistCount },
+                      { label: "Compare", href: "/compare", icon: ArrowLeftRight, color: "text-amber-600", bg: "bg-amber-50", badge: isMounted ? compare.items.length : 0 },
+                      { label: "Track Order", href: "/track-order", icon: Truck, color: "text-indigo-600", bg: "bg-indigo-50", badge: 0 },
+                      { label: "All Products", href: "/products", icon: ShoppingBag, color: "text-purple-600", bg: "bg-purple-50", badge: 0 },
+                    ].map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex items-center justify-between p-2.5 rounded-xl hover:bg-gray-50 transition-colors group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className={`p-1.5 rounded-lg ${item.bg} ${item.color}`}>
+                            <item.icon size={16} />
+                          </span>
+                          <span className="text-sm font-semibold text-gray-800 group-hover:text-indigo-600 transition-colors">
+                            {item.label}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {item.badge > 0 && (
+                            <span className="h-4 min-w-4 px-1 flex items-center justify-center text-[9px] font-black rounded-full bg-indigo-600 text-white">
+                              {item.badge}
+                            </span>
+                          )}
+                          <ChevronRight size={15} className="text-gray-300 group-hover:text-indigo-500 transition-colors" />
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
                   <div className="space-y-1">
                     {categoryTree.map((node) => (
                       <MobileCategoryItem
@@ -593,26 +626,60 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
                       />
                     ))}
                   </div>
-                </div>
+                )}
 
-                <div className="p-6 pb-6 border-t bg-gray-50/50">
-                  {!isMounted || isPending ? (
-                    <div className="w-full h-14 bg-gray-100 animate-pulse rounded-2xl mb-4" />
-                  ) : !session ? (
+                {/* Quick Links Section */}
+                <div className="border-t border-gray-100 pt-4">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                    Quick Links
+                  </p>
+                  <div className="flex flex-col space-y-1">
                     <Link
-                      href="/sign-in"
-                      className="flex items-center justify-center w-full bg-gray-900 text-white font-bold py-4 rounded-2xl mb-4 hover:bg-indigo-600 shadow-lg shadow-gray-200"
+                      href="/sale"
                       onClick={() => setIsMobileMenuOpen(false)}
+                      className="text-xs font-semibold text-gray-600 hover:text-indigo-600 py-1.5 transition-colors"
                     >
-                      Join Now / Sign In
+                      New Arrivals & Deals
                     </Link>
-                  ) : null}
-                  <div className="flex justify-center gap-4 text-[11px] text-gray-600 font-medium uppercase tracking-tighter">
-                    <Link href="/support">Support</Link>
-                    <Link href="/tracking">Orders</Link>
-                    <Link href="/privacy">Privacy</Link>
+                    <Link
+                      href="/track-order"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="text-xs font-semibold text-gray-600 hover:text-indigo-600 py-1.5 transition-colors"
+                    >
+                      Track Your Order
+                    </Link>
+                    <Link
+                      href="/contact"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="text-xs font-semibold text-gray-600 hover:text-indigo-600 py-1.5 transition-colors"
+                    >
+                      Customer Support
+                    </Link>
                   </div>
                 </div>
+              </div>
+
+              {/* Bottom Sign-In / User Footer */}
+              <div className="p-4 border-t border-gray-100 bg-gray-50">
+                {!isMounted || isPending ? (
+                  <div className="w-full h-10 bg-gray-200 animate-pulse rounded-xl" />
+                ) : !session ? (
+                  <Link
+                    href="/sign-in"
+                    className="flex items-center justify-center w-full bg-[#161c26] hover:bg-black text-white text-xs font-bold py-3 rounded-xl transition-all shadow-sm"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Join Now / Sign In
+                  </Link>
+                ) : (
+                  <Link
+                    href="/account"
+                    className="flex items-center justify-center w-full bg-[#161c26] hover:bg-black text-white text-xs font-bold py-3 rounded-xl transition-all shadow-sm"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    View Account Dashboard
+                  </Link>
+                )}
               </div>
             </motion.div>
           </>

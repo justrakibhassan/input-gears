@@ -1,28 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/modules/cart/hooks/use-cart";
+import { useCartDrawer } from "@/modules/cart/hooks/use-cart-drawer";
+import { useScrollLock } from "@/hooks/use-scroll-lock";
 import { useSession } from "@/lib/auth-client";
 import { ShoppingBag, X, Trash2, ArrowRight, Truck } from "lucide-react";
 
 export default function CartNav() {
-  const [isOpen, setIsOpen] = useState(false);
+  const { isOpen, open, close } = useCartDrawer();
   const cart = useCart();
   const { data: session } = useSession();
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
+  useScrollLock(isOpen);
 
   const total = cart.items.reduce(
     (sum, item) => sum + Number(item.price) * item.quantity,
@@ -36,9 +28,9 @@ export default function CartNav() {
 
   const TriggerButton = (
     <button
-      onClick={() => setIsOpen(true)}
+      onClick={open}
       aria-label={`Open cart, ${totalItems} items`}
-      className="relative p-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-full transition-all active:scale-95 group"
+      className="relative hidden md:inline-flex items-center justify-center p-2 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-full transition-all active:scale-95 group"
     >
       <ShoppingBag
         size={24}
@@ -53,10 +45,10 @@ export default function CartNav() {
   );
 
   const DrawerContent = (
-    <div className="relative z-9999">
+    <div className="relative z-1400">
       <div
         className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 animate-in fade-in"
-        onClick={() => setIsOpen(false)}
+        onClick={close}
       />
       <div className="fixed inset-y-0 right-0 flex max-w-full pl-0 sm:pl-10 pointer-events-none">
         <div className="pointer-events-auto w-screen max-w-md transform bg-white shadow-2xl transition-transform duration-300 ease-out animate-in slide-in-from-right h-full flex flex-col">
@@ -68,7 +60,7 @@ export default function CartNav() {
               </span>
             </h2>
             <button
-              onClick={() => setIsOpen(false)}
+              onClick={close}
               aria-label="Close cart"
               className="p-2 -mr-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
             >
@@ -91,7 +83,7 @@ export default function CartNav() {
                   </p>
                 </div>
                 <button
-                  onClick={() => setIsOpen(false)}
+                  onClick={close}
                   className="mt-6 px-8 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
                 >
                   Start Shopping
@@ -148,7 +140,7 @@ export default function CartNav() {
                           <h3 className="font-semibold text-gray-900 leading-snug line-clamp-2">
                             <Link
                               href={`/products/${item.slug}`}
-                              onClick={() => setIsOpen(false)}
+                              onClick={close}
                               className="hover:text-indigo-600 transition-colors"
                             >
                               {item.name}
@@ -198,7 +190,7 @@ export default function CartNav() {
               <div className="space-y-3">
                 <Link
                   href="/checkout"
-                  onClick={() => setIsOpen(false)}
+                  onClick={close}
                   className="flex items-center justify-center w-full rounded-xl border border-transparent bg-indigo-600 px-6 py-4 text-base font-bold text-white shadow-lg shadow-indigo-200 hover:bg-indigo-700 active:scale-[0.98] transition-all"
                 >
                   Checkout Now
@@ -207,7 +199,7 @@ export default function CartNav() {
 
                 <Link
                   href="/cart"
-                  onClick={() => setIsOpen(false)}
+                  onClick={close}
                   className="flex items-center justify-center w-full rounded-xl border border-gray-200 bg-white px-6 py-3.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 transition-all"
                 >
                   View Full Cart

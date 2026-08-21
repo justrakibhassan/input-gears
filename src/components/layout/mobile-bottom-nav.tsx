@@ -1,180 +1,289 @@
 "use client";
 
-import { useState, useSyncExternalStore, useCallback } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { Home, Tag, Heart, User, LayoutDashboard } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { usePathname, useRouter } from "next/navigation";
+import { Home, LayoutGrid, Search, ShoppingBag, User } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
-import { useWishlist } from "@/modules/products/hooks/use-wishlist";
+import { useCart } from "@/modules/cart/hooks/use-cart";
+import { useCartDrawer } from "@/modules/cart/hooks/use-cart-drawer";
+import { useMobileNav } from "./use-mobile-nav";
 import MobileAccountMenu from "./mobile-account-menu";
+import MobileSearchModal from "./mobile-search-modal";
 
 const emptySubscribe = () => () => {};
 
-interface Tab {
-  name: string;
-  icon: React.ElementType;
-  href: string;
-  isActive: boolean;
-  badge?: number;
-  isAccountTab?: boolean;
+interface NavItemProps {
+  label: string;
+  glyph: ReactNode;
+  isActive?: boolean;
+  href?: string;
+  onClick?: () => void;
+  isExpanded?: boolean;
+}
+
+function NavItem({
+  label,
+  glyph,
+  isActive = false,
+  href,
+  onClick,
+  isExpanded,
+}: NavItemProps) {
+  const itemClasses = `relative flex flex-1 flex-col items-center justify-center py-1.5 transition-all duration-200 outline-none select-none active:scale-95 ${
+    isActive ? "text-white font-bold" : "text-white/80 hover:text-white font-medium"
+  }`;
+
+  const content = (
+    <>
+      <span className="flex items-center justify-center transition-transform duration-200">
+        {glyph}
+      </span>
+      <span className="text-[9px] leading-none tracking-wider uppercase mt-1">
+        {label}
+      </span>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={itemClasses}
+        aria-current={isActive ? "page" : undefined}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={itemClasses}
+      aria-expanded={isExpanded}
+    >
+      {content}
+    </button>
+  );
 }
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const { data: session } = useSession();
-  const wishlist = useWishlist();
+  const cart = useCart();
+  const { isOpen: isCartOpen, open: openCartDrawer } = useCartDrawer();
+  const {
+    isMobileMenuOpen,
+    toggleMobileMenu,
+    closeMobileMenu,
+    isMobileSearchOpen,
+    toggleMobileSearch,
+    closeMobileSearch,
+  } = useMobileNav();
   const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const [isCartPopping, setIsCartPopping] = useState(false);
+  const lastCartCount = useRef(0);
+  const hasSyncedCart = useRef(false);
 
-  const wishlistCount = isMounted ? wishlist.items.length : 0;
+  const totalCartItems = isMounted
+    ? cart.items.reduce((sum, item) => sum + item.quantity, 0)
+    : 0;
+
+  // Cart bounce / pop animation when items are added
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const previous = lastCartCount.current;
+    lastCartCount.current = totalCartItems;
+
+    if (!hasSyncedCart.current) {
+      hasSyncedCart.current = true;
+      return;
+    }
+    if (totalCartItems <= previous) return;
+
+    const raf = requestAnimationFrame(() => setIsCartPopping(true));
+    const timer = setTimeout(() => setIsCartPopping(false), 500);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(timer);
+    };
+  }, [isMounted, totalCartItems]);
+
+  const handleToggleMobileMenu = useCallback(() => {
+    setIsAccountMenuOpen(false);
+    toggleMobileMenu();
+  }, [toggleMobileMenu]);
+
+  const handleToggleMobileSearch = useCallback(() => {
+    setIsAccountMenuOpen(false);
+    toggleMobileSearch();
+  }, [toggleMobileSearch]);
+
+  const handleOpenCart = useCallback(() => {
+    setIsAccountMenuOpen(false);
+    closeMobileMenu();
+    closeMobileSearch();
+    openCartDrawer();
+  }, [closeMobileMenu, closeMobileSearch, openCartDrawer]);
 
   const handleToggleAccountMenu = useCallback(() => {
-    setIsAccountMenuOpen((prev: boolean) => !prev);
-  }, []);
+    if (!session) {
+      router.push("/sign-in");
+      return;
+    }
+    closeMobileMenu();
+    closeMobileSearch();
+    setIsAccountMenuOpen((prev) => !prev);
+  }, [session, router, closeMobileMenu, closeMobileSearch]);
 
   const handleCloseAccountMenu = useCallback(() => {
     setIsAccountMenuOpen(false);
   }, []);
 
-  const isAdmin = isMounted && !!session?.user && ["SUPER_ADMIN", "MANAGER", "CONTENT_EDITOR"].includes((session.user as { role?: string }).role!);
-
-  const tabs: Tab[] = [
-    {
-      name: "Home",
-      icon: Home,
-      href: "/",
-      isActive: pathname === "/",
-    },
-    ...(isAdmin ? [{
-      name: "Admin",
-      icon: LayoutDashboard,
-      href: "/admin",
-      isActive: pathname.startsWith("/admin"),
-    }] : []),
-    {
-      name: "Offers",
-      icon: Tag,
-      href: "/sale",
-      isActive: pathname === "/sale",
-    },
-    {
-      name: "Wishlist",
-      icon: Heart,
-      href: "/account/wishlist",
-      isActive: pathname === "/account/wishlist",
-      badge: wishlistCount,
-    },
-    {
-      name: "Account",
-      icon: User,
-      href: (isMounted && session) ? "/account" : "/sign-in",
-      isActive: pathname.startsWith("/account") || pathname === "/sign-in",
-      isAccountTab: true,
-    },
-  ];
-
-  const handleTabClick = (tab: Tab, e: React.MouseEvent) => {
-    if (tab.isAccountTab && session) {
-      e.preventDefault();
-      handleToggleAccountMenu();
-    }
-  };
+  const isHomeActive = pathname === "/";
+  const isAccountActive =
+    isAccountMenuOpen ||
+    pathname.startsWith("/account") ||
+    pathname === "/sign-in";
 
   return (
     <>
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-1100 bg-white/95 backdrop-blur-3xl border-t border-gray-100 rounded-t-[32px] shadow-[0_-15px_40px_-15px_rgba(0,0,0,0.08)] pb-safe">
-        <nav className="max-w-md mx-auto px-6 pt-3 pb-2 flex items-center justify-between">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const sharedClasses = `relative flex flex-col items-center gap-1 transition-all duration-300 ${
-              tab.isActive ? "scale-105" : "hover:scale-105 active:scale-95"
-            }`;
-
-            if (tab.isAccountTab && isMounted && session) {
-              return (
-                <button
-                  key={tab.name}
-                  onClick={(e) => handleTabClick(tab, e)}
-                  className={sharedClasses}
-                >
-                  <div
-                    className={`relative p-1.5 rounded-xl transition-all duration-300 ${
-                      tab.isActive
-                        ? "text-indigo-600 shadow-[inset_0_0_10px_rgba(79,70,229,0.08)]"
-                        : "text-gray-400"
-                    }`}
-                  >
-                    {session.user.image ? (
-                      <div className={cn(
-                        "relative w-5 h-5 rounded-full overflow-hidden border-2 transition-all",
-                        tab.isActive ? "border-indigo-600 shadow-lg shadow-indigo-100 ring-2 ring-indigo-50" : "border-gray-200"
-                      )}>
-                        <Image
-                          src={session.user.image}
-                          alt={session.user.name || "User"}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <Icon size={20} strokeWidth={tab.isActive ? 2.5 : 2} />
-                    )}
-
-                    {tab.badge !== undefined && tab.badge > 0 && (
-                      <span className="absolute -top-1 -right-1 h-3.5 w-3.5 bg-indigo-600 text-white text-[8px] font-black flex items-center justify-center rounded-full border border-white">
-                        {tab.badge}
-                      </span>
-                    )}
-                  </div>
-
-                  <span
-                    className={`text-[10px] font-black tracking-wide transition-colors duration-300 ${
-                      tab.isActive ? "text-indigo-600" : "text-gray-600"
-                    }`}
-                  >
-                    {tab.name}
-                  </span>
-                </button>
-              );
-            }
-
-            return (
-              <Link key={tab.name} href={tab.href} className={sharedClasses}>
-                <div
-                  className={`relative p-1.5 rounded-xl transition-all duration-300 ${
-                    tab.isActive
-                      ? "text-indigo-600 shadow-[inset_0_0_10px_rgba(79,70,229,0.08)]"
-                      : "text-gray-400"
-                  }`}
-                >
-                  <Icon size={20} strokeWidth={tab.isActive ? 2.5 : 2} />
-
-                  {tab.badge !== undefined && tab.badge > 0 && (
-                    <span className="absolute -top-1 -right-1 h-3.5 w-3.5 bg-indigo-600 text-white text-[8px] font-black flex items-center justify-center rounded-full border border-white">
-                      {tab.badge}
-                    </span>
-                  )}
-                </div>
-
-                <span
-                  className={`text-[10px] font-black tracking-wide transition-colors duration-300 ${
-                    tab.isActive ? "text-indigo-600" : "text-gray-600"
-                  }`}
-                >
-                  {tab.name}
-                </span>
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
-
+      <MobileSearchModal />
       <MobileAccountMenu
         isOpen={isAccountMenuOpen}
         onClose={handleCloseAccountMenu}
       />
+
+      <nav
+        aria-label="Mobile bottom navigation"
+        data-mobile-bottom-nav
+        className={`pointer-events-none fixed inset-x-2.5 bottom-2 z-1050 pb-safe transition-transform duration-300 ease-out select-none md:hidden ${
+          isMobileMenuOpen ? "translate-y-[140%]" : "translate-y-0"
+        }`}
+      >
+        <div className="pointer-events-auto relative mx-auto w-full max-w-lg">
+          {/* Floating Center Cart Button */}
+          <div className="absolute -top-[22px] left-1/2 z-20 -translate-x-1/2">
+            <button
+              type="button"
+              onClick={handleOpenCart}
+              aria-label={`Open cart, ${totalCartItems} items`}
+              className={`relative flex h-[42px] w-[42px] items-center justify-center rounded-full bg-black text-white shadow-[0_2px_8px_rgba(0,0,0,0.4)] ring-1 ring-white/10 outline-none transition-transform duration-200 focus-visible:ring-2 focus-visible:ring-indigo-300 active:scale-90 ${
+                isCartPopping ? "animate-cart-pop" : ""
+              } ${isCartOpen ? "scale-95" : ""}`}
+            >
+              <ShoppingBag size={18} strokeWidth={1.8} className="text-white" />
+              <span className="absolute -top-1 -right-1 flex h-[16px] min-w-[16px] items-center justify-center rounded-full bg-[#222831] px-1 text-[8.5px] font-bold text-white border border-white/80 shadow-xs">
+                {totalCartItems > 99 ? "99+" : totalCartItems}
+              </span>
+            </button>
+          </div>
+
+          {/* SVG Cutout Pill Background */}
+          <div className="relative h-[62px] w-full drop-shadow-[0_6px_20px_rgba(0,0,0,0.35)]">
+            <svg
+              viewBox="0 0 800 68"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              preserveAspectRatio="none"
+              className="absolute inset-0 h-full w-full text-[#222831] fill-current"
+            >
+              <path d="M766 0C784.778 0 800 15.2223 800 34C800 52.7777 784.778 68 766 68H34C15.2223 68 0 52.7777 0 34C0 15.2223 15.2223 0 34 0H339.239C353.506 0 364.975 13.2005 375.719 22.5877C382.012 28.0857 390.57 31.4668 400 31.4668C409.43 31.4668 417.988 28.0857 424.281 22.5877C435.025 13.2005 446.494 0 460.761 0H766Z" />
+            </svg>
+
+            {/* Navigation Tab Items Row */}
+            <div className="relative z-10 flex h-full items-center justify-between px-3">
+              {/* 1. Home */}
+              <NavItem
+                label="Home"
+                href="/"
+                isActive={isHomeActive}
+                glyph={<Home size={18} strokeWidth={isHomeActive ? 2.2 : 1.75} />}
+              />
+
+              {/* 2. Menu */}
+              <NavItem
+                label="Menu"
+                onClick={handleToggleMobileMenu}
+                isActive={isMobileMenuOpen}
+                isExpanded={isMobileMenuOpen}
+                glyph={
+                  <LayoutGrid
+                    size={18}
+                    strokeWidth={isMobileMenuOpen ? 2.2 : 1.75}
+                  />
+                }
+              />
+
+              {/* 3. Cart (Center Label Slot) */}
+              <button
+                type="button"
+                onClick={handleOpenCart}
+                aria-label="Open cart"
+                className="flex flex-1 flex-col items-center justify-end h-full pb-2.5 outline-none select-none text-white/80 hover:text-white transition-colors active:scale-95"
+              >
+                <span className="text-[9px] leading-none tracking-wider uppercase font-semibold text-white">
+                  Cart
+                </span>
+              </button>
+
+              {/* 4. Search */}
+              <NavItem
+                label="Search"
+                onClick={handleToggleMobileSearch}
+                isActive={isMobileSearchOpen}
+                isExpanded={isMobileSearchOpen}
+                glyph={
+                  <Search
+                    size={18}
+                    strokeWidth={isMobileSearchOpen ? 2.2 : 1.75}
+                  />
+                }
+              />
+
+              {/* 5. Account */}
+              <NavItem
+                label="Account"
+                onClick={handleToggleAccountMenu}
+                isActive={isAccountActive}
+                isExpanded={session ? isAccountMenuOpen : undefined}
+                glyph={
+                  isMounted && session?.user?.image ? (
+                    <span
+                      className={`relative block h-[20px] w-[20px] overflow-hidden rounded-full border transition-colors ${
+                        isAccountActive ? "border-white ring-1 ring-white/50" : "border-white/40"
+                      }`}
+                    >
+                      <Image
+                        src={session.user.image}
+                        alt=""
+                        fill
+                        sizes="20px"
+                        className="object-cover"
+                      />
+                    </span>
+                  ) : (
+                    <User size={18} strokeWidth={isAccountActive ? 2.2 : 1.75} />
+                  )
+                }
+              />
+            </div>
+          </div>
+        </div>
+      </nav>
     </>
   );
 }

@@ -48,7 +48,7 @@ export default async function RootLayout({
       <Suspense fallback={<NavbarSkeleton />}>
         <Navbar initialCategories={categoriesWithBrands} />
       </Suspense>
-      <div className="pb-24 lg:pb-0">
+      <div className="pb-[calc(7rem+env(safe-area-inset-bottom,0px))] md:pb-0">
         <Suspense fallback={<div className="min-h-screen bg-gray-50/50" />}>
           {children}
         </Suspense>

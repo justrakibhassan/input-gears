@@ -12,12 +12,16 @@ import {
   Shield,
   User as UserIcon,
   ArrowLeftRight,
+  Heart,
+  Tag,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { User } from "@prisma/client";
 import { useCompare } from "@/modules/products/hooks/use-compare";
+import { useWishlist } from "@/modules/products/hooks/use-wishlist";
+import { useScrollLock } from "@/hooks/use-scroll-lock";
 
 export default function MobileAccountMenu({
   isOpen,
@@ -31,23 +35,15 @@ export default function MobileAccountMenu({
   const router = useRouter();
   const compare = useCompare();
   const compareCount = compare.items.length;
+  const wishlist = useWishlist();
+  const wishlistCount = wishlist.items.length;
 
   // Close menu when route changes
   useEffect(() => {
     onClose();
   }, [pathname, onClose]);
 
-  // Prevent body scroll when menu is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+  useScrollLock(isOpen);
 
   const handleLogout = async () => {
     await authClient.signOut();
@@ -79,12 +75,27 @@ export default function MobileAccountMenu({
       bg: "bg-blue-50",
     },
     {
+      label: "Wishlist",
+      icon: Heart,
+      href: "/account/wishlist",
+      color: "text-pink-600",
+      bg: "bg-pink-50",
+      badge: wishlistCount,
+    },
+    {
       label: "Compare",
       icon: ArrowLeftRight,
       href: "/compare",
       color: "text-amber-600",
       bg: "bg-amber-50",
       badge: compareCount,
+    },
+    {
+      label: "Offers & Deals",
+      icon: Tag,
+      href: "/sale",
+      color: "text-emerald-600",
+      bg: "bg-emerald-50",
     },
   ];
 
@@ -101,27 +112,28 @@ export default function MobileAccountMenu({
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop. Sits below the bottom bar so the bar stays lit while open. */}
       <div
-        className={`fixed inset-0 bg-black/50 backdrop-blur-xs z-999 transition-opacity duration-300 lg:hidden ${
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        className={`fixed inset-0 z-1040 bg-black/50 backdrop-blur-xs transition-opacity duration-300 md:hidden ${
+          isOpen ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
         onClick={onClose}
       />
 
-      {/* Drop-up Menu */}
+      {/* Drop-up card, floating just above the bottom bar */}
       <div
-        className={`fixed bottom-0 left-0 right-0 z-1000 bg-white rounded-t-[24px] shadow-2xl transition-transform duration-500 ease-out lg:hidden ${
-          isOpen ? "translate-y-0" : "translate-y-full"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Account menu"
+        className={`fixed inset-x-2.5 bottom-[calc(78px+env(safe-area-inset-bottom,0px))] z-1070 mx-auto flex max-h-[calc(100dvh-150px)] max-w-lg origin-bottom flex-col overflow-hidden rounded-[26px] bg-white shadow-[0_18px_50px_-12px_rgba(0,0,0,0.45)] transition-all duration-300 ease-out md:hidden ${
+          isOpen
+            ? "translate-y-0 scale-100 opacity-100"
+            : "pointer-events-none translate-y-3 scale-95 opacity-0"
         }`}
       >
-        {/* Handle Bar */}
-        <div className="flex justify-center pt-2.5 pb-1">
-          <div className="w-10 h-1 bg-gray-200 rounded-full" />
-        </div>
 
         {/* Header with User Info */}
-        <div className="px-5 py-4 flex items-center justify-between border-b border-gray-100">
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-5 py-4">
           <div className="flex items-center gap-3">
             <div className="relative shrink-0">
               <div className="h-11 w-11 rounded-xl border border-gray-100 overflow-hidden bg-gray-50">
@@ -171,7 +183,7 @@ export default function MobileAccountMenu({
         </div>
 
         {/* Menu Items */}
-        <div className="px-4 py-4">
+        <div className="flex-1 overflow-y-auto px-4 py-4">
           <div className="space-y-1.5">
             {menuItems.map((item) => {
               const isActive =
@@ -236,9 +248,6 @@ export default function MobileAccountMenu({
             </button>
           </div>
         </div>
-
-        {/* Bottom spacing to clear the bottom navigation bar and respect safe areas */}
-        <div className="h-16 pb-safe" />
       </div>
     </>
   );
