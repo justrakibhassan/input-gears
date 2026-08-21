@@ -1286,11 +1286,11 @@ export default function CompareView() {
         .navbar-hidden header.sticky {
           transform: translateY(-100%) !important;
         }
-        .lg\:hidden.fixed.bottom-0.z-1100 {
+        [data-mobile-bottom-nav] {
           transition: transform 0.35s ease-in-out !important;
         }
-        .navbar-hidden .lg\:hidden.fixed.bottom-0.z-1100 {
-          transform: translateY(100%) !important;
+        .navbar-hidden [data-mobile-bottom-nav] {
+          transform: translateY(calc(100% + 32px)) !important;
         }
       `}</style>
     </div>
