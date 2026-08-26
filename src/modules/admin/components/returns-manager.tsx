@@ -13,13 +13,6 @@ import {
   Check,
   X,
   AlertTriangle,
-  FileText,
-  User,
-  ShoppingBag,
-  ArrowRight,
-  Filter,
-  RefreshCw,
-  SlidersHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -227,124 +220,45 @@ export default function ReturnsManager() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* 1. Metric KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {/* Pending Requests */}
-        <div
-          onClick={() => setStatusFilter("PENDING")}
-          className={cn(
-            "bg-white border rounded-2xl p-4 sm:p-5 shadow-xs cursor-pointer transition-all",
-            statusFilter === "PENDING"
-              ? "border-amber-400 ring-2 ring-amber-400/20"
-              : "border-gray-200/80 hover:border-gray-300"
-          )}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-gray-500">
-              Pending Review
-            </span>
-            <div className="p-2 rounded-xl bg-amber-50 text-amber-600">
-              <Clock size={18} />
-            </div>
+    <div className="space-y-6 w-full">
+      {/* 1. Page Header with Title on Left & Summary Pills on Right */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-sm shadow-indigo-200 dark:shadow-none shrink-0">
+            <RotateCcw size={20} />
           </div>
-          <div className="mt-3">
-            <span className="text-2xl sm:text-3xl font-extrabold text-amber-600 tracking-tight">
-              {pendingCount}
-            </span>
-            <span className="block text-[11px] text-gray-400 font-medium mt-0.5">
-              Requires approval
-            </span>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+              Returns & Refunds
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              Review return requests, approve shipments, and process customer refunds
+            </p>
           </div>
         </div>
 
-        {/* Approved Returns */}
-        <div
-          onClick={() => setStatusFilter("APPROVED")}
-          className={cn(
-            "bg-white border rounded-2xl p-4 sm:p-5 shadow-xs cursor-pointer transition-all",
-            statusFilter === "APPROVED"
-              ? "border-blue-400 ring-2 ring-blue-400/20"
-              : "border-gray-200/80 hover:border-gray-300"
-          )}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-gray-500">
-              Approved
-            </span>
-            <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
-              <CheckCircle2 size={18} />
-            </div>
-          </div>
-          <div className="mt-3">
-            <span className="text-2xl sm:text-3xl font-extrabold text-blue-600 tracking-tight">
-              {approvedCount}
-            </span>
-            <span className="block text-[11px] text-gray-400 font-medium mt-0.5">
-              Ready for refund
-            </span>
-          </div>
-        </div>
-
-        {/* Total Refunded */}
-        <div
-          onClick={() => setStatusFilter("REFUNDED")}
-          className={cn(
-            "bg-white border rounded-2xl p-4 sm:p-5 shadow-xs cursor-pointer transition-all",
-            statusFilter === "REFUNDED"
-              ? "border-emerald-400 ring-2 ring-emerald-400/20"
-              : "border-gray-200/80 hover:border-gray-300"
-          )}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-gray-500">
-              Total Refunded
-            </span>
-            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
-              <DollarSign size={18} />
-            </div>
-          </div>
-          <div className="mt-3">
-            <span className="text-2xl sm:text-3xl font-extrabold text-emerald-600 tracking-tight">
-              ${totalRefundedAmount.toFixed(2)}
-            </span>
-            <span className="block text-[11px] text-gray-400 font-medium mt-0.5">
-              {refundedCount} refunds settled
-            </span>
-          </div>
-        </div>
-
-        {/* Total Requests */}
-        <div
-          onClick={() => setStatusFilter("ALL")}
-          className={cn(
-            "bg-white border rounded-2xl p-4 sm:p-5 shadow-xs cursor-pointer transition-all",
-            statusFilter === "ALL"
-              ? "border-indigo-400 ring-2 ring-indigo-400/20"
-              : "border-gray-200/80 hover:border-gray-300"
-          )}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-gray-500">
-              Total Requests
-            </span>
-            <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600">
-              <RotateCcw size={18} />
-            </div>
-          </div>
-          <div className="mt-3">
-            <span className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+        {/* Right Side: Total Cases & Total Refunded Badges */}
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="px-3.5 py-2 bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 rounded-xl shadow-2xs text-xs font-semibold text-gray-600 dark:text-gray-300 flex items-center gap-2">
+            <span className="text-gray-400 font-medium">Total Cases:</span>
+            <span className="font-extrabold text-gray-900 dark:text-white">
               {returnsList.length}
             </span>
-            <span className="block text-[11px] text-gray-400 font-medium mt-0.5">
-              All return cases
+          </div>
+
+          <div className="px-3.5 py-2 bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/60 rounded-xl shadow-2xs text-xs font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+            <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+              Total Refunded:
+            </span>
+            <span className="font-black text-emerald-700 dark:text-emerald-300">
+              ${totalRefundedAmount.toFixed(2)}
             </span>
           </div>
         </div>
       </div>
 
-      {/* 2. Control Bar: Search & Status Filter Tabs */}
-      <div className="bg-white rounded-2xl border border-gray-200/80 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      {/* 2. Control Bar: Filter Tabs & Search */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200/80 dark:border-gray-800 p-3 sm:p-4 shadow-2xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         {/* Filter Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
           {[
@@ -358,10 +272,10 @@ export default function ReturnsManager() {
               key={tab.key}
               onClick={() => setStatusFilter(tab.key)}
               className={cn(
-                "px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5",
+                "px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5",
                 statusFilter === tab.key
-                  ? "bg-gray-900 text-white shadow-xs"
-                  : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                  ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-xs"
+                  : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/60"
               )}
             >
               <span>{tab.label}</span>
@@ -369,8 +283,8 @@ export default function ReturnsManager() {
                 className={cn(
                   "px-1.5 py-0.2 rounded-full text-[10px]",
                   statusFilter === tab.key
-                    ? "bg-white/20 text-white"
-                    : "bg-gray-200 text-gray-700"
+                    ? "bg-white/20 dark:bg-black/20 text-white dark:text-gray-900"
+                    : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                 )}
               >
                 {tab.count}
@@ -380,26 +294,26 @@ export default function ReturnsManager() {
         </div>
 
         {/* Search Input */}
-        <div className="relative min-w-[240px] sm:w-72">
+        <div className="relative min-w-[220px] sm:w-64">
           <Search
-            size={16}
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+            size={15}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
           />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search return ID, order, name..."
-            className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-indigo-500 focus:outline-none transition-all"
+            placeholder="Search returns..."
+            className="w-full pl-8.5 pr-3 py-1.5 text-xs rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-900 focus:border-indigo-500 focus:outline-none transition-all"
           />
         </div>
       </div>
 
-      {/* 3. Actionable Returns Table */}
-      <div className="bg-white rounded-2xl border border-gray-200/80 shadow-xs overflow-hidden">
+      {/* 3. Actionable Returns Table (Full Width) */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200/80 dark:border-gray-800 shadow-2xs overflow-hidden w-full">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50/80 border-b border-gray-200/80 text-xs font-bold text-gray-500 uppercase tracking-wider">
+            <thead className="bg-gray-50/80 dark:bg-gray-800/60 border-b border-gray-200/80 dark:border-gray-800 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               <tr>
                 <th className="px-5 py-3.5">Return ID & Date</th>
                 <th className="px-5 py-3.5">Customer & Order</th>
@@ -409,16 +323,16 @@ export default function ReturnsManager() {
                 <th className="px-5 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {filteredReturns.length > 0 ? (
                 filteredReturns.map((ret) => (
                   <tr
                     key={ret.id}
-                    className="hover:bg-gray-50/70 transition-colors group"
+                    className="hover:bg-gray-50/70 dark:hover:bg-gray-800/50 transition-colors group"
                   >
                     {/* Return ID & Date */}
                     <td className="px-5 py-4">
-                      <div className="font-mono font-bold text-xs text-gray-900">
+                      <div className="font-mono font-bold text-xs text-gray-900 dark:text-white">
                         {ret.id}
                       </div>
                       <div className="text-[11px] text-gray-400 mt-0.5 font-medium">
@@ -428,32 +342,32 @@ export default function ReturnsManager() {
 
                     {/* Customer & Order */}
                     <td className="px-5 py-4">
-                      <div className="font-bold text-gray-900 text-xs sm:text-sm">
+                      <div className="font-bold text-gray-900 dark:text-white text-xs sm:text-sm">
                         {ret.customer}
                       </div>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="text-[11px] text-gray-500">
+                        <span className="text-[11px] text-gray-500 dark:text-gray-400">
                           {ret.email}
                         </span>
-                        <span className="text-gray-300">•</span>
-                        <span className="font-mono text-xs font-bold text-indigo-600">
+                        <span className="text-gray-300 dark:text-gray-600">•</span>
+                        <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400">
                           {ret.orderNumber}
                         </span>
                       </div>
                     </td>
 
                     {/* Item & Reason */}
-                    <td className="px-5 py-4 max-w-xs">
-                      <p className="font-semibold text-gray-900 text-xs truncate">
+                    <td className="px-5 py-4 max-w-sm">
+                      <p className="font-semibold text-gray-900 dark:text-white text-xs truncate">
                         {ret.item}
                       </p>
-                      <p className="text-[11px] text-gray-500 line-clamp-1 mt-0.5">
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-1 mt-0.5">
                         {ret.reason}
                       </p>
                     </td>
 
                     {/* Refund Amount */}
-                    <td className="px-5 py-4 font-black text-gray-900 text-sm">
+                    <td className="px-5 py-4 font-black text-gray-900 dark:text-white text-sm">
                       ${ret.amount.toFixed(2)}
                     </td>
 
@@ -463,13 +377,13 @@ export default function ReturnsManager() {
                         className={cn(
                           "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider",
                           ret.status === "PENDING" &&
-                            "bg-amber-50 text-amber-700 border border-amber-200",
+                            "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800",
                           ret.status === "APPROVED" &&
-                            "bg-blue-50 text-blue-700 border border-blue-200",
+                            "bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800",
                           ret.status === "REFUNDED" &&
-                            "bg-emerald-50 text-emerald-700 border border-emerald-200",
+                            "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800",
                           ret.status === "REJECTED" &&
-                            "bg-red-50 text-red-700 border border-red-200"
+                            "bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800"
                         )}
                       >
                         {ret.status === "PENDING" && <Clock size={11} />}
@@ -486,10 +400,10 @@ export default function ReturnsManager() {
                         {/* View Details */}
                         <button
                           onClick={() => setSelectedReturn(ret)}
-                          className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+                          className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
                           title="View Details"
                         >
-                          <Eye size={16} />
+                          <Eye size={15} />
                         </button>
 
                         {/* Action buttons based on status */}
@@ -497,7 +411,7 @@ export default function ReturnsManager() {
                           <>
                             <button
                               onClick={() => handleApprove(ret)}
-                              className="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-200 rounded-lg text-xs font-bold transition-all shadow-2xs inline-flex items-center gap-1 cursor-pointer"
+                              className="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-200 dark:border-indigo-800 dark:bg-indigo-950/50 dark:text-indigo-300 rounded-lg text-xs font-bold transition-all shadow-2xs inline-flex items-center gap-1 cursor-pointer"
                               title="Approve Return"
                             >
                               <Check size={12} />
@@ -508,7 +422,7 @@ export default function ReturnsManager() {
                                 setRejectModalReturn(ret);
                                 setRejectReason("");
                               }}
-                              className="px-2.5 py-1.5 bg-red-50 hover:bg-red-600 text-red-700 hover:text-white border border-red-200 rounded-lg text-xs font-bold transition-all shadow-2xs inline-flex items-center gap-1 cursor-pointer"
+                              className="px-2.5 py-1.5 bg-red-50 hover:bg-red-600 text-red-700 hover:text-white border border-red-200 dark:border-red-800 dark:bg-red-950/50 dark:text-red-300 rounded-lg text-xs font-bold transition-all shadow-2xs inline-flex items-center gap-1 cursor-pointer"
                               title="Reject Return"
                             >
                               <X size={12} />
@@ -521,7 +435,7 @@ export default function ReturnsManager() {
                           <>
                             <button
                               onClick={() => setRefundModalReturn(ret)}
-                              className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs inline-flex items-center gap-1 cursor-pointer"
+                              className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-2xs inline-flex items-center gap-1 cursor-pointer"
                               title="Process Refund"
                             >
                               <DollarSign size={12} />
@@ -532,16 +446,16 @@ export default function ReturnsManager() {
                                 setRejectModalReturn(ret);
                                 setRejectReason("");
                               }}
-                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition-colors cursor-pointer"
                               title="Reject"
                             >
-                              <X size={16} />
+                              <X size={15} />
                             </button>
                           </>
                         )}
 
                         {ret.status === "REFUNDED" && (
-                          <span className="text-[11px] font-bold text-emerald-600 px-2 py-1 bg-emerald-50 rounded-md border border-emerald-200">
+                          <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/50 rounded-md border border-emerald-200 dark:border-emerald-800">
                             Completed
                           </span>
                         )}
@@ -549,7 +463,7 @@ export default function ReturnsManager() {
                         {ret.status === "REJECTED" && (
                           <button
                             onClick={() => handleApprove(ret)}
-                            className="px-2 py-1 text-xs font-semibold text-gray-600 hover:text-indigo-600 bg-gray-50 hover:bg-indigo-50 rounded-lg border border-gray-200 transition-colors"
+                            className="px-2 py-1 text-xs font-semibold text-gray-600 dark:text-gray-400 hover:text-indigo-600 bg-gray-50 dark:bg-gray-800 hover:bg-indigo-50 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors cursor-pointer"
                           >
                             Reopen
                           </button>
@@ -577,49 +491,49 @@ export default function ReturnsManager() {
       {/* 4. Reject Confirmation Modal */}
       {rejectModalReturn && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 space-y-4">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 dark:border-gray-800 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+              <div className="h-10 w-10 rounded-full bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
                 <AlertTriangle size={20} />
               </div>
               <div>
-                <h3 className="text-base font-bold text-gray-900">
+                <h3 className="text-base font-bold text-gray-900 dark:text-white">
                   Reject Return Request
                 </h3>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   {rejectModalReturn.id} • Order {rejectModalReturn.orderNumber}
                 </p>
               </div>
             </div>
 
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-gray-600 dark:text-gray-300">
               Are you sure you want to reject the return for{" "}
-              <strong className="text-gray-900">{rejectModalReturn.customer}</strong>?
+              <strong className="text-gray-900 dark:text-white">{rejectModalReturn.customer}</strong>?
               Please specify the reason below.
             </p>
 
             <div>
-              <label className="text-xs font-bold text-gray-700 block mb-1.5">
+              <label className="text-xs font-bold text-gray-700 dark:text-gray-300 block mb-1.5">
                 Rejection Reason (Customer will be notified)
               </label>
               <textarea
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
                 placeholder="e.g. Returned after the 14-day warranty policy / Items damaged by user..."
-                className="w-full p-3 text-xs border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:border-red-400 focus:outline-none min-h-[80px]"
+                className="w-full p-3 text-xs border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-900 focus:border-red-400 focus:outline-none min-h-[80px]"
               />
             </div>
 
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 onClick={() => setRejectModalReturn(null)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmReject}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-red-600 hover:bg-red-700 transition-colors shadow-xs"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-red-600 hover:bg-red-700 transition-colors shadow-xs cursor-pointer"
               >
                 Confirm Rejection
               </button>
@@ -631,50 +545,50 @@ export default function ReturnsManager() {
       {/* 5. Process Refund Modal */}
       {refundModalReturn && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 space-y-4">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 dark:border-gray-800 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+              <div className="h-10 w-10 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                 <DollarSign size={20} />
               </div>
               <div>
-                <h3 className="text-base font-bold text-gray-900">
+                <h3 className="text-base font-bold text-gray-900 dark:text-white">
                   Process Customer Refund
                 </h3>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   {refundModalReturn.id} • Order {refundModalReturn.orderNumber}
                 </p>
               </div>
             </div>
 
-            <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-4 text-xs space-y-1.5">
+            <div className="bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl p-4 text-xs space-y-1.5">
               <div className="flex justify-between">
-                <span className="text-gray-600">Customer:</span>
-                <span className="font-bold text-gray-900">{refundModalReturn.customer}</span>
+                <span className="text-gray-600 dark:text-gray-400">Customer:</span>
+                <span className="font-bold text-gray-900 dark:text-white">{refundModalReturn.customer}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Item:</span>
-                <span className="font-semibold text-gray-900 truncate max-w-[200px]">{refundModalReturn.item}</span>
+                <span className="text-gray-600 dark:text-gray-400">Item:</span>
+                <span className="font-semibold text-gray-900 dark:text-white truncate max-w-[200px]">{refundModalReturn.item}</span>
               </div>
-              <div className="flex justify-between border-t border-emerald-200/60 pt-1.5 font-bold text-sm">
-                <span className="text-gray-900">Total Refund Amount:</span>
-                <span className="text-emerald-700">${refundModalReturn.amount.toFixed(2)}</span>
+              <div className="flex justify-between border-t border-emerald-200/60 dark:border-emerald-800/60 pt-1.5 font-bold text-sm">
+                <span className="text-gray-900 dark:text-white">Total Refund Amount:</span>
+                <span className="text-emerald-700 dark:text-emerald-300">${refundModalReturn.amount.toFixed(2)}</span>
               </div>
             </div>
 
-            <p className="text-xs text-gray-500 leading-relaxed">
+            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
               This action will mark the return as <strong>REFUNDED</strong> and trigger the payment provider settlement for the original transaction.
             </p>
 
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 onClick={() => setRefundModalReturn(null)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmRefund}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors shadow-xs"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors shadow-xs cursor-pointer"
               >
                 Execute Refund
               </button>
@@ -686,11 +600,11 @@ export default function ReturnsManager() {
       {/* 6. Return Request Details Modal */}
       {selectedReturn && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 space-y-5">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 dark:border-gray-800 space-y-5">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
               <div>
-                <h3 className="text-base font-bold text-gray-900">
+                <h3 className="text-base font-bold text-gray-900 dark:text-white">
                   Return Case #{selectedReturn.id}
                 </h3>
                 <p className="text-xs text-gray-400">
@@ -699,25 +613,25 @@ export default function ReturnsManager() {
               </div>
               <button
                 onClick={() => setSelectedReturn(null)}
-                className="p-1.5 text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+                className="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 <X size={18} />
               </button>
             </div>
 
             {/* Content Details */}
-            <div className="space-y-3.5 text-xs text-gray-700">
+            <div className="space-y-3.5 text-xs text-gray-700 dark:text-gray-300">
               {/* Status & Amount Box */}
-              <div className="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-200/80">
+              <div className="flex items-center justify-between p-3.5 bg-gray-50 dark:bg-gray-800/80 rounded-xl border border-gray-200/80 dark:border-gray-700">
                 <div>
-                  <span className="text-gray-500 block text-[11px]">Status</span>
-                  <span className="font-bold text-sm text-gray-900">
+                  <span className="text-gray-500 dark:text-gray-400 block text-[11px]">Status</span>
+                  <span className="font-bold text-sm text-gray-900 dark:text-white">
                     {selectedReturn.status}
                   </span>
                 </div>
                 <div className="text-right">
-                  <span className="text-gray-500 block text-[11px]">Refund Value</span>
-                  <span className="font-black text-base text-gray-900">
+                  <span className="text-gray-500 dark:text-gray-400 block text-[11px]">Refund Value</span>
+                  <span className="font-black text-base text-gray-900 dark:text-white">
                     ${selectedReturn.amount.toFixed(2)}
                   </span>
                 </div>
@@ -728,10 +642,10 @@ export default function ReturnsManager() {
                 <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
                   Customer & Order
                 </span>
-                <div className="p-3 bg-gray-50/50 rounded-xl border border-gray-100 space-y-1">
-                  <p className="font-bold text-gray-900">{selectedReturn.customer}</p>
-                  <p className="text-gray-600">{selectedReturn.email} • {selectedReturn.phone}</p>
-                  <p className="font-mono text-indigo-600 font-bold">Order #{selectedReturn.orderNumber}</p>
+                <div className="p-3 bg-gray-50/50 dark:bg-gray-800/40 rounded-xl border border-gray-100 dark:border-gray-800 space-y-1">
+                  <p className="font-bold text-gray-900 dark:text-white">{selectedReturn.customer}</p>
+                  <p className="text-gray-600 dark:text-gray-400">{selectedReturn.email} • {selectedReturn.phone}</p>
+                  <p className="font-mono text-indigo-600 dark:text-indigo-400 font-bold">Order #{selectedReturn.orderNumber}</p>
                 </div>
               </div>
 
@@ -740,9 +654,9 @@ export default function ReturnsManager() {
                 <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
                   Product & Return Reason
                 </span>
-                <div className="p-3 bg-gray-50/50 rounded-xl border border-gray-100 space-y-1">
-                  <p className="font-bold text-gray-900">{selectedReturn.item}</p>
-                  <p className="text-gray-600">{selectedReturn.reason}</p>
+                <div className="p-3 bg-gray-50/50 dark:bg-gray-800/40 rounded-xl border border-gray-100 dark:border-gray-800 space-y-1">
+                  <p className="font-bold text-gray-900 dark:text-white">{selectedReturn.item}</p>
+                  <p className="text-gray-600 dark:text-gray-400">{selectedReturn.reason}</p>
                   {selectedReturn.trackingNumber && (
                     <p className="text-gray-400 text-[11px] pt-1">
                       Tracking: <span className="font-mono">{selectedReturn.trackingNumber}</span>
@@ -757,7 +671,7 @@ export default function ReturnsManager() {
                   <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
                     Admin Notes
                   </span>
-                  <p className="p-3 bg-amber-50/60 border border-amber-100 rounded-xl text-amber-900">
+                  <p className="p-3 bg-amber-50/60 dark:bg-amber-950/40 border border-amber-100 dark:border-amber-900/60 rounded-xl text-amber-900 dark:text-amber-200">
                     {selectedReturn.notes}
                   </p>
                 </div>
@@ -765,10 +679,10 @@ export default function ReturnsManager() {
             </div>
 
             {/* Modal Actions */}
-            <div className="flex items-center justify-between border-t border-gray-100 pt-4">
+            <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-800 pt-4">
               <button
                 onClick={() => setSelectedReturn(null)}
-                className="px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                className="px-4 py-2 text-xs font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
               >
                 Close
               </button>
@@ -778,7 +692,7 @@ export default function ReturnsManager() {
                   <>
                     <button
                       onClick={() => handleApprove(selectedReturn)}
-                      className="px-3.5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors shadow-xs inline-flex items-center gap-1.5"
+                      className="px-3.5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors shadow-xs inline-flex items-center gap-1.5 cursor-pointer"
                     >
                       <Check size={14} />
                       <span>Approve Return</span>
@@ -788,7 +702,7 @@ export default function ReturnsManager() {
                         setRejectModalReturn(selectedReturn);
                         setRejectReason("");
                       }}
-                      className="px-3.5 py-2 text-xs font-bold text-red-700 bg-red-50 hover:bg-red-600 hover:text-white border border-red-200 rounded-xl transition-colors inline-flex items-center gap-1.5"
+                      className="px-3.5 py-2 text-xs font-bold text-red-700 bg-red-50 hover:bg-red-600 hover:text-white border border-red-200 dark:border-red-800 rounded-xl transition-colors inline-flex items-center gap-1.5 cursor-pointer"
                     >
                       <X size={14} />
                       <span>Reject</span>
@@ -799,7 +713,7 @@ export default function ReturnsManager() {
                 {selectedReturn.status === "APPROVED" && (
                   <button
                     onClick={() => setRefundModalReturn(selectedReturn)}
-                    className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors shadow-xs inline-flex items-center gap-1.5"
+                    className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors shadow-xs inline-flex items-center gap-1.5 cursor-pointer"
                   >
                     <DollarSign size={14} />
                     <span>Process Refund</span>

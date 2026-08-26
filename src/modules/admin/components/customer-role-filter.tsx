@@ -3,42 +3,38 @@
 import { useQueryState, parseAsString } from "nuqs";
 import { cn } from "@/lib/utils";
 
-interface OrderStatusFilterProps {
+interface CustomerRoleFilterProps {
   counts?: {
     ALL: number;
-    PENDING: number;
-    PROCESSING: number;
-    SHIPPED: number;
-    DELIVERED: number;
-    CANCELLED: number;
+    CUSTOMERS: number;
+    STAFF: number;
+    BANNED: number;
   };
 }
 
 const TABS = [
-  { key: "", label: "All", countKey: "ALL" as const },
-  { key: "PENDING", label: "Pending", countKey: "PENDING" as const },
-  { key: "PROCESSING", label: "Processing", countKey: "PROCESSING" as const },
-  { key: "SHIPPED", label: "Shipped", countKey: "SHIPPED" as const },
-  { key: "DELIVERED", label: "Delivered", countKey: "DELIVERED" as const },
-  { key: "CANCELLED", label: "Cancelled", countKey: "CANCELLED" as const },
+  { key: "", label: "All Users", countKey: "ALL" as const },
+  { key: "USER", label: "Customers", countKey: "CUSTOMERS" as const },
+  { key: "STAFF", label: "Staff & Admins", countKey: "STAFF" as const },
+  { key: "BANNED", label: "Banned", countKey: "BANNED" as const },
 ];
 
-export default function OrderStatusFilter({ counts }: OrderStatusFilterProps) {
-  const [status, setStatus] = useQueryState(
-    "status",
+export default function CustomerRoleFilter({ counts }: CustomerRoleFilterProps) {
+  const [role, setRole] = useQueryState(
+    "role",
     parseAsString.withDefault("").withOptions({ shallow: false })
   );
 
   return (
     <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
       {TABS.map((tab) => {
-        const isActive = status === tab.key;
+        const isActive = role === tab.key;
         const count = counts ? counts[tab.countKey] : undefined;
 
         return (
           <button
             key={tab.key}
-            onClick={() => setStatus(tab.key || null)}
+            onClick={() => setRole(tab.key || null)}
             className={cn(
               "px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5",
               isActive

@@ -10,7 +10,7 @@ export default async function AdminCouponsPage() {
   const coupons = (await getCoupons()) as Coupon[];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
+    <div className="w-full space-y-6 pb-10">
       <CouponManager initialCoupons={coupons} />
     </div>
   );
