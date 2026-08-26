@@ -26,8 +26,11 @@ import {
   Gamepad2,
   Search,
   ShoppingBag,
-  Menu
+  Menu,
+  Paintbrush,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+
 import { motion, AnimatePresence } from "framer-motion";
 
 import { CldUploadWidget, type CloudinaryUploadWidgetResults } from "next-cloudinary";
@@ -271,38 +274,63 @@ interface AppearanceFormProps {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-32">
-      {/* 1. Sticky Header Toolbar */}
-      <div className="sticky top-0 z-30 bg-white dark:bg-gray-900 backdrop-blur-xl border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between shadow-sm dark:shadow-none">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Store Appearance</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Customize Homepage & Banners</p>
+    <div className="w-full space-y-6 pb-20">
+      {/* 1. Page Header Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-sm shadow-indigo-200 dark:shadow-none shrink-0">
+            <Paintbrush size={20} />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Store Appearance</h1>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Customize Homepage hero slider, top notification banner, and brand logos</p>
+          </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setShowPreview(!showPreview)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all font-medium ${
-            showPreview
-              ? "bg-indigo-50 border-indigo-200 text-indigo-700 shadow-inner"
-              : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-gray-800 shadow-sm dark:shadow-none"
-          }`}
-        >
-          {showPreview ? <EyeOff size={18} /> : <Eye size={18} />}
-          {showPreview ? "Close Preview" : "Live Preview"}
-        </button>
+        {/* Right Side: Hero Slides, Brand Logos Badges & Live Preview Toggle */}
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="px-3.5 py-2 bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 rounded-xl shadow-2xs text-xs font-semibold text-gray-600 dark:text-gray-300 flex items-center gap-2">
+            <span className="text-gray-400 font-medium">Hero Slides:</span>
+            <span className="font-extrabold text-gray-900 dark:text-white">
+              {fields.length}
+            </span>
+          </div>
+
+          <div className="px-3.5 py-2 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/70 dark:border-blue-800/60 rounded-xl shadow-2xs text-xs font-semibold text-blue-800 dark:text-blue-300 flex items-center gap-2">
+            <span className="text-blue-600 dark:text-blue-400 font-medium">
+              Brand Logos:
+            </span>
+            <span className="font-bold text-blue-700 dark:text-blue-300">
+              {brandFields.length}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowPreview(!showPreview)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-bold transition-all shadow-2xs cursor-pointer ${
+              showPreview
+                ? "bg-indigo-600 border-indigo-600 text-white shadow-xs"
+                : "bg-white dark:bg-gray-900 border-gray-200/80 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+            }`}
+          >
+            {showPreview ? <EyeOff size={15} /> : <Eye size={15} />}
+            {showPreview ? "Close Preview" : "Live Preview"}
+          </button>
+        </div>
       </div>
 
       {/* 2. Main Content Grid */}
       <div
-        className={`p-6 transition-all duration-500 ease-in-out ${
+        className={`transition-all duration-300 ${
           showPreview
-            ? "grid grid-cols-1 xl:grid-cols-2 gap-8"
-            : "max-w-4xl mx-auto"
+            ? "grid grid-cols-1 xl:grid-cols-2 gap-8 items-start w-full"
+            : "w-full"
         }`}
       >
         {/* --- LEFT SIDE: FORMS --- */}
-        <div className="space-y-8">
+        <div className="space-y-6">
+
           {/* Top Bar Form */}
           <section className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-none group hover:border-indigo-200 transition-colors">
             <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100 dark:border-gray-800">
@@ -492,7 +520,14 @@ interface AppearanceFormProps {
               </div>
             </div>
 
-            <div className="space-y-8">
+            <div
+              className={cn(
+                "grid gap-6 transition-all",
+                showPreview
+                  ? "grid-cols-1"
+                  : "grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3"
+              )}
+            >
               {fields.map((field, index) => (
                 <div
                   key={field.id}
@@ -651,7 +686,14 @@ interface AppearanceFormProps {
                 }}
               >
                 {({ open }) => (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div
+              className={cn(
+                "grid gap-3 transition-all",
+                showPreview
+                  ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-2"
+                  : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5"
+              )}
+            >
               {brandFields.map((field, index) => {
                 const imgUrl = brandForm.watch(`brands.${index}.image`);
                 return (

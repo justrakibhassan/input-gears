@@ -20,7 +20,8 @@ import {
   Award,
   Zap,
   Check,
-  X
+  X,
+  Copy,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -33,7 +34,6 @@ import {
 import { Coupon } from "@prisma/client";
 import CouponSkeleton from "./coupon-skeleton";
 
-// Demo fallback data if database currently has no coupons created
 const demoFallbackCoupons: Coupon[] = [
   {
     id: "demo-1",
@@ -64,7 +64,7 @@ const demoFallbackCoupons: Coupon[] = [
     code: "FLASH50",
     type: "PERCENTAGE",
     value: 15,
-    expiresAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // expired
+    expiresAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
     isActive: true,
     usageLimit: 30,
     usageCount: 30,
@@ -96,11 +96,10 @@ export default function CouponManager({ initialCoupons }: CouponManagerProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showAnalyticsSection, setShowAnalyticsSection] = useState(true);
+  const [showAnalyticsSection, setShowAnalyticsSection] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "scheduled" | "expired" | "disabled">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "expired" | "disabled">("all");
 
-  // Form State
   const [newCoupon, setNewCoupon] = useState({
     code: "",
     type: "PERCENTAGE" as "PERCENTAGE" | "FIXED",
@@ -109,7 +108,6 @@ export default function CouponManager({ initialCoupons }: CouponManagerProps) {
     usageLimit: "",
   });
 
-  // Client timestamp for stable calculations
   const [now, setNow] = useState<number>(0);
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -188,7 +186,7 @@ export default function CouponManager({ initialCoupons }: CouponManagerProps) {
     }
   };
 
-  // Analytics Stats
+  // Stats
   const activeCouponsCount = useMemo(() => {
     if (now === 0) return coupons.filter((c) => c.isActive).length;
     return coupons.filter((c) => c.isActive && new Date(c.expiresAt).getTime() > now).length;
@@ -203,7 +201,10 @@ export default function CouponManager({ initialCoupons }: CouponManagerProps) {
     return coupons.filter((c) => new Date(c.expiresAt).getTime() <= now).length;
   }, [coupons, now]);
 
-  // Top Most Used Coupons Leaderboard
+  const disabledCount = useMemo(() => {
+    return coupons.filter((c) => !c.isActive).length;
+  }, [coupons]);
+
   const topUsedCoupons = useMemo(() => {
     return [...coupons]
       .sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0))
@@ -213,7 +214,6 @@ export default function CouponManager({ initialCoupons }: CouponManagerProps) {
   // Filtered List
   const filteredCoupons = useMemo(() => {
     return coupons.filter((coupon) => {
-      // Search Code
       const matchesSearch = coupon.code.toLowerCase().includes(searchQuery.toLowerCase());
       if (!matchesSearch) return false;
 
@@ -222,251 +222,152 @@ export default function CouponManager({ initialCoupons }: CouponManagerProps) {
       if (statusFilter === "active") return coupon.isActive && !isExpired;
       if (statusFilter === "expired") return isExpired;
       if (statusFilter === "disabled") return !coupon.isActive;
-      if (statusFilter === "scheduled") return coupon.isActive && !isExpired && (coupon.usageCount || 0) === 0;
 
       return true;
     });
   }, [coupons, searchQuery, statusFilter, now]);
 
+  const copyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    toast.success(`Coupon code ${code} copied to clipboard!`);
+  };
+
+  const TABS = [
+    { key: "all" as const, label: "All Coupons", count: coupons.length },
+    { key: "active" as const, label: "Active", count: activeCouponsCount },
+    { key: "expired" as const, label: "Expired", count: expiredCount },
+    { key: "disabled" as const, label: "Disabled", count: disabledCount },
+  ];
+
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Header */}
+    <div className="space-y-6 w-full">
+      {/* 1. Page Header with Title on Left & Summary Badges on Right */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200 dark:shadow-none">
-            <Ticket size={22} className="text-white" />
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-sm shadow-indigo-200 dark:shadow-none shrink-0">
+            <Ticket size={20} />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-gray-900 dark:text-white">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
               Coupons & Discounts
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-              Manage promo codes, view usage analytics, and monitor discount performance
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              Manage promo codes, usage limits, and monitor discount performance
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Right Side: Total Coupons, Active, Usage Badges & Create Button */}
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="px-3.5 py-2 bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 rounded-xl shadow-2xs text-xs font-semibold text-gray-600 dark:text-gray-300 flex items-center gap-2">
+            <span className="text-gray-400 font-medium">Total:</span>
+            <span className="font-extrabold text-gray-900 dark:text-white">
+              {coupons.length}
+            </span>
+          </div>
+
+          <div className="px-3.5 py-2 bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/60 rounded-xl shadow-2xs text-xs font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+            <span className="text-emerald-600 dark:text-emerald-400 font-medium">Active:</span>
+            <span className="font-bold text-emerald-700 dark:text-emerald-300">
+              {activeCouponsCount}
+            </span>
+          </div>
+
+          <div className="px-3.5 py-2 bg-purple-50/80 dark:bg-purple-950/40 border border-purple-200/70 dark:border-purple-800/60 rounded-xl shadow-2xs text-xs font-semibold text-purple-800 dark:text-purple-300 flex items-center gap-2">
+            <span className="text-purple-600 dark:text-purple-400 font-medium">Uses:</span>
+            <span className="font-black text-purple-700 dark:text-purple-300">
+              {totalTimesUsed}
+            </span>
+          </div>
+
           <button
             onClick={() => setShowAnalyticsSection(!showAnalyticsSection)}
             className={cn(
-              "flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all border",
+              "px-3.5 py-2 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 cursor-pointer shadow-2xs",
               showAnalyticsSection
-                ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800"
-                : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800"
+                ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-200/80 dark:border-gray-800 hover:bg-gray-50"
             )}
+            title="Toggle Analytics Drawer"
           >
-            <BarChart3 size={18} />
-            {showAnalyticsSection ? "Hide Usage Analytics" : "Show Usage Analytics"}
+            <BarChart3 size={14} />
+            <span>Analytics</span>
           </button>
 
           <button
             onClick={() => setShowAddForm(!showAddForm)}
             className={cn(
-              "flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all shrink-0",
+              "flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer",
               showAddForm 
-                ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700" 
-                : "bg-gray-900 dark:bg-indigo-600 text-white hover:bg-indigo-600 dark:hover:bg-indigo-500 shadow-lg dark:shadow-none shadow-gray-200"
+                ? "bg-gray-100 hover:bg-gray-200 text-gray-700" 
+                : "bg-indigo-600 hover:bg-indigo-700 text-white"
             )}
           >
-            {showAddForm ? "Cancel" : <><Plus size={18} /> Create Coupon</>}
+            {showAddForm ? <><X size={14} /> Close</> : <><Plus size={14} /> Create Coupon</>}
           </button>
         </div>
       </div>
 
-      {/* Overview Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-950/40 dark:to-blue-950/20 border border-indigo-100 dark:border-indigo-900/50 rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-1">
-            <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">
-              Total Coupons
-            </p>
-            <Ticket size={18} className="text-indigo-500" />
-          </div>
-          <p className="text-3xl font-black text-indigo-700 dark:text-indigo-300">
-            {coupons.length}
-          </p>
-          <p className="text-xs text-indigo-600/80 dark:text-indigo-400/80 mt-1">
-            Created in system
-          </p>
-        </div>
-
-        <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/20 border border-emerald-100 dark:border-emerald-900/50 rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-1">
-            <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
-              Active Coupons
-            </p>
-            <CheckCircle2 size={18} className="text-emerald-500" />
-          </div>
-          <p className="text-3xl font-black text-emerald-700 dark:text-emerald-300">
-            {activeCouponsCount}
-          </p>
-          <p className="text-xs text-emerald-600/80 dark:text-emerald-400/80 mt-1">
-            Ready for checkout redeem
-          </p>
-        </div>
-
-        <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/40 dark:to-pink-950/20 border border-purple-100 dark:border-purple-900/50 rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-1">
-            <p className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-widest">
-              Total Usage Count
-            </p>
-            <TrendingUp size={18} className="text-purple-500" />
-          </div>
-          <p className="text-3xl font-black text-purple-700 dark:text-purple-300">
-            {totalTimesUsed} <span className="text-sm font-medium text-purple-500">times</span>
-          </p>
-          <p className="text-xs text-purple-600/80 dark:text-purple-400/80 mt-1">
-            Total successful redemptions
-          </p>
-        </div>
-
-        <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/20 border border-amber-100 dark:border-amber-900/50 rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-1">
-            <p className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest">
-              Expired Coupons
-            </p>
-            <Clock size={18} className="text-amber-500" />
-          </div>
-          <p className="text-3xl font-black text-amber-700 dark:text-amber-300">
-            {expiredCount}
-          </p>
-          <p className="text-xs text-amber-600/80 dark:text-amber-400/80 mt-1">
-            Past expiration date
-          </p>
-        </div>
-      </div>
-
-      {/* DETAILED USAGE ANALYTICS SECTION */}
+      {/* Analytics Drawer (Toggleable) */}
       {showAnalyticsSection && (
-        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 space-y-6 shadow-sm dark:shadow-none">
-          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4">
-            <div className="flex items-center gap-2">
-              <BarChart3 size={20} className="text-indigo-600 dark:text-indigo-400" />
-              <h2 className="font-bold text-gray-900 dark:text-white text-base">
-                Usage Analytics & Leaderboard
-              </h2>
-            </div>
-            <span className="text-xs text-gray-400 font-medium">
-              Real-time checkout usage performance
-            </span>
+        <div className="bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 rounded-xl p-5 shadow-2xs animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4">
+            <h3 className="font-bold text-gray-900 dark:text-white text-xs uppercase tracking-wider flex items-center gap-2">
+              <Award size={15} className="text-amber-500" />
+              Most Popular Coupons Leaderboard
+            </h3>
+            <span className="text-[11px] text-gray-400 font-medium">Real-time checkout usage performance</span>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Top Performing Leaderboard */}
-            <div className="lg:col-span-2 space-y-3">
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
-                <Award size={14} className="text-amber-500" /> Most Popular Coupons
-              </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {topUsedCoupons.map((coupon, index) => {
+              const limit = coupon.usageLimit || 100;
+              const percent = Math.min(100, Math.round(((coupon.usageCount || 0) / limit) * 100));
 
-              <div className="space-y-3">
-                {topUsedCoupons.map((coupon, index) => {
-                  const limit = coupon.usageLimit || 100;
-                  const percent = Math.min(100, Math.round(((coupon.usageCount || 0) / limit) * 100));
-
-                  return (
-                    <div
-                      key={coupon.id}
-                      className="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/40 flex items-center justify-between gap-4"
-                    >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <span
-                          className={cn(
-                            "w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs shrink-0",
-                            index === 0
-                              ? "bg-amber-400 text-amber-950"
-                              : index === 1
-                              ? "bg-slate-300 text-slate-900"
-                              : index === 2
-                              ? "bg-amber-700 text-white"
-                              : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
-                          )}
-                        >
-                          #{index + 1}
-                        </span>
-
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-gray-900 dark:text-white font-mono">
-                              {coupon.code}
-                            </span>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300">
-                              {coupon.type === "PERCENTAGE" ? `${coupon.value}% OFF` : `$${coupon.value} OFF`}
-                            </span>
-                          </div>
-
-                          <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full mt-2 overflow-hidden">
-                            <div
-                              className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500"
-                              style={{ width: `${percent}%` }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="text-right shrink-0">
-                        <p className="text-lg font-black text-gray-900 dark:text-white font-mono">
-                          {coupon.usageCount} <span className="text-xs font-normal text-gray-500">uses</span>
-                        </p>
-                        <p className="text-[10px] font-semibold text-gray-400">
-                          {coupon.usageLimit ? `${percent}% of ${coupon.usageLimit} max` : "Unlimited limit"}
-                        </p>
+              return (
+                <div
+                  key={coupon.id}
+                  className="p-3 rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/40 flex items-center justify-between gap-3 text-xs"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <span className="w-5 h-5 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold text-[10px] flex items-center justify-center shrink-0">
+                      #{index + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-gray-900 dark:text-white font-mono truncate">{coupon.code}</p>
+                      <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mt-1 overflow-hidden">
+                        <div className="h-full bg-indigo-600 rounded-full" style={{ width: `${percent}%` }} />
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Usage Summary Insights */}
-            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 border border-gray-100 dark:border-gray-800 flex flex-col justify-between space-y-4">
-              <div>
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                  <Zap size={14} className="text-indigo-500" /> Usage Summary
-                </h3>
-
-                <div className="space-y-4 text-sm">
-                  <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700/60 pb-3">
-                    <span className="text-gray-500 dark:text-gray-400">Total Redemptions</span>
-                    <span className="font-bold text-gray-900 dark:text-white font-mono">{totalTimesUsed} times</span>
                   </div>
-
-                  <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700/60 pb-3">
-                    <span className="text-gray-500 dark:text-gray-400">Avg Uses / Coupon</span>
-                    <span className="font-bold text-gray-900 dark:text-white font-mono">
-                      {coupons.length > 0 ? (totalTimesUsed / coupons.length).toFixed(1) : 0}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700/60 pb-3">
-                    <span className="text-gray-500 dark:text-gray-400">Active Campaign Rate</span>
-                    <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono">
-                      {coupons.length > 0 ? Math.round((activeCouponsCount / coupons.length) * 100) : 0}%
-                    </span>
+                  <div className="text-right shrink-0">
+                    <span className="font-bold text-gray-900 dark:text-white">{coupon.usageCount} uses</span>
+                    <span className="text-[10px] text-gray-400 block">{percent}%</span>
                   </div>
                 </div>
-              </div>
-
-              <div className="bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 rounded-xl p-3 text-xs text-indigo-700 dark:text-indigo-300 font-medium flex items-center gap-2">
-                <CheckCircle2 size={16} className="shrink-0 text-indigo-500" />
-                <span>Usage stats update automatically whenever buyers enter codes at checkout.</span>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* Create Form */}
+      {/* Create Coupon Drawer */}
       {showAddForm && (
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm dark:shadow-none animate-in slide-in-from-top-4 duration-300">
-          <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4">
-            Create New Discount Coupon
-          </h3>
+        <div className="bg-white dark:bg-gray-900 p-5 sm:p-6 rounded-xl border border-gray-200/80 dark:border-gray-800 shadow-2xs animate-in slide-in-from-top-3 duration-200">
+          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4">
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+              Create New Promo Coupon
+            </h3>
+            <button onClick={() => setShowAddForm(false)} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg">
+              <X size={16} />
+            </button>
+          </div>
+
           <form onSubmit={handleCreate} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
               {/* Code */}
               <div>
-                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">
+                <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">
                   Coupon Code
                 </label>
                 <div className="relative">
@@ -474,29 +375,29 @@ export default function CouponManager({ initialCoupons }: CouponManagerProps) {
                     type="text"
                     value={newCoupon.code}
                     onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value.toUpperCase() })}
-                    placeholder="E.g. SUMMER25"
-                    className="w-full pl-4 pr-12 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:focus:bg-gray-900 focus:border-indigo-500 text-gray-900 dark:text-white outline-none transition-all font-mono"
+                    placeholder="SUMMER25"
+                    className="w-full pl-3 pr-8 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-mono font-bold focus:bg-white dark:focus:bg-gray-900 focus:border-indigo-500 outline-none"
                   />
                   <button
                     type="button"
                     onClick={handleGenerateCode}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-lg transition-colors"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-indigo-600 hover:text-indigo-700"
                     title="Generate Random Code"
                   >
-                    <RefreshCcw size={16} />
+                    <RefreshCcw size={13} />
                   </button>
                 </div>
               </div>
 
               {/* Type */}
               <div>
-                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">
+                <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">
                   Discount Type
                 </label>
                 <select
                   value={newCoupon.type}
                   onChange={(e) => setNewCoupon({ ...newCoupon, type: e.target.value as "PERCENTAGE" | "FIXED" })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:focus:bg-gray-900 text-gray-900 dark:text-white focus:border-indigo-500 outline-none transition-all"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs focus:bg-white dark:focus:bg-gray-900 focus:border-indigo-500 outline-none"
                 >
                   <option value="PERCENTAGE">Percentage (%)</option>
                   <option value="FIXED">Fixed Amount ($)</option>
@@ -505,60 +406,51 @@ export default function CouponManager({ initialCoupons }: CouponManagerProps) {
 
               {/* Value */}
               <div>
-                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">
-                  Discount Value
+                <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">
+                  Value ({newCoupon.type === "PERCENTAGE" ? "%" : "$"})
                 </label>
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                    {newCoupon.type === "PERCENTAGE" ? <Percent size={14} /> : <DollarSign size={14} />}
-                  </div>
-                  <input
-                    type="number"
-                    value={newCoupon.value || ""}
-                    onChange={(e) => setNewCoupon({ ...newCoupon, value: Number(e.target.value) })}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:focus:bg-gray-900 text-gray-900 dark:text-white focus:border-indigo-500 outline-none transition-all"
-                    placeholder="0"
-                  />
-                </div>
+                <input
+                  type="number"
+                  value={newCoupon.value || ""}
+                  onChange={(e) => setNewCoupon({ ...newCoupon, value: Number(e.target.value) })}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs focus:bg-white dark:focus:bg-gray-900 focus:border-indigo-500 outline-none"
+                  placeholder="20"
+                />
               </div>
 
               {/* Expiry */}
               <div>
-                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">
+                <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">
                   Expiration Date
                 </label>
-                <div className="relative">
-                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                  <input
-                    type="date"
-                    value={newCoupon.expiresAt}
-                    onChange={(e) => setNewCoupon({ ...newCoupon, expiresAt: e.target.value })}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:focus:bg-gray-900 text-gray-900 dark:text-white focus:border-indigo-500 outline-none transition-all"
-                  />
-                </div>
-              </div>
-
-              {/* Limit */}
-              <div>
-                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">
-                  Usage Limit (Optional)
-                </label>
                 <input
-                  type="number"
-                  value={newCoupon.usageLimit}
-                  onChange={(e) => setNewCoupon({ ...newCoupon, usageLimit: e.target.value })}
-                  placeholder="Unlimited"
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 focus:bg-white dark:focus:bg-gray-900 text-gray-900 dark:text-white focus:border-indigo-500 outline-none transition-all"
+                  type="date"
+                  value={newCoupon.expiresAt}
+                  onChange={(e) => setNewCoupon({ ...newCoupon, expiresAt: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs focus:bg-white dark:focus:bg-gray-900 focus:border-indigo-500 outline-none"
                 />
               </div>
 
-              <div className="flex items-end">
+              {/* Limit & Submit */}
+              <div className="flex items-end gap-2">
+                <div className="flex-1">
+                  <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">
+                    Limit (Qty)
+                  </label>
+                  <input
+                    type="number"
+                    value={newCoupon.usageLimit}
+                    onChange={(e) => setNewCoupon({ ...newCoupon, usageLimit: e.target.value })}
+                    placeholder="Unlimited"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs focus:bg-white dark:focus:bg-gray-900 focus:border-indigo-500 outline-none"
+                  />
+                </div>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full h-[46px] bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg dark:shadow-none shadow-indigo-100 transition-all flex items-center justify-center gap-2"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 h-[34px]"
                 >
-                  {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : "Save Coupon"}
+                  {isSubmitting ? <Loader2 className="animate-spin" size={14} /> : "Save"}
                 </button>
               </div>
             </div>
@@ -566,170 +458,204 @@ export default function CouponManager({ initialCoupons }: CouponManagerProps) {
         </div>
       )}
 
-      {/* Filter & Search Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <div className="relative flex-1 w-full">
-          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by coupon code..."
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400"
-          />
+      {/* 2. Control Bar: Filter Tabs & Search */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200/80 dark:border-gray-800 p-3 sm:p-4 shadow-2xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        {/* Filter Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+          {TABS.map((tab) => {
+            const isActive = statusFilter === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setStatusFilter(tab.key)}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5",
+                  isActive
+                    ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-xs"
+                    : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/60"
+                )}
+              >
+                <span>{tab.label}</span>
+                <span
+                  className={cn(
+                    "px-1.5 py-0.2 rounded-full text-[10px]",
+                    isActive
+                      ? "bg-white/20 dark:bg-black/20 text-white dark:text-gray-900"
+                      : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                  )}
+                >
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
-        <div className="flex gap-2 overflow-x-auto w-full sm:w-auto">
-          {(["all", "active", "scheduled", "expired", "disabled"] as const).map((f) => (
-            <button
-              key={f}
-              onClick={() => setStatusFilter(f)}
-              className={cn(
-                "px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors shrink-0",
-                statusFilter === f
-                  ? "bg-indigo-600 text-white"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-              )}
-            >
-              {f}
-            </button>
-          ))}
+        {/* Search Input */}
+        <div className="relative min-w-[220px] sm:w-64">
+          <Search
+            size={15}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+          />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search coupon code..."
+            className="w-full pl-8.5 pr-3 py-1.5 text-xs rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-900 focus:border-indigo-500 focus:outline-none transition-all font-mono"
+          />
         </div>
       </div>
 
-      {/* Coupons Table */}
+      {/* 3. Actionable Coupons Table */}
       {isLoading ? (
         <CouponSkeleton />
       ) : (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm dark:shadow-none overflow-hidden">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200/80 dark:border-gray-800 shadow-2xs overflow-hidden w-full">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 dark:bg-gray-800/60 border-b border-gray-100 dark:border-gray-800">
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Coupon Code
-                  </th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Type & Value
-                  </th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Expiry Date
-                  </th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Usage Analytics (Times Used)
-                  </th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">
-                    Actions
-                  </th>
+            <table className="w-full text-left text-sm">
+              <thead className="bg-gray-50/80 dark:bg-gray-800/60 border-b border-gray-200/80 dark:border-gray-800 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <tr>
+                  <th className="px-5 py-3.5">Coupon Code</th>
+                  <th className="px-5 py-3.5">Discount Value</th>
+                  <th className="px-5 py-3.5">Expiry Date</th>
+                  <th className="px-5 py-3.5">Usage Analytics</th>
+                  <th className="px-5 py-3.5 text-center">Status</th>
+                  <th className="px-5 py-3.5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {filteredCoupons.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-16 text-center text-gray-400 dark:text-gray-500">
-                      <Ticket size={40} className="mx-auto mb-3 opacity-30" />
-                      <p className="font-semibold text-sm">No matching coupons found</p>
+                    <td colSpan={6} className="py-12 text-center text-gray-400 dark:text-gray-500">
+                      <Ticket size={32} className="mx-auto mb-2 opacity-40" />
+                      <p className="text-sm font-semibold">No coupons found</p>
+                      <p className="text-xs text-gray-400 mt-0.5">Try changing filters or create a new coupon code.</p>
                     </td>
                   </tr>
                 ) : (
                   filteredCoupons.map((coupon) => {
                     const isExpired = now > 0 && new Date(coupon.expiresAt).getTime() <= now;
+                    const limit = coupon.usageLimit || 100;
+                    const percent = Math.min(100, Math.round(((coupon.usageCount || 0) / limit) * 100));
 
                     return (
-                      <tr key={coupon.id} className="hover:bg-gray-50/60 dark:hover:bg-gray-800/60 transition-colors group">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/50 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-mono font-bold text-xs border border-indigo-100 dark:border-indigo-900/50">
+                      <tr
+                        key={coupon.id}
+                        className="hover:bg-gray-50/70 dark:hover:bg-gray-800/50 transition-colors group"
+                      >
+                        {/* Coupon Code */}
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-900/60 flex items-center justify-center font-mono font-bold text-xs text-indigo-600 dark:text-indigo-400">
                               {coupon.code.slice(0, 2)}
                             </div>
-                            <span className="font-bold text-gray-900 dark:text-white font-mono text-base tracking-wide">
-                              {coupon.code}
-                            </span>
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-mono font-bold text-sm text-gray-900 dark:text-white">
+                                {coupon.code}
+                              </span>
+                              <button
+                                onClick={() => copyCode(coupon.code)}
+                                className="p-1 text-gray-400 hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                title="Copy code"
+                              >
+                                <Copy size={13} />
+                              </button>
+                            </div>
                           </div>
                         </td>
 
-                        <td className="px-6 py-4">
+                        {/* Type & Value */}
+                        <td className="px-5 py-4">
                           <div className="flex items-center gap-2">
-                            <span className={cn(
-                              "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider",
-                              coupon.type === "PERCENTAGE" 
-                                ? "bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-900/40" 
-                                : "bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40"
-                            )}>
+                            <span
+                              className={cn(
+                                "px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider",
+                                coupon.type === "PERCENTAGE"
+                                  ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                  : "bg-blue-50 text-blue-700 border border-blue-200"
+                              )}
+                            >
                               {coupon.type}
                             </span>
-                            <span className="font-black text-gray-900 dark:text-white text-sm">
+                            <span className="font-bold text-gray-900 dark:text-white text-xs sm:text-sm">
                               {coupon.type === "PERCENTAGE" ? `${coupon.value}% OFF` : `$${coupon.value} OFF`}
                             </span>
                           </div>
                         </td>
 
-                        <td className="px-6 py-4">
-                          <span className={cn(
-                            "text-sm font-semibold",
-                            isExpired ? "text-red-500" : "text-gray-700 dark:text-gray-300"
-                          )}>
+                        {/* Expiry Date */}
+                        <td className="px-5 py-4 text-xs">
+                          <span
+                            className={cn(
+                              "font-semibold",
+                              isExpired ? "text-rose-500" : "text-gray-600 dark:text-gray-300"
+                            )}
+                          >
                             {new Date(coupon.expiresAt).toLocaleDateString("en-US", {
                               month: "short",
                               day: "numeric",
-                              year: "numeric"
+                              year: "numeric",
                             })}
                           </span>
                         </td>
 
-                        <td className="px-6 py-4">
+                        {/* Usage Analytics */}
+                        <td className="px-5 py-4">
                           <div className="flex flex-col max-w-[160px]">
                             <div className="flex items-center justify-between text-xs">
-                              <span className="font-black text-gray-900 dark:text-white font-mono">
-                                {coupon.usageCount} times
+                              <span className="font-bold text-gray-900 dark:text-white font-mono">
+                                {coupon.usageCount || 0} uses
                               </span>
-                              <span className="text-[10px] text-gray-400 font-medium">
-                                {coupon.usageLimit ? `Limit: ${coupon.usageLimit}` : "No limit"}
+                              <span className="text-[10px] text-gray-400">
+                                {coupon.usageLimit ? `Max: ${coupon.usageLimit}` : "No limit"}
                               </span>
                             </div>
-                            <div className="w-full h-2 bg-gray-100 dark:bg-gray-800 rounded-full mt-1.5 overflow-hidden">
-                              <div 
-                                className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full" 
-                                style={{ width: `${coupon.usageLimit ? Math.min(100, (coupon.usageCount / coupon.usageLimit) * 100) : 100}%` }}
+                            <div className="w-full h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full mt-1.5 overflow-hidden">
+                              <div
+                                className="h-full bg-indigo-600 rounded-full"
+                                style={{ width: `${percent}%` }}
                               />
                             </div>
                           </div>
                         </td>
 
-                        <td className="px-6 py-4 text-center">
-                          <span className={cn(
-                            "inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest",
-                            !coupon.isActive
-                              ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
-                              : isExpired
-                              ? "bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400"
-                              : "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400"
-                          )}>
+                        {/* Status */}
+                        <td className="px-5 py-4 text-center">
+                          <span
+                            className={cn(
+                              "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider",
+                              !coupon.isActive
+                                ? "bg-gray-100 text-gray-600 border border-gray-200"
+                                : isExpired
+                                ? "bg-rose-50 text-rose-700 border border-rose-200"
+                                : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            )}
+                          >
                             {!coupon.isActive ? "Disabled" : isExpired ? "Expired" : "Active"}
                           </span>
                         </td>
 
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
+                        {/* Actions */}
+                        <td className="px-5 py-4 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
                             <button
                               onClick={() => handleToggle(coupon.id, coupon.isActive)}
                               className={cn(
-                                "p-1.5 rounded-xl transition-colors",
-                                coupon.isActive ? "text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40" : "text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                "p-1 rounded-lg transition-colors cursor-pointer",
+                                coupon.isActive ? "text-emerald-600 hover:bg-emerald-50" : "text-gray-400 hover:bg-gray-100"
                               )}
-                              title={coupon.isActive ? "Disable Coupon" : "Enable Coupon"}
+                              title={coupon.isActive ? "Disable coupon" : "Enable coupon"}
                             >
-                              {coupon.isActive ? <ToggleRight size={26} /> : <ToggleLeft size={26} />}
+                              {coupon.isActive ? <ToggleRight size={24} /> : <ToggleLeft size={24} />}
                             </button>
 
                             <button
                               onClick={() => handleDelete(coupon.id)}
-                              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition-all"
-                              title="Delete Coupon"
+                              className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                              title="Delete coupon"
                             >
-                              <Trash2 size={16} />
+                              <Trash2 size={15} />
                             </button>
                           </div>
                         </td>
