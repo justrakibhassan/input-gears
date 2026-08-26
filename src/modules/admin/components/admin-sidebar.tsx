@@ -56,18 +56,12 @@ const sidebarGroups: {
     ],
   },
   {
-    group: "Manage Product",
+    group: "Catalog",
     items: [
       {
-        title: "All Products",
+        title: "Products",
         href: "/admin/products",
         icon: List,
-        roles: ["SUPER_ADMIN", "MANAGER", "CONTENT_EDITOR"],
-      },
-      {
-        title: "Add New",
-        href: "/admin/products/create",
-        icon: PackagePlus,
         roles: ["SUPER_ADMIN", "MANAGER", "CONTENT_EDITOR"],
       },
       {
@@ -79,7 +73,7 @@ const sidebarGroups: {
     ],
   },
   {
-    group: "Manage Order",
+    group: "Sales & Orders",
     items: [
       {
         title: "Orders",
@@ -99,6 +93,11 @@ const sidebarGroups: {
         icon: ShoppingBag,
         roles: ["SUPER_ADMIN", "MANAGER"],
       },
+    ],
+  },
+  {
+    group: "Customers & Reviews",
+    items: [
       {
         title: "Customers",
         href: "/admin/customers",
@@ -114,14 +113,8 @@ const sidebarGroups: {
     ],
   },
   {
-    group: "Store Front",
+    group: "Marketing",
     items: [
-      {
-        title: "Appearance",
-        icon: Paintbrush,
-        href: "/admin/appearance",
-        roles: ["SUPER_ADMIN", "CONTENT_EDITOR"],
-      },
       {
         title: "Sale Manager",
         icon: Tag,
@@ -134,19 +127,19 @@ const sidebarGroups: {
         href: "/admin/coupons",
         roles: ["SUPER_ADMIN", "MANAGER"],
       },
+      {
+        title: "Store Appearance",
+        icon: Paintbrush,
+        href: "/admin/appearance",
+        roles: ["SUPER_ADMIN", "CONTENT_EDITOR"],
+      },
     ],
   },
   {
-    group: "Settings",
+    group: "Administration",
     items: [
       {
-        title: "Settings",
-        href: "/admin/settings",
-        icon: Settings,
-        roles: ["SUPER_ADMIN"],
-      },
-      {
-        title: "Team",
+        title: "Team Members",
         href: "/admin/team",
         icon: Users,
         roles: ["SUPER_ADMIN"],
@@ -162,6 +155,12 @@ const sidebarGroups: {
         href: "/admin/media",
         icon: ImageIcon,
         roles: ["SUPER_ADMIN", "MANAGER"],
+      },
+      {
+        title: "Settings",
+        href: "/admin/settings",
+        icon: Settings,
+        roles: ["SUPER_ADMIN"],
       },
     ],
   },

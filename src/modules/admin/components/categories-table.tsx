@@ -201,8 +201,8 @@ export default function CategoriesTable({ categories }: CategoriesTableProps) {
                             className="object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-bold text-sm">
-                            {category.name.charAt(0).toUpperCase()}
+                          <div className="w-full h-full flex items-center justify-center bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">
+                            <Layers size={18} />
                           </div>
                         )}
                       </div>
