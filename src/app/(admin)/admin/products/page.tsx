@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { Plus, Package, AlertTriangle, DollarSign } from "lucide-react";
-import AdminSearch from "@/modules/admin/components/admin-search";
+import { Plus, Package, AlertTriangle, DollarSign, History } from "lucide-react";
 import ProductsTable from "@/modules/admin/components/products-table";
 import { Product } from "@/types/product";
+
+export const metadata = {
+  title: "Products Catalog — Admin",
+};
 
 interface ProductsPageProps {
   searchParams: Promise<{
@@ -56,132 +59,124 @@ export default async function ProductsPage({
   }
 
   // 2. Parallel Data Fetching
-  const [products, totalCount, filteredCount, lowStockCount, categories] =
-    await Promise.all([
-      prisma.product.findMany({
-        where,
-        include: {
-          category: true,
-        },
-        orderBy: { [sort]: order },
-        skip,
-        take: limitNum,
-      }),
-      prisma.product.count(), // Total in store
-      prisma.product.count({ where }), // Filtered count
-      prisma.product.count({
-        where: { stock: { lte: 10 } },
-      }),
-      prisma.category.findMany({
-        select: { id: true, name: true, slug: true },
-        orderBy: { name: "asc" },
-      }),
-      // Efficiently calculate inventory value using aggregate
-      prisma.product.aggregate({
-        _sum: {
-          price: true,
-          stock: true,
-        },
-      }),
-    ]);
-
-  // Inventory value logic: we need (price * stock) for each item.
-  // Prisma aggregate doesn't support multiplying fields within the database easily without raw queries.
-  // HOWEVER, we can at least fetch the sum of everything or just fetch price and stock for all products.
-  // To keep it simple and performant, let's fetch only price and stock for ALL products once.
-  // This is still better than include: { category: true } and many other fields.
-  const allProductStats = await prisma.product.findMany({
-    select: { price: true, stock: true },
-  });
+  const [
+    products,
+    totalCount,
+    filteredCount,
+    inStockCount,
+    lowStockCount,
+    outOfStockCount,
+    categories,
+    allProductStats,
+  ] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      include: {
+        category: true,
+      },
+      orderBy: { [sort]: order },
+      skip,
+      take: limitNum,
+    }),
+    prisma.product.count(), // Total in store
+    prisma.product.count({ where }), // Filtered count
+    prisma.product.count({ where: { stock: { gt: 10 } } }),
+    prisma.product.count({ where: { stock: { gt: 0, lte: 10 } } }),
+    prisma.product.count({ where: { stock: 0 } }),
+    prisma.category.findMany({
+      select: { id: true, name: true, slug: true },
+      orderBy: { name: "asc" },
+    }),
+    prisma.product.findMany({
+      select: { price: true, stock: true },
+    }),
+  ]);
 
   const inventoryValue = allProductStats.reduce(
     (acc, item) => acc + item.price * item.stock,
     0
   );
 
-  return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-10">
-      {/* 1. Header & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white font-sans tracking-tight">
-            Products
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-            Manage your store&apos;s inventory and catalog.
-          </p>
-        </div>
-        <Link
-          href="/admin/products/create"
-          className="inline-flex items-center gap-2 bg-gray-900 hover:bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg dark:shadow-none shadow-gray-200 active:scale-95"
-        >
-          <Plus size={18} strokeWidth={3} /> Add Product
-        </Link>
-      </div>
+  const stockCounts = {
+    all: totalCount,
+    inStock: inStockCount,
+    lowStock: lowStockCount,
+    outOfStock: outOfStockCount,
+  };
 
-      {/* 2. Quick Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm dark:shadow-none flex items-center gap-4 group hover:border-blue-100 transition-all">
-          <div className="p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:scale-110 transition-transform">
+  return (
+    <div className="w-full space-y-6 pb-10">
+      {/* 1. Page Header with Title on Left & Summary Badges on Right (with icons) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-sm shadow-indigo-200 dark:shadow-none shrink-0">
             <Package size={20} />
           </div>
           <div>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">
-              Total Products
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+              Product Catalog
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              Manage product inventory, stock levels, categories, and pricing
             </p>
-            <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tighter tabular-nums">
+          </div>
+        </div>
+
+        {/* Right Side: Total Products, Inventory Value, Low Stock Badges & Add Button */}
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="px-3.5 py-2 bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 rounded-xl shadow-2xs text-xs font-semibold text-gray-600 dark:text-gray-300 flex items-center gap-2">
+            <Package size={14} className="text-gray-400" />
+            <span className="text-gray-400 font-medium">Products:</span>
+            <span className="font-extrabold text-gray-900 dark:text-white">
               {totalCount}
-            </h3>
+            </span>
           </div>
-        </div>
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm dark:shadow-none flex items-center gap-4 group hover:border-green-100 transition-all">
-          <div className="p-3 bg-green-50 text-green-600 rounded-xl group-hover:scale-110 transition-transform">
-            <DollarSign size={20} />
-          </div>
-          <div>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">
-              Inventory Value
-            </p>
-            <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tighter tabular-nums">
+
+          <div className="px-3.5 py-2 bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/60 rounded-xl shadow-2xs text-xs font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+            <DollarSign size={14} className="text-emerald-500" />
+            <span className="text-emerald-600 dark:text-emerald-400 font-medium">Inventory:</span>
+            <span className="font-bold text-emerald-700 dark:text-emerald-300">
               ${inventoryValue.toLocaleString()}
-            </h3>
+            </span>
           </div>
-        </div>
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm dark:shadow-none flex items-center gap-4 group hover:border-orange-100 transition-all">
-          <div
-            className={`p-3 rounded-xl transition-all group-hover:scale-110 ${
-              lowStockCount > 0
-                ? "bg-orange-50 text-orange-600"
-                : "bg-gray-50 dark:bg-gray-800/50 text-gray-400"
-            }`}
+
+          {lowStockCount > 0 && (
+            <div className="px-3.5 py-2 bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-800/60 rounded-xl shadow-2xs text-xs font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-2">
+              <AlertTriangle size={14} className="text-amber-500" />
+              <span className="text-amber-600 dark:text-amber-400 font-medium">Low Stock:</span>
+              <span className="font-bold text-amber-700 dark:text-amber-300">
+                {lowStockCount}
+              </span>
+            </div>
+          )}
+
+          <Link
+            href="/admin/inventory/history"
+            className="inline-flex items-center gap-1.5 bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 text-gray-700 dark:text-gray-200 px-3.5 py-2 rounded-xl text-xs font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all shadow-2xs active:scale-95"
+            title="View Stock History"
           >
-            <AlertTriangle size={20} />
-          </div>
-          <div>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">
-              Low Stock Items
-            </p>
-            <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tighter tabular-nums">
-              {lowStockCount}
-            </h3>
-          </div>
+            <History size={14} className="text-gray-500" />
+            <span>Stock History</span>
+          </Link>
+
+          <Link
+            href="/admin/products/create"
+            className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-2xs active:scale-95 cursor-pointer"
+          >
+            <Plus size={15} />
+            <span>Add Product</span>
+          </Link>
         </div>
       </div>
 
-      {/* 3. Main Product Table Wrapper */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-3xl shadow-sm dark:shadow-none overflow-hidden">
-        {/* A. Toolbar (Search & Filter) */}
-        <div className="p-6 border-b border-gray-50 dark:border-gray-800 flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-gray-50 dark:bg-gray-800/50">
-          <AdminSearch placeholder="Search by name, SKU..." />
-        </div>
-
-        <ProductsTable
-          products={products as unknown as Product[]}
-          categories={categories}
-          totalCount={filteredCount}
-          allCount={totalCount}
-        />
-      </div>
+      {/* 2. Main Product Table Wrapper */}
+      <ProductsTable
+        products={products as unknown as Product[]}
+        categories={categories}
+        totalCount={filteredCount}
+        allCount={totalCount}
+        stockCounts={stockCounts}
+      />
     </div>
   );
 }

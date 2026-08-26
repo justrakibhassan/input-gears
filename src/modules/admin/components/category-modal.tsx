@@ -25,10 +25,11 @@ interface CategoryModalProps {
     description: string | null;
     image: string | null;
   };
+  triggerText?: string;
   onSuccess?: () => void;
 }
 
-export default function CategoryModal({ category, onSuccess }: CategoryModalProps) {
+export default function CategoryModal({ category, triggerText, onSuccess }: CategoryModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
 
@@ -81,10 +82,22 @@ export default function CategoryModal({ category, onSuccess }: CategoryModalProp
             e.preventDefault();
             setIsOpen(true);
           }}
-          className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+          className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors cursor-pointer"
           title="Edit Category"
         >
-          <Edit size={16} />
+          <Edit size={15} />
+        </button>
+      ) : triggerText ? (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            setIsOpen(true);
+          }}
+          className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95"
+        >
+          <Plus size={15} />
+          <span>{triggerText}</span>
         </button>
       ) : (
         <button
@@ -93,12 +106,13 @@ export default function CategoryModal({ category, onSuccess }: CategoryModalProp
             e.preventDefault();
             setIsOpen(true);
           }}
-          className="p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors shadow-sm dark:shadow-none"
+          className="p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors shadow-sm dark:shadow-none cursor-pointer"
           title="Quick Add Category"
         >
           <Plus size={18} />
         </button>
       )}
+
 
       {isOpen && (
         <div className="fixed inset-0 z-100 flex items-center justify-center p-4">

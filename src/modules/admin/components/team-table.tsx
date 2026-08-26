@@ -14,6 +14,10 @@ import {
   CheckCircle,
   Plus,
   UserMinus,
+  Users,
+  UserCheck,
+  Edit3,
+  Search,
 } from "lucide-react";
 import { toast } from "sonner";
 import { toggleBanUser, updateUserRole } from "@/modules/admin/actions";
@@ -52,6 +56,12 @@ export default function TeamTable({ staff }: TeamTableProps) {
   const [activeTab, setActiveTab] = useState<"ALL" | UserRole>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Stats calculation
+  const totalStaff = staff.length;
+  const admins = staff.filter((s) => s.role === "SUPER_ADMIN").length;
+  const managers = staff.filter((s) => s.role === "MANAGER").length;
+  const editors = staff.filter((s) => s.role === "CONTENT_EDITOR").length;
+
   // Client-side search and tab filtering
   const filteredStaff = staff.filter((member) => {
     const matchesSearch =
@@ -63,7 +73,6 @@ export default function TeamTable({ staff }: TeamTableProps) {
     return matchesSearch && matchesTab;
   });
 
-  // Count helper
   const getTabCount = (role: "ALL" | UserRole) => {
     if (role === "ALL") return staff.length;
     return staff.filter((m) => m.role === role).length;
@@ -105,8 +114,15 @@ export default function TeamTable({ staff }: TeamTableProps) {
     });
   };
 
+  const TABS = [
+    { label: "All Staff", value: "ALL" as const, count: totalStaff },
+    { label: "Admins", value: "SUPER_ADMIN" as const, count: admins },
+    { label: "Managers", value: "MANAGER" as const, count: managers },
+    { label: "Editors", value: "CONTENT_EDITOR" as const, count: editors },
+  ];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       {/* Alert for demotion confirmation */}
       <AlertModal
         isOpen={demotingUser !== null}
@@ -137,82 +153,135 @@ export default function TeamTable({ staff }: TeamTableProps) {
         onClose={() => setIsAddStaffOpen(false)}
       />
 
-      {/* Top action bar: Search & Add Team Member */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div className="relative w-full sm:max-w-xs">
+      {/* 1. Page Header with Title on Left & Summary Badges on Right (with icons) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-sm shadow-indigo-200 dark:shadow-none shrink-0">
+            <Users size={20} />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+              Team Management
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              Manage administrator permissions, staff roles, and access controls
+            </p>
+          </div>
+        </div>
+
+        {/* Right Side: Total Staff, Admins, Managers, Editors Badges & Add Button */}
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="px-3.5 py-2 bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 rounded-xl shadow-2xs text-xs font-semibold text-gray-600 dark:text-gray-300 flex items-center gap-2">
+            <Users size={14} className="text-gray-400" />
+            <span className="text-gray-400 font-medium">Total:</span>
+            <span className="font-extrabold text-gray-900 dark:text-white">
+              {totalStaff}
+            </span>
+          </div>
+
+          <div className="px-3.5 py-2 bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200/70 dark:border-rose-800/60 rounded-xl shadow-2xs text-xs font-semibold text-rose-800 dark:text-rose-300 flex items-center gap-2">
+            <Shield size={14} className="text-rose-500" />
+            <span className="text-rose-600 dark:text-rose-400 font-medium">Admins:</span>
+            <span className="font-bold text-rose-700 dark:text-rose-300">
+              {admins}
+            </span>
+          </div>
+
+          <div className="px-3.5 py-2 bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-800/60 rounded-xl shadow-2xs text-xs font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-2">
+            <UserCheck size={14} className="text-amber-500" />
+            <span className="text-amber-600 dark:text-amber-400 font-medium">Managers:</span>
+            <span className="font-bold text-amber-700 dark:text-amber-300">
+              {managers}
+            </span>
+          </div>
+
+          <div className="px-3.5 py-2 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/70 dark:border-blue-800/60 rounded-xl shadow-2xs text-xs font-semibold text-blue-800 dark:text-blue-300 flex items-center gap-2">
+            <Edit3 size={14} className="text-blue-500" />
+            <span className="text-blue-600 dark:text-blue-400 font-medium">Editors:</span>
+            <span className="font-bold text-blue-700 dark:text-blue-300">
+              {editors}
+            </span>
+          </div>
+
+          <button
+            onClick={() => setIsAddStaffOpen(true)}
+            className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95"
+          >
+            <Plus size={15} />
+            <span>Add Team Member</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 2. Control Bar: Filter Tabs & Search */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200/80 dark:border-gray-800 p-3 sm:p-4 shadow-2xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        {/* Filter Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+          {TABS.map((tab) => {
+            const isActive = activeTab === tab.value;
+            return (
+              <button
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value)}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5",
+                  isActive
+                    ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-xs"
+                    : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/60"
+                )}
+              >
+                <span>{tab.label}</span>
+                <span
+                  className={cn(
+                    "px-1.5 py-0.2 rounded-full text-[10px]",
+                    isActive
+                      ? "bg-white/20 dark:bg-black/20 text-white dark:text-gray-900"
+                      : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                  )}
+                >
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Search Input */}
+        <div className="relative min-w-[220px] sm:w-64">
+          <Search
+            size={15}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+          />
           <input
             type="text"
             placeholder="Search team members..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-11 bg-white dark:bg-gray-900 border border-gray-150 dark:border-gray-800 rounded-2xl pl-4 pr-4 text-xs font-semibold focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 transition-all outline-none text-gray-900 dark:text-white"
+            className="w-full pl-8.5 pr-3 py-1.5 text-xs rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-900 focus:border-indigo-500 focus:outline-none transition-all"
           />
         </div>
-        <button
-          onClick={() => setIsAddStaffOpen(true)}
-          className="w-full sm:w-auto h-11 px-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg dark:shadow-none shadow-indigo-100 transition-all active:scale-98"
-        >
-          <Plus size={16} />
-          Add Team Member
-        </button>
       </div>
 
-      {/* Filters tabs bar */}
-      <div className="flex border-b border-gray-100 dark:border-gray-800/80 overflow-x-auto scrollbar-none gap-2">
-        {([
-          { label: "All Staff", value: "ALL" },
-          { label: "Admins", value: "SUPER_ADMIN" },
-          { label: "Managers", value: "MANAGER" },
-          { label: "Editors", value: "CONTENT_EDITOR" },
-        ] as const).map((tab) => {
-          const isActive = activeTab === tab.value;
-          return (
-            <button
-              key={tab.value}
-              onClick={() => setActiveTab(tab.value)}
-              className={cn(
-                "pb-3.5 px-3 text-xs font-bold transition-all relative border-b-2 border-transparent -mb-[2px]",
-                isActive
-                  ? "text-indigo-600 border-indigo-600"
-                  : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              )}
-            >
-              <div className="flex items-center gap-1.5 whitespace-nowrap">
-                <span>{tab.label}</span>
-                <span
-                  className={cn(
-                    "px-1.5 py-0.5 rounded-md text-[10px] font-black tracking-normal",
-                    isActive
-                      ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400"
-                      : "bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500"
-                  )}
-                >
-                  {getTabCount(tab.value)}
-                </span>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Staff Table */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm dark:shadow-none overflow-hidden">
+      {/* 3. Actionable Staff Table */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200/80 dark:border-gray-800 shadow-2xs overflow-hidden w-full">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[700px] border-collapse text-left">
-            <thead>
-              <tr className="border-b border-gray-50 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-850/50">
-                <th className="px-6 py-4 text-xs font-bold text-gray-400">Team Member</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400">System Role</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400">Status</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400">Joined On</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-400 text-right">Actions</th>
+          <table className="w-full text-left text-sm">
+            <thead className="bg-gray-50/80 dark:bg-gray-800/60 border-b border-gray-200/80 dark:border-gray-800 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <tr>
+                <th className="px-5 py-3.5">Team Member</th>
+                <th className="px-5 py-3.5">System Role</th>
+                <th className="px-5 py-3.5">Status</th>
+                <th className="px-5 py-3.5">Joined On</th>
+                <th className="px-5 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50 dark:divide-gray-800/80">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {filteredStaff.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-gray-400 text-xs font-medium">
-                    No team members found.
+                  <td colSpan={5} className="py-12 text-center text-gray-400 dark:text-gray-500">
+                    <Users size={32} className="mx-auto mb-2 opacity-40" />
+                    <p className="text-sm font-semibold">No team members found</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Try searching with a different name or role filter.</p>
                   </td>
                 </tr>
               ) : (
@@ -220,11 +289,11 @@ export default function TeamTable({ staff }: TeamTableProps) {
                   return (
                     <tr
                       key={member.id}
-                      className="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors"
+                      className="hover:bg-gray-50/70 dark:hover:bg-gray-800/50 transition-colors"
                     >
-                      <td className="px-6 py-4.5">
+                      <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
-                          <div className="relative w-9 h-9 rounded-xl overflow-hidden bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-100/10 shrink-0 flex items-center justify-center">
+                          <div className="relative w-9 h-9 rounded-xl overflow-hidden bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-100/30 shrink-0 flex items-center justify-center">
                             {member.image ? (
                               <Image
                                 src={member.image}
@@ -246,37 +315,37 @@ export default function TeamTable({ staff }: TeamTableProps) {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4.5">
+                      <td className="px-5 py-3.5">
                         <span
                           className={cn(
-                            "px-2.5 py-1 rounded-xl text-[10px] font-bold border",
+                            "px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border",
                             member.role === "SUPER_ADMIN" &&
-                              "bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30",
+                              "bg-rose-50 text-rose-700 border-rose-200/80 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900/40",
                             member.role === "MANAGER" &&
-                              "bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30",
+                              "bg-amber-50 text-amber-700 border-amber-200/80 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900/40",
                             member.role === "CONTENT_EDITOR" &&
-                              "bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30"
+                              "bg-blue-50 text-blue-700 border-blue-200/80 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900/40"
                           )}
                         >
                           {member.role === "SUPER_ADMIN"
-                            ? "Admin"
+                            ? "Super Admin"
                             : member.role === "MANAGER"
                             ? "Manager"
-                            : "Editor"}
+                            : "Content Editor"}
                         </span>
                       </td>
-                      <td className="px-6 py-4.5">
+                      <td className="px-5 py-3.5">
                         {member.banned ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-bold bg-rose-50 text-rose-600 border border-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/30 animate-pulse">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200 animate-pulse">
                             Banned
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/30">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">
                             Active
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4.5">
+                      <td className="px-5 py-3.5">
                         <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
                           {new Date(member.createdAt).toLocaleDateString("en-US", {
                             month: "short",
@@ -285,14 +354,14 @@ export default function TeamTable({ staff }: TeamTableProps) {
                           })}
                         </span>
                       </td>
-                      <td className="px-6 py-4.5 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                      <td className="px-5 py-3.5 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
                           <a
                             href={`mailto:${member.email}`}
-                            className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-all"
+                            className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-gray-800 rounded-lg transition-all"
                             title="Email Member"
                           >
-                            <Mail size={16} />
+                            <Mail size={15} />
                           </a>
 
                           {/* Action Dropdown Menu */}
@@ -303,30 +372,29 @@ export default function TeamTable({ staff }: TeamTableProps) {
                                   activeDropdownId === member.id ? null : member.id
                                 )
                               }
-                              className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-all"
+                              className="p-1.5 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all cursor-pointer"
                               title="Actions"
                             >
-                              <MoreHorizontal size={16} />
+                              <MoreHorizontal size={15} />
                             </button>
 
                             {activeDropdownId === member.id && (
                               <>
-                                {/* Backdrop to close dropdown */}
                                 <div
                                   className="fixed inset-0 z-40 bg-transparent"
                                   onClick={() => setActiveDropdownId(null)}
                                 />
 
-                                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl z-50 py-2 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 rounded-xl shadow-xl z-50 py-1.5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                                   <button
                                     onClick={() => {
                                       setChangingRoleUser(member);
                                       setActiveDropdownId(null);
                                     }}
-                                    className="w-full text-left px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors"
+                                    className="w-full text-left px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors cursor-pointer"
                                   >
-                                    <Shield size={14} className="text-gray-400" />
-                                    Change Role
+                                    <Shield size={13} className="text-gray-400" />
+                                    <span>Change Role</span>
                                   </button>
 
                                   <button
@@ -335,7 +403,7 @@ export default function TeamTable({ staff }: TeamTableProps) {
                                       setActiveDropdownId(null);
                                     }}
                                     className={cn(
-                                      "w-full text-left px-4 py-2.5 text-xs font-semibold flex items-center gap-2 transition-colors",
+                                      "w-full text-left px-3.5 py-2 text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer",
                                       member.banned
                                         ? "text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/20"
                                         : "text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/20"
@@ -343,28 +411,28 @@ export default function TeamTable({ staff }: TeamTableProps) {
                                   >
                                     {member.banned ? (
                                       <>
-                                        <CheckCircle size={14} />
-                                        Unban Member
+                                        <CheckCircle size={13} />
+                                        <span>Unban Member</span>
                                       </>
                                     ) : (
                                       <>
-                                        <Ban size={14} />
-                                        Ban Member
+                                        <Ban size={13} />
+                                        <span>Ban Member</span>
                                       </>
                                     )}
                                   </button>
 
-                                  <div className="border-t border-gray-50 dark:border-gray-800 my-1" />
+                                  <div className="border-t border-gray-100 dark:border-gray-800 my-1" />
 
                                   <button
                                     onClick={() => {
                                       setDemotingUser(member);
                                       setActiveDropdownId(null);
                                     }}
-                                    className="w-full text-left px-4 py-2.5 text-xs font-semibold text-red-650 hover:bg-red-50 dark:hover:bg-red-950/20 flex items-center gap-2 transition-colors"
+                                    className="w-full text-left px-3.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 flex items-center gap-2 transition-colors cursor-pointer"
                                   >
-                                    <UserMinus size={14} />
-                                    Demote to Customer
+                                    <UserMinus size={13} />
+                                    <span>Demote to Customer</span>
                                   </button>
                                 </div>
                               </>
