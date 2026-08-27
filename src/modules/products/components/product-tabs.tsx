@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Product } from "../types";
 import { FileText, ClipboardList, MessageSquare, Star } from "lucide-react";
@@ -34,20 +34,40 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
     { id: "reviews", label: `Reviews (${reviewCount})`, icon: Star },
   ];
 
-  const specs = [
-    { label: "Brand", value: product.brand },
-    { label: "SKU", value: product.sku },
-    { label: "DPI", value: product.dpi },
-    { label: "Weight", value: product.weight },
-    { label: "Connection Type", value: product.connectionType },
-    { label: "Polling Rate", value: product.pollingRate },
-    { label: "Sensor", value: product.sensor },
-    { label: "Warranty", value: product.warranty },
-    { label: "Availability", value: product.availability },
-  ].filter((spec) => spec.value);
+  const specs = useMemo(() => {
+    const list: { label: string; value: string | number }[] = [];
+
+    if (product.brand) list.push({ label: "Brand", value: product.brand });
+    if (product.sku) list.push({ label: "SKU / Model Code", value: product.sku });
+    if (product.switchType) list.push({ label: "Switch Type", value: product.switchType });
+    if (product.connectionType) list.push({ label: "Connection Type", value: product.connectionType });
+    if (product.sensor) list.push({ label: "Sensor", value: product.sensor });
+    if (product.dpi) list.push({ label: "DPI / Resolution", value: product.dpi });
+    if (product.pollingRate) list.push({ label: "Polling Rate", value: product.pollingRate });
+    if (product.weight) list.push({ label: "Weight", value: product.weight });
+    if (product.warranty) list.push({ label: "Warranty", value: product.warranty });
+    if (product.availability) list.push({ label: "Availability", value: product.availability });
+
+    // Include custom JSON specs if provided, safely excluding colorMap or nested objects
+    if (product.specs && typeof product.specs === "object") {
+      Object.entries(product.specs).forEach(([key, val]) => {
+        if (key === "colorMap") return;
+        if (typeof val === "object" && val !== null) return;
+        if (val !== null && val !== undefined && val !== "") {
+          const formattedLabel = key
+            .replace(/([A-Z])/g, " $1")
+            .replace(/^./, (str) => str.toUpperCase());
+          list.push({ label: formattedLabel, value: String(val) });
+        }
+      });
+    }
+
+    return list;
+  }, [product]);
 
   return (
     <div className="w-full">
+      {/* Tabs Header Navigation */}
       <div className="flex flex-wrap gap-2 border-b border-gray-200 mb-8 pb-px overflow-x-auto no-scrollbar">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -57,17 +77,17 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "relative flex items-center gap-2 px-6 py-4 text-sm font-semibold transition-all duration-300 whitespace-nowrap",
+                "relative flex items-center gap-2 px-6 py-4 text-sm font-semibold transition-all duration-300 whitespace-nowrap cursor-pointer",
                 isActive
                   ? "text-indigo-600"
-                  : "text-gray-500 hover:text-gray-900"
+                  : "text-gray-500 hover:text-gray-900",
               )}
             >
               <Icon size={18} />
               {tab.label}
               {isActive && (
                 <motion.div
-                  layoutId="activeTab"
+                  layoutId="activeProductTab"
                   className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 shadow-[0_-2px_8px_rgba(79,70,229,0.4)]"
                   initial={false}
                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
@@ -78,6 +98,7 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
         })}
       </div>
 
+      {/* Tabs Content Surface */}
       <div className="min-h-[400px]">
         <AnimatePresence mode="wait">
           <motion.div
@@ -87,37 +108,46 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
           >
+            {/* 1. Specification Tab */}
             {activeTab === "specification" && (
               <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-                <table className="w-full text-left border-collapse">
-                  <tbody>
-                    {specs.map((spec, index) => (
-                      <tr
-                        key={spec.label}
-                        className={cn(
-                          "transition-colors hover:bg-gray-50/50",
-                          index !== specs.length - 1 && "border-b border-gray-50"
-                        )}
-                      >
-                        <td className="py-4 px-6 text-sm font-medium text-gray-500 w-1/3">
-                          {spec.label}
-                        </td>
-                        <td className="py-4 px-6 text-sm font-semibold text-gray-900">
-                          {spec.value}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                {specs.length > 0 ? (
+                  <table className="w-full text-left border-collapse">
+                    <tbody>
+                      {specs.map((spec, index) => (
+                        <tr
+                          key={spec.label}
+                          className={cn(
+                            "transition-colors hover:bg-gray-50/50",
+                            index !== specs.length - 1 && "border-b border-gray-50",
+                          )}
+                        >
+                          <td className="py-4 px-6 text-sm font-medium text-gray-500 w-1/3">
+                            {spec.label}
+                          </td>
+                          <td className="py-4 px-6 text-sm font-semibold text-gray-900">
+                            {spec.value}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className="p-8 text-center text-gray-400 text-sm font-medium">
+                    No detailed specifications listed for this product yet.
+                  </div>
+                )}
               </div>
             )}
 
+            {/* 2. Description Tab */}
             {activeTab === "description" && (
-              <div className="prose prose-indigo max-w-none bg-white p-8 rounded-2xl border border-gray-100 shadow-sm leading-relaxed text-gray-600">
+              <div className="prose prose-indigo max-w-none bg-white p-8 rounded-2xl border border-gray-100 shadow-sm leading-relaxed text-gray-600 whitespace-pre-line">
                 {product.description || "No description available."}
               </div>
             )}
 
+            {/* 3. Questions Tab */}
             {activeTab === "questions" && (
               <div className="flex flex-col items-center justify-center py-20 text-center bg-gray-50/50 rounded-2xl border-2 border-dashed border-gray-200">
                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
@@ -127,12 +157,13 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
                 <p className="text-gray-500 mt-2 max-w-xs">
                   Be the first to ask a question about this product!
                 </p>
-                <button className="mt-6 px-6 py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-indigo-600 transition shadow-lg">
+                <button className="mt-6 px-6 py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-indigo-600 transition shadow-lg cursor-pointer">
                   Ask a Question
                 </button>
               </div>
             )}
 
+            {/* 4. Reviews Tab */}
             {activeTab === "reviews" && (
               <div className="space-y-12">
                 <ReviewForm productId={product.id} />

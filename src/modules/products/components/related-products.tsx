@@ -29,42 +29,57 @@ const RelatedProducts = ({ products }: RelatedProductsProps) => {
       </div>
 
       <div className="space-y-5">
-        {products.map((product) => (
-          <Link
-            key={product.id}
-            href={`/products/${product.slug}`}
-            className="group flex gap-4 p-3 rounded-2xl hover:bg-white hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 border border-transparent hover:border-indigo-100"
-          >
-            <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-50 border border-gray-100">
-              <Image
-                src={product.images?.[0] || product.image || "/placeholder.png"}
-                alt={product.name}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-            </div>
+        {products.map((product) => {
+          const effectivePrice =
+            product.isOnSale && product.salePrice
+              ? product.salePrice
+              : product.price;
 
-            <div className="flex flex-col justify-center min-w-0">
-              <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-1">
-                {product.category?.name || "General"}
-              </span>
-              <h4 className="text-sm font-bold text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
-                {product.name}
-              </h4>
-              <div className="flex items-center gap-2 mt-1.5">
-                <span className="text-sm font-black text-gray-900">
-                  ${product.price}
+          const formattedPrice = new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+          }).format(effectivePrice);
+
+          return (
+            <Link
+              key={product.id}
+              href={`/products/${product.slug}`}
+              className="group flex gap-4 p-3 rounded-2xl hover:bg-white hover:shadow-lg hover:shadow-gray-200/50 transition-all duration-300 border border-transparent hover:border-gray-200"
+            >
+              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-50 border border-gray-150/80">
+                <Image
+                  src={
+                    product.images?.[0] || product.image || "/placeholder.png"
+                  }
+                  alt={product.name}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  sizes="80px"
+                />
+              </div>
+
+              <div className="flex flex-col justify-center min-w-0">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+                  {product.category?.name || "General"}
                 </span>
-                <div className="flex items-center text-yellow-400">
-                  <Star size={10} fill="currentColor" />
-                  <span className="text-[10px] font-bold text-gray-400 ml-0.5">
-                    4.8
+                <h4 className="text-sm font-bold text-gray-900 truncate group-hover:text-gray-700 transition-colors tracking-tight">
+                  {product.name}
+                </h4>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className="text-sm font-extrabold text-gray-900 tabular-nums">
+                    {formattedPrice}
                   </span>
+                  <div className="flex items-center text-yellow-400">
+                    <Star size={10} fill="currentColor" />
+                    <span className="text-[10px] font-bold text-gray-400 ml-0.5">
+                      4.8
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          );
+        })}
       </div>
 
       {/* Modern Ad/Promo Card */}
@@ -78,9 +93,12 @@ const RelatedProducts = ({ products }: RelatedProductsProps) => {
             Our technical experts are ready to help you choose the best gear for
             your setup.
           </p>
-          <button className="w-full py-2 bg-white text-indigo-600 rounded-lg text-xs font-black shadow-lg hover:bg-indigo-50 transition-colors active:scale-95">
+          <Link
+            href="/contact"
+            className="block text-center w-full py-2 bg-white text-indigo-600 rounded-lg text-xs font-black shadow-lg hover:bg-indigo-50 transition-colors active:scale-95"
+          >
             CHAT WITH EXPERT
-          </button>
+          </Link>
         </div>
       </div>
     </div>

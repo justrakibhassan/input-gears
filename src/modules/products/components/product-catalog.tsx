@@ -134,10 +134,10 @@ const ProductCatalog = memo(({ products, showFilters = true }: ProductCatalogPro
       {viewMode === "grid" && (
         <div
           className={cn(
-            "grid grid-cols-2 gap-5 sm:gap-6 lg:gap-8",
+            "grid grid-cols-2 gap-3.5 sm:gap-4 lg:gap-5",
             showFilters
-              ? "lg:grid-cols-2 xl:grid-cols-3 mini:grid-cols-3"
-              : "lg:grid-cols-3 xl:grid-cols-4 mini:grid-cols-4",
+              ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              : "sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5",
           )}
         >
           {products.map((product) => (
@@ -149,10 +149,10 @@ const ProductCatalog = memo(({ products, showFilters = true }: ProductCatalogPro
       {viewMode === "compact-grid" && (
         <div
           className={cn(
-            "grid grid-cols-2 gap-4",
+            "grid grid-cols-2 gap-3 sm:gap-3.5 lg:gap-4",
             showFilters
-              ? "md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 mini:grid-cols-4"
-              : "md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 mini:grid-cols-5",
+              ? "sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+              : "sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6",
           )}
         >
           {products.map((product) => (

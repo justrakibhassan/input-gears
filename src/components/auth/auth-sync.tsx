@@ -7,7 +7,7 @@ import { useCart } from "@/modules/cart/hooks/use-cart";
 
 export function AuthSync() {
   const { data: session, isPending } = useSession();
-  const { syncAccount: syncWishlist, fetchWishlist, items: wishlistItems } = useWishlist();
+  const { syncAccount: syncWishlist, fetchWishlist, clearWishlist, items: wishlistItems } = useWishlist();
   const { syncAccount: syncCart, fetchCart, items: cartItems } = useCart();
   const prevSessionRef = useRef(session);
 
@@ -27,6 +27,9 @@ export function AuthSync() {
         } else {
           fetchCart();
         }
+      } else if (!session && prevSessionRef.current) {
+        // User logged out: Reset client-side wishlist so previous user items/counts don't remain
+        clearWishlist();
       }
       prevSessionRef.current = session;
     }

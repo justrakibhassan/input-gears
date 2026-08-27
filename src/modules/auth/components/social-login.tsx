@@ -1,7 +1,7 @@
 "use client";
 
 import { authClient } from "@/lib/auth-client";
-import { Github, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -12,19 +12,19 @@ export default function SocialLogin() {
 
   const callbackURL = searchParams.get("callbackURL") || "/account";
 
-  const handleSocialLogin = async (provider: "github" | "google") => {
+  const handleGoogleLogin = async () => {
     setIsLoading(true);
-    toast.loading(`Redirecting to ${provider}...`);
+    toast.loading("Redirecting to Google...");
 
     await authClient.signIn.social(
       {
-        provider: provider,
+        provider: "google",
         callbackURL: callbackURL,
       },
       {
         onError: (ctx) => {
           toast.dismiss();
-          toast.error(ctx.error.message || `Failed to login with ${provider}`);
+          toast.error(ctx.error.message || "Failed to login with Google");
           setIsLoading(false);
         },
         onSuccess: () => {
@@ -36,32 +36,17 @@ export default function SocialLogin() {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="w-full">
       <button
         type="button"
         disabled={isLoading}
-        onClick={() => handleSocialLogin("github")}
-        className="flex items-center justify-center gap-2 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 rounded-lg text-sm text-gray-700 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        onClick={handleGoogleLogin}
+        className="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 rounded-xl text-sm text-gray-800 font-semibold shadow-2xs transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
       >
         {isLoading ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
+          <Loader2 className="w-4 h-4 animate-spin text-gray-600" />
         ) : (
-          <Github className="w-4 h-4 text-gray-900" />
-        )}
-        GitHub
-      </button>
-
-      <button
-        type="button"
-        disabled={isLoading}
-        onClick={() => handleSocialLogin("google")}
-        className="flex items-center justify-center gap-2 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 rounded-lg text-sm text-gray-700 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {isLoading ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
-        ) : (
-          // SVG Icon
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+          <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
             <path
               d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
               fill="#34A853"
@@ -80,7 +65,7 @@ export default function SocialLogin() {
             />
           </svg>
         )}
-        Google
+        <span>Continue with Google</span>
       </button>
     </div>
   );

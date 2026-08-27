@@ -5,10 +5,8 @@ import { format, formatDistanceToNow } from "date-fns";
 import {
   ShieldAlert,
   Search,
-  Filter,
   Calendar,
   ChevronDown,
-  ChevronUp,
   Copy,
   Download,
   User,
@@ -21,9 +19,6 @@ import {
   Check,
   Layers,
   Settings,
-  AlertTriangle,
-  Database,
-  ArrowUpDown,
   ChevronLeft,
   ChevronRight,
   Sparkles,
@@ -34,10 +29,10 @@ import { cn } from "@/lib/utils";
 export interface AuditLog {
   id: string;
   adminId: string;
-  admin: {
-    name: string;
-    email: string;
-  };
+  admin?: {
+    name?: string | null;
+    email?: string | null;
+  } | null;
   action: string;
   entityType: string;
   entityId: string;
@@ -45,8 +40,11 @@ export interface AuditLog {
   createdAt: Date | string;
 }
 
-interface AuditLogsTableProps {
-  data: AuditLog[];
+export type ActionCategoryOption = "ALL" | "CREATE" | "UPDATE" | "DELETE" | "OTHER";
+export type DateRangeOption = "ALL" | "TODAY" | "7D" | "30D";
+
+export interface AuditLogsTableProps {
+  data?: AuditLog[] | null;
 }
 
 // Fallback demo audit trail if DB is currently clean
@@ -140,10 +138,10 @@ export function AuditLogsTable({ data: initialData }: AuditLogsTableProps) {
 
   // Filters State
   const [search, setSearch] = useState("");
-  const [actionCategory, setActionCategory] = useState<"ALL" | "CREATE" | "UPDATE" | "DELETE" | "OTHER">("ALL");
+  const [actionCategory, setActionCategory] = useState<ActionCategoryOption>("ALL");
   const [selectedEntity, setSelectedEntity] = useState<string>("ALL");
   const [selectedAdmin, setSelectedAdmin] = useState<string>("ALL");
-  const [dateRange, setDateRange] = useState<"ALL" | "TODAY" | "7D" | "30D">("ALL");
+  const [dateRange, setDateRange] = useState<DateRangeOption>("ALL");
 
   // Interactive Table State
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -504,7 +502,7 @@ export function AuditLogsTable({ data: initialData }: AuditLogsTableProps) {
               <select
                 value={dateRange}
                 onChange={(e) => {
-                  setDateRange(e.target.value as any);
+                  setDateRange(e.target.value as DateRangeOption);
                   setPage(1);
                 }}
                 className="bg-transparent text-gray-900 dark:text-white font-bold outline-none cursor-pointer text-xs"

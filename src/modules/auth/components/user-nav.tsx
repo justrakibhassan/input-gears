@@ -7,13 +7,13 @@ import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 import {
   User,
-  Settings,
   LogOut,
   LayoutDashboard,
   BadgeCheck,
   CreditCard,
 } from "lucide-react";
 import Image from "next/image";
+import { useWishlist } from "@/modules/products/hooks/use-wishlist";
 
 interface UserNavProps {
   session: {
@@ -44,6 +44,7 @@ export default function UserNav({ session }: UserNavProps) {
   }, []);
 
   const handleLogout = async () => {
+    useWishlist.getState().clearWishlist();
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {

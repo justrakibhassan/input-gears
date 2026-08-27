@@ -118,58 +118,47 @@ const ProductRowCard = memo(({ data }: ProductRowCardProps) => {
 
   return (
     <motion.div
-      whileHover={{ y: -2, scale: 1.005 }}
+      whileHover={{ y: -2 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      className="group relative bg-white rounded-3xl border border-gray-100 shadow-sm transition-all duration-300 md:hover:shadow-[0_15px_35px_rgba(79,70,229,0.08)] md:hover:border-indigo-100 overflow-hidden flex flex-row p-3 sm:p-4 gap-4 sm:gap-6 items-center"
+      className="group relative bg-white rounded-2xl sm:rounded-3xl border border-gray-150/90 shadow-2xs transition-all duration-300 hover:shadow-xl hover:shadow-gray-200/50 hover:border-gray-200 overflow-hidden flex flex-row p-3 sm:p-4 gap-4 sm:gap-6 items-center"
     >
       <QuickViewModal
         isOpen={isQuickViewOpen}
         onClose={() => setIsQuickViewOpen(false)}
-        product={{
-          id: data.id,
-          name: data.name,
-          price: data.price,
-          image: data.image,
-          description: data.description,
-          stock: data.stock,
-          slug: data.slug,
-          category: data.category,
-          brand: data.brand || null,
-          switchType: data.switchType,
-        }}
+        product={data}
       />
 
-      {/* Image */}
-      <div className="relative w-24 h-24 sm:w-48 sm:aspect-4/3 bg-gray-50 rounded-xl sm:rounded-2xl overflow-hidden flex-shrink-0">
+      {/* Image Container */}
+      <div className="relative w-24 h-24 sm:w-44 sm:aspect-4/3 bg-gray-50/80 rounded-xl sm:rounded-2xl overflow-hidden flex-shrink-0">
         <Link href={`/products/${data.slug}`} className="relative block w-full h-full">
           {data.image ? (
             <Image
               src={data.image}
               alt={data.name}
               fill
-              className={`object-cover transition-transform duration-700 ${
-                isOutOfStock ? "opacity-45 grayscale" : "md:group-hover:scale-105"
+              className={`object-cover transition-transform duration-700 ease-out ${
+                isOutOfStock ? "opacity-35 grayscale" : "group-hover:scale-105"
               }`}
               sizes="(max-width: 640px) 100vw, 200px"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-300 font-medium italic">
+            <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs font-medium italic">
               No Image
             </div>
           )}
         </Link>
 
-        {/* Category Badges */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-          {data.category && (
-            <div className="bg-gray-900/90 backdrop-blur-md text-white px-2 py-0.5 rounded-full text-[8px] sm:text-[9px] font-bold uppercase tracking-wider shadow-sm">
-              {data.category.name}
-            </div>
+        {/* Minimal Badges */}
+        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10 pointer-events-none">
+          {data.isOnSale && data.salePrice && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200/80 shadow-2xs">
+              Sale
+            </span>
           )}
           {isOutOfStock && (
-            <div className="bg-red-500/95 backdrop-blur-md text-white px-2 py-0.5 rounded-full text-[8px] sm:text-[9px] font-bold uppercase tracking-wider shadow-md">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-gray-900/85 backdrop-blur-md text-white shadow-2xs">
               Sold Out
-            </div>
+            </span>
           )}
         </div>
       </div>
@@ -177,19 +166,25 @@ const ProductRowCard = memo(({ data }: ProductRowCardProps) => {
       {/* Content Details */}
       <div className="flex-1 flex flex-col min-w-0 text-left">
         <div className="flex-1">
+          {data.category && (
+            <span className="text-[10px] sm:text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-0.5 block line-clamp-1">
+              {data.category.name}
+            </span>
+          )}
+
           <Link href={`/products/${data.slug}`} className="inline-block">
-            <h3 className="font-bold text-gray-900 text-sm sm:text-xl group-hover:text-indigo-600 transition-colors tracking-tight line-clamp-1">
+            <h3 className="font-bold text-gray-900 text-sm sm:text-lg group-hover:text-gray-700 transition-colors tracking-tight line-clamp-1">
               {data.name}
             </h3>
           </Link>
           
-          <p className="hidden sm:block text-xs sm:text-sm text-gray-500 font-medium mt-1.5 sm:mt-2 line-clamp-2 max-w-xl">
+          <p className="hidden sm:block text-xs text-gray-500 font-medium mt-1 line-clamp-2 max-w-xl">
             {data.description || "Premium gadget for enthusiasts."}
           </p>
 
           {/* Key specs row */}
           {(data.brand || data.connectionType || data.switchType) && (
-            <div className="hidden sm:flex flex-wrap justify-center sm:justify-start gap-x-4 gap-y-1.5 mt-3 sm:mt-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+            <div className="hidden sm:flex flex-wrap justify-start gap-x-3.5 gap-y-1 mt-2.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
               {data.brand && (
                 <span>
                   Brand: <span className="text-gray-700">{data.brand}</span>
@@ -210,41 +205,49 @@ const ProductRowCard = memo(({ data }: ProductRowCardProps) => {
         </div>
 
         {/* Footer Actions */}
-        <div className="flex flex-row items-center justify-between mt-2 pt-2 border-t border-gray-100 gap-2 w-full sm:mt-4 sm:pt-4">
+        <div className="flex flex-row items-center justify-between mt-2 pt-2.5 border-t border-gray-100 gap-2 w-full sm:mt-3 sm:pt-3">
           <div className="flex flex-col items-start">
-            <span className="text-[8px] sm:text-[9px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">
-              Price
-            </span>
-            <span className="font-black text-sm sm:text-2xl text-indigo-600 tabular-nums">
-              {formattedPrice}
-            </span>
+            {data.isOnSale && data.salePrice ? (
+              <div className="flex items-baseline gap-1.5">
+                <span className="font-extrabold text-sm sm:text-xl text-rose-600 tabular-nums">
+                  {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(data.salePrice)}
+                </span>
+                <span className="text-xs text-gray-400 line-through tabular-nums">
+                  {formattedPrice}
+                </span>
+              </div>
+            ) : (
+              <span className="font-extrabold text-sm sm:text-xl text-gray-900 tabular-nums tracking-tight">
+                {formattedPrice}
+              </span>
+            )}
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             {/* Wishlist */}
             <button
               onClick={onToggleWishlist}
               aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-              className={`h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.06)] border border-gray-100 backdrop-blur-md transition-all ${
+              className={`h-8 w-8 sm:h-9 sm:w-9 rounded-xl flex items-center justify-center border shadow-2xs backdrop-blur-md transition-all cursor-pointer ${
                 isWishlisted
-                  ? "bg-indigo-600 text-white border-indigo-600"
-                  : "bg-white text-gray-900 hover:bg-indigo-600 hover:text-white hover:border-indigo-600"
+                  ? "bg-rose-50 text-rose-600 border-rose-200 shadow-rose-100/50"
+                  : "bg-white text-gray-600 border-gray-200/80 hover:bg-white hover:text-rose-600 hover:border-rose-200"
               }`}
             >
-              <Heart size={14} fill={isWishlisted ? "currentColor" : "none"} className="sm:w-[16px] sm:h-[16px]" />
+              <Heart size={15} fill={isWishlisted ? "currentColor" : "none"} />
             </button>
 
             {/* Compare */}
             <button
               onClick={onToggleCompare}
               aria-label={isComparing ? "Remove from compare" : "Add to compare"}
-              className={`hidden sm:flex h-10 w-10 rounded-2xl items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.06)] border border-gray-100 backdrop-blur-md transition-all ${
+              className={`hidden sm:flex h-9 w-9 rounded-xl items-center justify-center border shadow-2xs backdrop-blur-md transition-all cursor-pointer ${
                 isComparing
-                  ? "bg-amber-500 text-white border-amber-500"
-                  : "bg-white text-gray-900 hover:bg-amber-500 hover:text-white hover:border-amber-500"
+                  ? "bg-gray-900 text-white border-gray-900"
+                  : "bg-white text-gray-600 border-gray-200/80 hover:bg-white hover:text-gray-950 hover:border-gray-300"
               }`}
             >
-              <ArrowLeftRight size={16} />
+              <ArrowLeftRight size={15} />
             </button>
 
             {/* Quick View */}
@@ -256,9 +259,9 @@ const ProductRowCard = memo(({ data }: ProductRowCardProps) => {
                 setIsQuickViewOpen(true);
               }}
               aria-label="Quick view product"
-              className="hidden sm:flex h-10 w-10 bg-white text-gray-900 rounded-2xl items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.06)] border border-gray-100 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all cursor-pointer"
+              className="hidden sm:flex h-9 w-9 bg-white text-gray-600 rounded-xl items-center justify-center border border-gray-200/80 hover:bg-white hover:text-gray-950 hover:border-gray-300 shadow-2xs transition-all cursor-pointer"
             >
-              <Search size={16} />
+              <Search size={15} />
             </button>
 
             {/* Add to Cart */}
@@ -266,25 +269,25 @@ const ProductRowCard = memo(({ data }: ProductRowCardProps) => {
               onClick={onAddToCart}
               disabled={isOutOfStock}
               className={`
-                h-8 w-8 sm:h-10 sm:w-auto sm:px-4 rounded-xl sm:rounded-2xl flex items-center justify-center gap-1.5 font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-sm active:scale-95 z-10 shrink-0
+                h-8 px-3 sm:h-9 sm:px-4 rounded-xl flex items-center justify-center gap-1.5 font-bold text-xs uppercase tracking-wider transition-all duration-200 shadow-2xs active:scale-95 z-10 shrink-0 cursor-pointer
                 ${
                   isOutOfStock
-                    ? "bg-gray-50 text-gray-300 cursor-not-allowed shadow-none border border-gray-100"
+                    ? "bg-gray-100 text-gray-300 cursor-not-allowed shadow-none border border-gray-200/60"
                     : isAdded
-                      ? "bg-emerald-500 text-white shadow-emerald-200"
-                      : "bg-gray-950 text-white shadow-gray-200 hover:bg-indigo-600 hover:shadow-indigo-100"
+                      ? "bg-emerald-600 text-white shadow-emerald-200/60"
+                      : "bg-gray-900 text-white hover:bg-black"
                 }
               `}
             >
               {isAdded ? (
                 <>
-                  <Check size={14} strokeWidth={3} className="animate-in zoom-in duration-500" />
+                  <Check size={14} strokeWidth={3} className="animate-in zoom-in duration-300" />
                   <span className="hidden sm:inline">Added</span>
                 </>
               ) : (
                 <>
-                  <ShoppingCart size={14} strokeWidth={2} className="transition-transform" />
-                  <span className="hidden sm:inline">Buy</span>
+                  <ShoppingCart size={14} strokeWidth={2.2} />
+                  <span className="hidden sm:inline">Add to Cart</span>
                 </>
               )}
             </button>

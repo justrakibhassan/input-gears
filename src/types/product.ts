@@ -7,7 +7,7 @@ export interface Category extends PrismaCategory {
   products?: Product[];
 }
 
-export interface Product extends Omit<PrismaProduct, "specs" | "image"> {
+export interface Product extends Omit<PrismaProduct, "specs" | "image" | "images"> {
   category?: Category | null;
   image: string | null;
   images?: string[]; // Optional array for UI components that prefer it
