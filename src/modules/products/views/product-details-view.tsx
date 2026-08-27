@@ -131,8 +131,13 @@ const ProductDetailsView = memo(
 
     const [selectedImage, setSelectedImage] = useState(allImages[0]);
     const [quantity, setQuantity] = useState(1);
+    const validColors = useMemo(() => {
+      if (!product?.colors || !Array.isArray(product.colors)) return [];
+      return product.colors.filter((c) => typeof c === "string" && c.trim().length > 0);
+    }, [product?.colors]);
+
     const [selectedColor, setSelectedColor] = useState<string | null>(
-      product?.colors?.[0] || null,
+      validColors[0] || null,
     );
     const [isAdding, setIsAdding] = useState(false);
     const [isAddedSuccess, setIsAddedSuccess] = useState(false);
@@ -147,10 +152,12 @@ const ProductDetailsView = memo(
       if (allImages.length > 0) {
         setSelectedImage(allImages[0]);
       }
-      if (product?.colors && product.colors.length > 0) {
-        setSelectedColor(product.colors[0]);
+      if (validColors.length > 0) {
+        setSelectedColor(validColors[0]);
+      } else {
+        setSelectedColor(null);
       }
-    }, [product, allImages]);
+    }, [validColors, allImages]);
 
     // Handle Color Change with automatic slider image update
     const handleSelectColor = (color: string | null) => {
@@ -608,8 +615,8 @@ const ProductDetailsView = memo(
                 </ul>
               </div>
 
-              {/* COLOR / VARIANT SELECTOR WITH DROPDOWN + PILLS */}
-              {product.colors && Array.isArray(product.colors) && product.colors.length > 0 && (
+              {/* COLOR / VARIANT SELECTOR WITH DROPDOWN + PILLS (Only shown if valid colors are declared) */}
+              {validColors.length > 0 && (
                 <div className="space-y-2.5 pt-3 border-t border-gray-150">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-gray-700 font-semibold">
@@ -631,7 +638,7 @@ const ProductDetailsView = memo(
 
                   {/* Dropdown / Swatch Selector */}
                   <div className="flex flex-wrap items-center gap-2">
-                    {product.colors.map((color) => {
+                    {validColors.map((color) => {
                       const isSelected = selectedColor === color;
                       const displayName = getDisplayColorName(color);
                       const variantMeta = colorMap && typeof colorMap === "object" ? colorMap[color] : null;
