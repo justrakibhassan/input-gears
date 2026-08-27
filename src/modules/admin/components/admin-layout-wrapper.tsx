@@ -27,12 +27,16 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTheme } from "next-themes";
+import { useWishlist } from "@/modules/products/hooks/use-wishlist";
 
 interface AdminLayoutWrapperProps {
   children: React.ReactNode;
   user: {
+    id: string;
     name: string;
-    image: string | null;
+    email: string;
+    image?: string | null;
+    role: string;
   };
 }
 export default function AdminLayoutWrapper({
@@ -52,6 +56,7 @@ export default function AdminLayoutWrapper({
   const handleSignOut = async () => {
     setIsLoggingOut(true);
     try {
+      useWishlist.getState().clearWishlist();
       await authClient.signOut();
       toast.success("Logged out successfully");
       router.replace("/sign-in");

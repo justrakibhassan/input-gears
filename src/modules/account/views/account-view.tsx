@@ -22,6 +22,7 @@ import {
   User as UserIcon,
 } from "lucide-react";
 import { useCart } from "@/modules/cart/hooks/use-cart";
+import { useWishlist } from "@/modules/products/hooks/use-wishlist";
 import { Order, OrderItem, Address } from "@prisma/client";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
@@ -135,6 +136,7 @@ export default function AccountView({
   const canAccessAdmin = isAdmin || isManager || isEditor;
 
   const handleSignOut = async () => {
+    useWishlist.getState().clearWishlist();
     await authClient.signOut();
     toast.success("Logged out successfully");
     router.push("/sign-in");

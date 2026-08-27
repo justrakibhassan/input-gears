@@ -76,6 +76,7 @@ export default function AccountSidebar({ user }: AccountSidebarProps) {
   const canAccessAdmin = isAdmin || isManager || isEditor;
 
   const handleSignOut = async () => {
+    wishlist.clearWishlist();
     await authClient.signOut();
     toast.success("Logged out successfully");
     router.push("/sign-in");

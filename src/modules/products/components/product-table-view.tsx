@@ -111,34 +111,23 @@ const TableRow = memo(({ product }: TableRowProps) => {
   };
 
   return (
-    <tr className="hover:bg-indigo-50/20 transition-colors border-b border-gray-100 group">
+    <tr className="hover:bg-gray-50/70 transition-colors border-b border-gray-100 group">
       <QuickViewModal
         isOpen={isQuickViewOpen}
         onClose={() => setIsQuickViewOpen(false)}
-        product={{
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          image: product.image,
-          description: product.description,
-          stock: product.stock,
-          slug: product.slug,
-          category: product.category,
-          brand: product.brand || null,
-          switchType: product.switchType,
-        }}
+        product={product}
       />
       {/* Product Column */}
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="flex items-center gap-4">
-          <div className="relative h-14 w-14 rounded-2xl bg-gray-50 overflow-hidden flex-shrink-0 border border-gray-100">
+        <div className="flex items-center gap-3.5">
+          <div className="relative h-12 w-12 rounded-xl bg-gray-50 overflow-hidden flex-shrink-0 border border-gray-150/80">
             {product.image ? (
               <Image
                 src={product.image}
                 alt={product.name}
                 fill
                 className="object-cover"
-                sizes="56px"
+                sizes="48px"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-300 text-[10px] italic">
@@ -149,12 +138,12 @@ const TableRow = memo(({ product }: TableRowProps) => {
           <div>
             <Link
               href={`/products/${product.slug}`}
-              className="text-sm font-bold text-gray-900 hover:text-indigo-600 transition-colors block max-w-xs truncate"
+              className="text-sm font-bold text-gray-900 hover:text-gray-700 transition-colors block max-w-xs truncate tracking-tight"
             >
               {product.name}
             </Link>
             {product.brand && (
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mt-0.5">
                 {product.brand}
               </span>
             )}
@@ -165,28 +154,27 @@ const TableRow = memo(({ product }: TableRowProps) => {
       {/* Category Column */}
       <td className="px-6 py-4 whitespace-nowrap">
         {product.category ? (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 font-medium">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100/80 text-gray-700">
             {product.category.name}
           </span>
         ) : (
-          <span className="text-gray-300 text-xs italic">-</span>
+          <span className="text-gray-300 text-xs italic">—</span>
         )}
       </td>
 
       {/* Stock Column */}
       <td className="px-6 py-4 whitespace-nowrap">
         {isOutOfStock ? (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-600 border border-rose-100">
-            <AlertTriangle size={12} />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500 border border-gray-200/60">
             Sold Out
           </span>
         ) : product.stock <= 5 ? (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-600 border border-amber-100">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200/60">
             <Package size={12} />
             Low Stock ({product.stock})
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-600 border border-emerald-100">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
             <Package size={12} />
             In Stock ({product.stock})
           </span>
@@ -195,21 +183,33 @@ const TableRow = memo(({ product }: TableRowProps) => {
 
       {/* Price Column */}
       <td className="px-6 py-4 whitespace-nowrap">
-        <span className="text-sm font-black text-indigo-600 tabular-nums">
-          {formattedPrice}
-        </span>
+        {product.isOnSale && product.salePrice ? (
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-sm font-extrabold text-rose-600 tabular-nums">
+              {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(product.salePrice)}
+            </span>
+            <span className="text-xs text-gray-400 line-through tabular-nums">
+              {formattedPrice}
+            </span>
+          </div>
+        ) : (
+          <span className="text-sm font-extrabold text-gray-900 tabular-nums tracking-tight">
+            {formattedPrice}
+          </span>
+        )}
       </td>
 
       {/* Actions Column */}
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-1.5">
           {/* Wishlist */}
           <button
             onClick={onToggleWishlist}
-            className={`h-9 w-9 rounded-xl flex items-center justify-center transition-all ${
+            aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            className={`h-8 w-8 rounded-xl flex items-center justify-center border transition-all cursor-pointer ${
               isWishlisted
-                ? "bg-indigo-600 text-white"
-                : "bg-gray-50 text-gray-500 hover:bg-indigo-50 hover:text-indigo-600"
+                ? "bg-rose-50 text-rose-600 border-rose-200"
+                : "bg-white text-gray-500 border-gray-200/80 hover:text-rose-600 hover:border-rose-200"
             }`}
           >
             <Heart size={14} fill={isWishlisted ? "currentColor" : "none"} />
@@ -218,10 +218,11 @@ const TableRow = memo(({ product }: TableRowProps) => {
           {/* Compare */}
           <button
             onClick={onToggleCompare}
-            className={`h-9 w-9 rounded-xl flex items-center justify-center transition-all ${
+            aria-label={isComparing ? "Remove from compare" : "Add to compare"}
+            className={`h-8 w-8 rounded-xl flex items-center justify-center border transition-all cursor-pointer ${
               isComparing
-                ? "bg-amber-500 text-white"
-                : "bg-gray-50 text-gray-500 hover:bg-amber-50 hover:text-amber-600"
+                ? "bg-gray-900 text-white border-gray-900"
+                : "bg-white text-gray-500 border-gray-200/80 hover:text-gray-900 hover:border-gray-300"
             }`}
           >
             <ArrowLeftRight size={14} />
@@ -230,7 +231,8 @@ const TableRow = memo(({ product }: TableRowProps) => {
           {/* Quick View */}
           <button
             onClick={() => setIsQuickViewOpen(true)}
-            className="h-9 w-9 bg-gray-50 text-gray-500 rounded-xl flex items-center justify-center hover:bg-indigo-50 hover:text-indigo-600 transition-all"
+            aria-label="Quick view product"
+            className="h-8 w-8 bg-white text-gray-500 rounded-xl flex items-center justify-center border border-gray-200/80 hover:text-gray-900 hover:border-gray-300 transition-all cursor-pointer"
           >
             <Search size={14} />
           </button>
@@ -240,25 +242,25 @@ const TableRow = memo(({ product }: TableRowProps) => {
             onClick={onAddToCart}
             disabled={isOutOfStock}
             className={`
-              h-9 px-4 rounded-xl flex items-center justify-center gap-1.5 font-bold text-xs uppercase tracking-wider transition-all shadow-sm active:scale-95
+              h-8 px-3.5 rounded-xl flex items-center justify-center gap-1.5 font-bold text-xs uppercase tracking-wider transition-all shadow-2xs active:scale-95 cursor-pointer
               ${
                 isOutOfStock
-                  ? "bg-gray-50 text-gray-300 cursor-not-allowed border border-gray-100 shadow-none"
+                  ? "bg-gray-100 text-gray-300 cursor-not-allowed border border-gray-200/60 shadow-none"
                   : isAdded
-                    ? "bg-emerald-500 text-white shadow-emerald-100"
-                    : "bg-gray-950 text-white shadow-gray-100 hover:bg-indigo-600 hover:shadow-indigo-50"
+                    ? "bg-emerald-600 text-white shadow-emerald-200/60"
+                    : "bg-gray-900 text-white hover:bg-black"
               }
             `}
           >
             {isAdded ? (
               <>
-                <Check size={12} strokeWidth={3} className="animate-in zoom-in duration-500" />
+                <Check size={12} strokeWidth={3} className="animate-in zoom-in duration-300" />
                 <span>Added</span>
               </>
             ) : (
               <>
-                <ShoppingCart size={12} strokeWidth={2} />
-                <span>Buy</span>
+                <ShoppingCart size={12} strokeWidth={2.2} />
+                <span>Add</span>
               </>
             )}
           </button>

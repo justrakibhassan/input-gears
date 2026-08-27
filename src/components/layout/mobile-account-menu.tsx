@@ -46,6 +46,7 @@ export default function MobileAccountMenu({
   useScrollLock(isOpen);
 
   const handleLogout = async () => {
+    wishlist.clearWishlist();
     await authClient.signOut();
     toast.success("Logged out successfully");
     onClose();

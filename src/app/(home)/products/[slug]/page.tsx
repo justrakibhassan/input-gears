@@ -83,28 +83,37 @@ export default async function ProductDetailsPage(props: PageProps) {
   });
 
   // 4. Fetch Review Stats
-  const reviewStats = await prisma.review.aggregate({
-    where: {
-      productId: productFromDb.id,
-      status: "APPROVED",
-    },
-    _avg: {
-      rating: true,
-    },
-    _count: {
-      rating: true,
-    },
-  });
+  let averageRating = 0;
+  let totalReviews = 0;
 
-  const averageRating = reviewStats._avg.rating || 0;
-  const totalReviews = reviewStats._count.rating || 0;
+  try {
+    const reviewStats = await prisma.review.aggregate({
+      where: {
+        productId: productFromDb.id,
+        status: "APPROVED",
+      },
+      _avg: {
+        rating: true,
+      },
+      _count: {
+        rating: true,
+      },
+    });
+
+    averageRating = reviewStats._avg.rating || 0;
+    totalReviews = reviewStats._count.rating || 0;
+  } catch (error) {
+    console.error("Error fetching review stats:", error);
+  }
 
   // 5. Data Transformation
   const transformedProduct: Product = {
     ...productFromDb,
     description: productFromDb.description || "",
     image: productFromDb.image,
-    images: productFromDb.image ? [productFromDb.image] : ["/placeholder.png"],
+    images: (productFromDb.images && productFromDb.images.length > 0)
+      ? productFromDb.images
+      : (productFromDb.image ? [productFromDb.image] : ["/placeholder.png"]),
     category: productFromDb.category
       ? {
           ...productFromDb.category,
@@ -118,7 +127,9 @@ export default async function ProductDetailsPage(props: PageProps) {
     ...p,
     description: p.description || "",
     image: p.image,
-    images: p.image ? [p.image] : ["/placeholder.png"],
+    images: (p.images && p.images.length > 0)
+      ? p.images
+      : (p.image ? [p.image] : ["/placeholder.png"]),
     category: p.category ? { ...p.category } : null,
     specs: (p.specs as Record<string, string | number | boolean | null>) || {},
   }));

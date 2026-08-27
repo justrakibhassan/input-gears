@@ -210,10 +210,10 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
       <header className="sticky top-0 z-50 w-full group/nav">
         {/* PRIMARY NAVBAR */}
         <nav
-          className={`w-full transition-all duration-500 border-b ${
+          className={`w-full transition-all duration-300 border-b ${
             isScrolled
-              ? "bg-white/60 backdrop-blur-2xl py-3 shadow-md border-white/40 ring-1 ring-black/5"
-              : "bg-white py-4 border-gray-200/50"
+              ? "bg-white/80 backdrop-blur-xl py-2 shadow-xs border-gray-200/60 ring-1 ring-black/5"
+              : "bg-white py-2.5 sm:py-3 border-gray-200/50"
           }`}
         >
           <div className="relative max-w-[1440px] mx-auto px-4 sm:px-8 flex items-center justify-between gap-4 md:gap-8">
@@ -406,11 +406,11 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
 
         {/* SECONDARY NAVBAR (Desktop Categories Mega Menu Row) */}
         <div
-          className={`hidden lg:flex w-full bg-white border-b border-gray-100 transition-all duration-300 ${
-            isScrolled ? "opacity-0 invisible h-0" : "opacity-100 visible h-[52px]"
+          className={`hidden lg:flex w-full bg-white/95 backdrop-blur-sm border-b border-gray-150/80 transition-all duration-300 ${
+            isScrolled ? "opacity-0 invisible h-0" : "opacity-100 visible h-[42px]"
           }`}
         >
-          <div className="max-w-[1440px] mx-auto px-8 h-full flex items-center justify-start gap-8">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-8 h-full flex items-center justify-start gap-7">
             {categories.map((cat) => {
               const Icon = CATEGORY_ICONS[cat.slug] || Cpu;
               const isActive = activeMegaMenu === cat.slug;
@@ -424,10 +424,10 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
                 >
                   <Link
                     href={`/${cat.slug}`}
-                    className={`group flex items-center h-full px-2 text-[15px] font-semibold transition-colors duration-200 border-b-2 ${
+                    className={`group flex items-center h-full px-1.5 text-[14.5px] font-semibold transition-colors duration-200 border-b-2 ${
                       isActive 
                         ? "text-indigo-600 border-indigo-600"
-                        : "text-gray-700 border-transparent hover:text-indigo-600"
+                        : "text-gray-750 border-transparent hover:text-indigo-600"
                     }`}
                   >
                     {cat.name}
@@ -440,23 +440,23 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 0 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute top-full left-0 w-[260px] z-50 cursor-default shadow-xl border border-gray-200 bg-white"
+                        className="absolute top-full left-0 w-[250px] z-50 cursor-default shadow-xl border border-gray-200/90 rounded-b-xl bg-white overflow-hidden"
                         style={{ marginTop: "1px" }}
                       >
-                        <div className="flex flex-col py-2 overflow-y-auto no-scrollbar bg-white max-h-[400px]">
+                        <div className="flex flex-col py-1.5 overflow-y-auto no-scrollbar bg-white max-h-[380px]">
                           {cat.brands.length > 0 ? (
                             cat.brands.map((brand) => (
                               <Link
                                 key={brand}
                                 href={`/${cat.slug}?brand=${encodeURIComponent(brand)}`}
-                                className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors group/item"
+                                className="flex items-center justify-between px-4 py-2.5 hover:bg-indigo-50/50 transition-colors group/item"
                               >
-                                <span className="text-[14px] text-gray-700 font-medium group-hover/item:text-indigo-600">{brand}</span>
+                                <span className="text-[14px] text-gray-750 font-medium group-hover/item:text-indigo-600">{brand}</span>
                                 <ChevronRight size={14} className="text-gray-400 group-hover/item:text-indigo-600" />
                               </Link>
                             ))
                           ) : (
-                            <div className="px-5 py-3 text-[14px] text-gray-500 italic">No items found</div>
+                            <div className="px-4 py-2.5 text-xs text-gray-400 italic">No brands listed</div>
                           )}
                         </div>
                       </motion.div>

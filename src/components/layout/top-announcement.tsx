@@ -15,7 +15,7 @@ export default function TopAnnouncement({ data }: TopAnnouncementProps) {
   if (!data || !data.topBarActive || !data.topBarText) return null;
 
   return (
-    <div className="bg-indigo-900 text-white text-[10px] md:text-[11px] font-medium tracking-widest text-center py-2.5 uppercase transition-all relative z-50">
+    <div className="bg-indigo-900 text-white text-[10px] md:text-[11px] font-medium tracking-widest text-center py-1.5 uppercase transition-all relative z-50">
       <div className="container mx-auto px-4 truncate">
         {data.topBarText}
         {data.topBarLink && (

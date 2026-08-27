@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { useAdminTheme } from "@/store/use-admin-theme";
+import { useWishlist } from "@/modules/products/hooks/use-wishlist";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -193,6 +194,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const handleSignOut = async () => {
     setIsLoggingOut(true);
     try {
+      useWishlist.getState().clearWishlist();
       await authClient.signOut();
       toast.success("Logged out successfully");
       router.replace("/sign-in");

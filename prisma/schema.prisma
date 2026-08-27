@@ -91,6 +91,7 @@ model Product {
   price       Float 
   stock       Int
   image       String? 
+  images      String[] @default([])
 
   // Technical Specifications
   brand          String?
