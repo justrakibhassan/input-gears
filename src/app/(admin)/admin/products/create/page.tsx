@@ -20,7 +20,8 @@ import {
   Zap,
   Plus,
   Cpu,
-  Save
+  Save,
+  Sparkles,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -30,6 +31,7 @@ import { generateSlug, cn } from "@/lib/utils";
 import ImageUpload from "@/components/ui/image-upload";
 import CategoryModal from "@/modules/admin/components/category-modal";
 import { useSession } from "@/lib/auth-client";
+import { STANDARD_SPEC_PRESETS } from "@/modules/admin/views/product-edit-form";
 
 // --- Validation Schema ---
 const formSchema = z.object({
@@ -38,7 +40,8 @@ const formSchema = z.object({
   description: z.string().min(10, "Description needs more detail"),
   price: z.coerce.number().min(0.1, "Price must be greater than 0"),
   stock: z.coerce.number().min(0, "Stock cannot be negative"),
-  image: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  image: z.string().optional().or(z.literal("")),
+  images: z.array(z.string()).default([]),
   categoryId: z.string().min(1, "Please select a category"),
   colors: z.array(z.string()).default([]),
   switchType: z.string().optional(),
@@ -53,7 +56,7 @@ const formSchema = z.object({
   availability: z.string().optional(),
   isActive: z.boolean().default(true),
   scheduledAt: z.string().optional().nullable(),
-  specs: z.record(z.string(), z.string().or(z.number()).or(z.boolean()).nullable()).optional(),
+  specs: z.record(z.string(), z.unknown()).optional(),
 });
 
 interface FormValues {
@@ -63,6 +66,7 @@ interface FormValues {
   price: number;
   stock: number;
   image?: string;
+  images: string[];
   categoryId: string;
   colors: string[];
   switchType?: string;
@@ -77,7 +81,7 @@ interface FormValues {
   availability?: string;
   isActive: boolean;
   scheduledAt?: string | null;
-  specs?: Record<string, string | number | boolean | null>;
+  specs?: Record<string, unknown>;
 }
 
 export default function CreateProductPage() {
@@ -162,6 +166,7 @@ export default function CreateProductPage() {
           price: 0,
           stock: 10,
           image: "",
+          images: [],
           categoryId: data.categoryId,
           colors: [],
           switchType: "",
@@ -546,78 +551,148 @@ export default function CreateProductPage() {
                       </Link>
                     </div>
 
-                    {/* Active Specs List */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {Object.entries(watchedValues.specs || {}).map(([key, value]) => (
-                        <div key={key} className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800 group">
-                           <div className="flex-1 min-w-0">
-                             <div className="text-[10px] font-black text-indigo-600 uppercase tracking-widest truncate">{key}</div>
-                             <div className="text-sm font-bold text-gray-900 dark:text-white truncate">{value as string}</div>
-                           </div>
-                           <button
-                             type="button"
-                             onClick={() => {
-                               const currentSpecs = { ...(watchedValues.specs || {}) };
-                               delete currentSpecs[key];
-                               form.setValue("specs", currentSpecs, { shouldDirty: true });
-                             }}
-                             className="p-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
-                           >
-                              <X size={16} />
-                           </button>
+                    {/* Quick Preset Badges (Unadded Parameters) */}
+                    {STANDARD_SPEC_PRESETS.filter(
+                      (preset) =>
+                        !watchedValues.specs ||
+                        !(
+                          preset.key in (watchedValues.specs as Record<string, unknown>) ||
+                          preset.label in (watchedValues.specs as Record<string, unknown>)
+                        )
+                    ).length > 0 && (
+                      <div className="space-y-1.5 p-3.5 bg-indigo-50/40 dark:bg-indigo-950/20 rounded-xl border border-indigo-100/60 dark:border-indigo-900/40">
+                        <span className="text-[11px] font-bold text-indigo-900 dark:text-indigo-300 flex items-center gap-1.5">
+                          <Sparkles size={13} className="text-indigo-600 dark:text-indigo-400" /> Click to Add Recommended Parameter:
+                        </span>
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {STANDARD_SPEC_PRESETS.filter(
+                            (preset) =>
+                              !watchedValues.specs ||
+                              !(
+                                preset.key in (watchedValues.specs as Record<string, unknown>) ||
+                                preset.label in (watchedValues.specs as Record<string, unknown>)
+                              )
+                          ).map((preset) => (
+                            <button
+                              key={preset.key}
+                              type="button"
+                              onClick={() => {
+                                const current = { ...(watchedValues.specs || {}) };
+                                current[preset.key] = "";
+                                form.setValue("specs", current, { shouldDirty: true });
+                              }}
+                              className="px-2.5 py-1 bg-white dark:bg-gray-900 border border-indigo-200 dark:border-indigo-800 hover:border-indigo-500 hover:text-indigo-600 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-300 transition shadow-2xs flex items-center gap-1 cursor-pointer"
+                            >
+                              <Plus size={11} />
+                              <span>{preset.label}</span>
+                            </button>
+                          ))}
                         </div>
-                      ))}
+                      </div>
+                    )}
+
+                    {/* Active Specs Grid with Direct Editable Value Inputs */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {Object.entries(watchedValues.specs || {})
+                        .filter(
+                          ([key, value]) => key !== "colorMap" && typeof value !== "object"
+                        )
+                        .map(([key, value]) => {
+                          const preset = STANDARD_SPEC_PRESETS.find(
+                            (p) => p.key.toLowerCase() === key.toLowerCase() || p.label.toLowerCase() === key.toLowerCase()
+                          );
+                          const displayLabel = preset ? preset.label : key;
+                          const placeholder = preset ? preset.placeholder : `Enter ${key} specification...`;
+
+                          return (
+                            <div
+                              key={key}
+                              className="p-3 bg-gray-50/90 dark:bg-gray-800/70 rounded-xl border border-gray-200/90 dark:border-gray-700/80 space-y-1.5 transition-all focus-within:border-indigo-500 focus-within:bg-white dark:focus-within:bg-gray-900 shadow-2xs"
+                            >
+                              <div className="flex items-center justify-between">
+                                <label className="text-[11px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+                                  {displayLabel}
+                                </label>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const currentSpecs = { ...(watchedValues.specs || {}) };
+                                    delete currentSpecs[key];
+                                    form.setValue("specs", currentSpecs, { shouldDirty: true });
+                                  }}
+                                  className="p-1 text-gray-400 hover:text-red-500 transition cursor-pointer rounded-md hover:bg-gray-200/60 dark:hover:bg-gray-800"
+                                  title="Remove Spec"
+                                >
+                                  <X size={13} />
+                                </button>
+                              </div>
+                              <input
+                                value={String(value || "")}
+                                onChange={(e) => {
+                                  const currentSpecs = { ...(watchedValues.specs || {}) };
+                                  currentSpecs[key] = e.target.value;
+                                  form.setValue("specs", currentSpecs, { shouldDirty: true });
+                                }}
+                                placeholder={placeholder}
+                                className="w-full px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-semibold text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 outline-none"
+                              />
+                            </div>
+                          );
+                        })}
                     </div>
 
-                    {/* Add Spec Row */}
-                    <div className="flex flex-col sm:flex-row gap-3 p-4 bg-indigo-50/30 rounded-2xl border border-indigo-100/50">
-                       <input 
-                        id="spec-key"
-                        placeholder="Key (e.g. Brand)"
-                        className="flex-1 px-4 py-2 text-sm font-bold rounded-xl border border-gray-200 dark:border-gray-700 outline-none focus:border-indigo-500"
-                       />
-                       <input 
-                        id="spec-value"
-                        placeholder="Value (e.g. Logitech)"
-                        className="flex-1 px-4 py-2 text-sm font-bold rounded-xl border border-gray-200 dark:border-gray-700 outline-none focus:border-indigo-500"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            const keyInput = document.getElementById("spec-key") as HTMLInputElement;
-                            const valueInput = document.getElementById("spec-value") as HTMLInputElement;
-                            const k = keyInput.value.trim();
-                            const v = valueInput.value.trim();
-                            if (k && v) {
-                              const currentSpecs = { ...(watchedValues.specs || {}) };
-                              currentSpecs[k] = v;
-                              form.setValue("specs", currentSpecs, { shouldDirty: true });
-                              keyInput.value = "";
-                              valueInput.value = "";
-                              keyInput.focus();
+                    {/* Custom Parameter Adder */}
+                    <div className="pt-2">
+                      <span className="text-[11px] font-bold text-gray-600 dark:text-gray-400 block mb-1.5">
+                        Add Custom Parameter:
+                      </span>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <input
+                          id="spec-key"
+                          placeholder="Parameter Name (e.g. Polling Rate, Software)"
+                          className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:bg-white focus:border-indigo-500 outline-none font-medium"
+                        />
+                        <input
+                          id="spec-value"
+                          placeholder="Value (e.g. 1000Hz, VIA / QMK Web Driver)"
+                          className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:bg-white focus:border-indigo-500 outline-none font-medium"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              const kInput = document.getElementById("spec-key") as HTMLInputElement;
+                              const vInput = document.getElementById("spec-value") as HTMLInputElement;
+                              const k = kInput?.value.trim();
+                              const v = vInput?.value.trim();
+                              if (k) {
+                                const current = { ...(watchedValues.specs || {}) };
+                                current[k] = v || "";
+                                form.setValue("specs", current, { shouldDirty: true });
+                                kInput.value = "";
+                                vInput.value = "";
+                              }
                             }
-                          }
-                        }}
-                       />
-                       <button
-                         type="button"
-                         onClick={() => {
-                            const keyInput = document.getElementById("spec-key") as HTMLInputElement;
-                            const valueInput = document.getElementById("spec-value") as HTMLInputElement;
-                            const k = keyInput.value.trim();
-                            const v = valueInput.value.trim();
-                            if (k && v) {
-                              const currentSpecs = { ...(watchedValues.specs || {}) };
-                              currentSpecs[k] = v;
-                              form.setValue("specs", currentSpecs, { shouldDirty: true });
-                              keyInput.value = "";
-                              valueInput.value = "";
-                              keyInput.focus();
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const kInput = document.getElementById("spec-key") as HTMLInputElement;
+                            const vInput = document.getElementById("spec-value") as HTMLInputElement;
+                            const k = kInput?.value.trim();
+                            const v = vInput?.value.trim();
+                            if (k) {
+                              const current = { ...(watchedValues.specs || {}) };
+                              current[k] = v || "";
+                              form.setValue("specs", current, { shouldDirty: true });
+                              kInput.value = "";
+                              vInput.value = "";
                             }
-                         }}
-                         className="px-6 py-2 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
-                       >
-                         <Plus size={16} /> Add
-                       </button>
+                          }}
+                          className="px-5 py-2 bg-gray-900 hover:bg-black text-white rounded-xl text-xs font-bold transition cursor-pointer shrink-0 flex items-center justify-center gap-1.5"
+                        >
+                          <Plus size={14} /> Add Parameter
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
