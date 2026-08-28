@@ -152,12 +152,17 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
     return list;
   }, [product.image, product.images, colorMap]);
 
+  const validColors = useMemo(() => {
+    if (!product?.colors || !Array.isArray(product.colors)) return [];
+    return product.colors.filter((c) => typeof c === "string" && c.trim().length > 0);
+  }, [product?.colors]);
+
   const [selectedImage, setSelectedImage] = useState<string | null>(
     allImages[0] || product.image || null,
   );
 
   const [selectedColor, setSelectedColor] = useState<string | null>(
-    product.colors?.[0] || null,
+    validColors[0] || null,
   );
 
   const handleSelectColor = (color: string) => {
@@ -178,7 +183,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
       setQuantity(1);
       setIsAddedSuccess(false);
       setSelectedImage(allImages[0] || product.image || null);
-      setSelectedColor(product.colors?.[0] || null);
+      setSelectedColor(validColors[0] || null);
 
       if (product.id) {
         getReviewStats(product.id).then((res) => {
@@ -574,19 +579,19 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                   </div>
                 </div>
 
-                {/* Color Variants (if any) */}
-                {product.colors && Array.isArray(product.colors) && product.colors.length > 0 && (
+                {/* Color Variants (Only if valid colors are declared) */}
+                {validColors.length > 0 && (
                   <div className="space-y-1.5 pt-1">
                     <span className="text-xs font-semibold text-gray-700">
                       Color:{" "}
                       <span className="text-gray-900 font-bold">
-                        {getDisplayColorName(selectedColor || product.colors[0])}
+                        {getDisplayColorName(selectedColor || validColors[0])}
                       </span>
                     </span>
                     <div className="flex flex-wrap items-center gap-1.5">
-                      {product.colors.map((color, idx) => {
+                      {validColors.map((color, idx) => {
                         const isSelected =
-                          (selectedColor || product.colors?.[0]) === color;
+                          (selectedColor || validColors[0]) === color;
                         const displayName = getDisplayColorName(color);
                         const variantMeta = colorMap[color];
                         const isOut = variantMeta && variantMeta.inStock === false;
