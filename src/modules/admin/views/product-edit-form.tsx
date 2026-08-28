@@ -22,13 +22,7 @@ import {
   X,
   Eye,
   EyeOff,
-  Image as ImageIcon,
-  Sparkles,
-  DollarSign,
-  Package,
-  Sliders,
-  Check,
-  ChevronDown,
+  ChevronDown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -47,8 +41,7 @@ const formSchema = z.object({
   description: z.string().min(10, "Description needs more detail"),
   price: z.coerce.number().min(0.1, "Price required"),
   stock: z.coerce.number().min(0, "Stock required"),
-  image: z.string().optional().or(z.literal("")),
-  images: z.array(z.string()).default([]),
+  image: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   categoryId: z.string().min(1, "Category is required"),
   colors: z.array(z.string()).default([]),
   switchType: z.string().optional(),
@@ -63,19 +56,8 @@ const formSchema = z.object({
   availability: z.string().optional(),
   isActive: z.boolean().default(true),
   scheduledAt: z.string().optional().nullable(),
-  specs: z.record(z.string(), z.unknown()).optional(),
+  specs: z.record(z.string(), z.string().or(z.number()).or(z.boolean()).nullable()).optional(),
 });
-
-export const STANDARD_SPEC_PRESETS = [
-  { key: "layout", label: "Keyboard Layout", placeholder: "e.g. Compact 75% (80 Keys + Volume Knob)" },
-  { key: "structure", label: "Mounting Structure", placeholder: "e.g. Gasket Mount with Flex-cut PC Plate" },
-  { key: "battery", label: "Battery Capacity", placeholder: "e.g. 4000mAh Rechargeable" },
-  { key: "hotSwappable", label: "Hot-Swappable", placeholder: "e.g. 3-pin & 5-pin TTC Switch Sockets" },
-  { key: "keycaps", label: "Keycaps Profile", placeholder: "e.g. Double-shot PBT Cherry Profile" },
-  { key: "backlight", label: "RGB Lighting", placeholder: "e.g. 16.8M Color South-facing RGB" },
-  { key: "plate", label: "Plate Material", placeholder: "e.g. Flex-cut Polycarbonate (PC)" },
-  { key: "dampening", label: "Sound Dampening", placeholder: "e.g. 5-Layer Acoustic Foam & Silicone Pad" },
-];
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -85,19 +67,13 @@ interface ProductEditFormProps {
   onSuccess?: () => void;
 }
 
-export default function ProductEditForm({
-  product,
-  isModal,
-  onSuccess,
-}: ProductEditFormProps) {
+export default function ProductEditForm({ product, isModal, onSuccess }: ProductEditFormProps) {
   const { data: session } = useSession();
-  const isContentEditor =
-    (session?.user as { role?: string })?.role === "CONTENT_EDITOR";
+  const isContentEditor = (session?.user as { role?: string })?.role === "CONTENT_EDITOR";
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(true);
-  const [newImageUrl, setNewImageUrl] = useState("");
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   // States for Categories
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(
@@ -114,12 +90,6 @@ export default function ProductEditForm({
       price: product.price,
       stock: product.stock,
       image: product.image || "",
-      images:
-        product.images && product.images.length > 0
-          ? product.images
-          : product.image
-            ? [product.image]
-            : [],
       categoryId: product.categoryId || "",
       colors: product.colors || [],
       switchType: product.switchType || "",
@@ -133,10 +103,8 @@ export default function ProductEditForm({
       warranty: product.warranty || "",
       availability: product.availability || "In Stock",
       isActive: product.isActive ?? true,
-      scheduledAt: product.scheduledAt
-        ? new Date(product.scheduledAt).toISOString().slice(0, 16)
-        : "",
-      specs: (product.specs as Record<string, unknown>) || {},
+      scheduledAt: product.scheduledAt ? new Date(product.scheduledAt).toISOString().slice(0, 16) : "",
+      specs: product.specs as Record<string, string>,
     },
     mode: "onChange",
   });
@@ -164,19 +132,6 @@ export default function ProductEditForm({
     form.setValue("name", name, { shouldValidate: true });
   };
 
-  const handleAddImageUrl = () => {
-    const val = newImageUrl.trim();
-    if (!val) return;
-    const current = watchedValues.images || [];
-    if (!current.includes(val)) {
-      form.setValue("images", [...current, val], { shouldDirty: true });
-      if (!watchedValues.image) {
-        form.setValue("image", val, { shouldDirty: true });
-      }
-    }
-    setNewImageUrl("");
-  };
-
   const onSubmit = async (data: FormValues) => {
     setIsPending(true);
     try {
@@ -185,10 +140,8 @@ export default function ProductEditForm({
       if (res.success) {
         toast.success(
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="text-green-500" size={18} />
-            <span className="font-semibold text-sm">
-              Product Updated Successfully!
-            </span>
+            <CheckCircle2 className="text-green-500" size={20} />
+            <span className="font-semibold">Product Updated Successfully!</span>
           </div>
         );
         if (onSuccess) {
@@ -209,1004 +162,869 @@ export default function ProductEditForm({
   };
 
   return (
-    <div className="w-full space-y-6">
-      {/* Top Header Bar */}
-      {!isModal && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-200 dark:border-gray-800">
-          <div className="flex items-center gap-3.5">
-            <Link
-              href="/admin/products"
-              className="p-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition shadow-2xs group cursor-pointer"
-              title="Back to Products"
-            >
-              <ArrowLeft
-                size={18}
-                className="text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
-              />
-            </Link>
-            <div>
-              <div className="flex items-center gap-2.5">
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-                  Edit Product
-                </h1>
-                <span
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 pb-36 transition-colors duration-300">
+      <div className="max-w-[1600px] mx-auto">
+        {!isModal && (
+          <div className="pt-10 pb-8 px-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+              <div className="flex items-center gap-5">
+                <Link
+                  href="/admin/products"
+                  className="p-3 bg-white dark:bg-gray-900 border border-neutral-200 rounded-2xl hover:bg-neutral-50 transition-all shadow-sm hover:shadow-md active:scale-95 group"
+                >
+                  <ArrowLeft size={22} className="text-neutral-600 group-hover:text-indigo-600 transition-colors" />
+                </Link>
+                <div>
+                  <h1 className="text-3xl font-black text-neutral-900 tracking-tight">Edit Product</h1>
+                  <p className="text-sm text-neutral-500 font-medium">
+                    Modifying <span className="text-indigo-600 font-bold">{product.name}</span>
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsPreviewOpen(!isPreviewOpen)}
                   className={cn(
-                    "px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider",
-                    watchedValues.isActive
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800"
-                      : "bg-gray-100 text-gray-600 border border-gray-200 dark:bg-gray-800 dark:text-gray-400"
+                    "flex items-center gap-2 px-5 py-2.5 text-sm font-bold border rounded-xl transition-all shadow-sm group",
+                    isPreviewOpen 
+                      ? "bg-indigo-600 border-indigo-600 text-white" 
+                      : "bg-white dark:bg-gray-900 border-neutral-200 text-neutral-700 hover:bg-neutral-50"
                   )}
                 >
-                  {watchedValues.isActive ? "Active" : "Draft"}
-                </span>
-              </div>
-              <p className="text-xs text-gray-500 font-medium truncate max-w-xl mt-0.5">
-                {product.name}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5 self-start sm:self-center">
-            <button
-              type="button"
-              onClick={() => setIsPreviewOpen(!isPreviewOpen)}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 text-xs font-semibold border rounded-xl transition shadow-2xs cursor-pointer",
-                isPreviewOpen
-                  ? "bg-gray-900 border-gray-900 text-white dark:bg-white dark:text-gray-900"
-                  : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-              )}
-            >
-              {isPreviewOpen ? <EyeOff size={15} /> : <Eye size={15} />}
-              <span>{isPreviewOpen ? "Hide Preview" : "Store Preview"}</span>
-            </button>
-            <Link
-              href={`/products/${watchedValues.slug}`}
-              target="_blank"
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition shadow-2xs cursor-pointer"
-            >
-              <ExternalLink size={14} />
-              <span>Live Page</span>
-            </Link>
-          </div>
-        </div>
-      )}
-
-      {/* Main Form Grid: 70% Left Main / 30% Right Sidebar */}
-      <form onSubmit={(e) => e.preventDefault()} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* --- LEFT MAIN COLUMN (lg:col-span-8) --- */}
-        <div className="lg:col-span-8 space-y-6">
-          {/* Card 1: General Product Details */}
-          <div className="bg-white dark:bg-gray-900 p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-2xs space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
-              <h2 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                <Info size={16} className="text-indigo-600" /> Basic Information
-              </h2>
-            </div>
-
-            {/* Title */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-700 dark:text-gray-300">
-                Product Title <span className="text-red-500">*</span>
-              </label>
-              <input
-                {...form.register("name")}
-                onChange={handleNameChange}
-                placeholder="e.g. AULA F75 MAX Tri-Mode Wireless Mechanical Keyboard"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 text-sm font-semibold focus:bg-white dark:focus:bg-gray-900 focus:border-indigo-500 outline-none transition"
-              />
-              {form.formState.errors.name && (
-                <p className="text-red-500 text-xs mt-1">
-                  {form.formState.errors.name.message}
-                </p>
-              )}
-            </div>
-
-            {/* 2-Column Row: Slug & Category */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Slug */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-gray-700 dark:text-gray-300">
-                    URL Slug <span className="text-red-500">*</span>
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const currentName = form.getValues("name");
-                      if (currentName) {
-                        const slug = generateSlug(currentName);
-                        form.setValue("slug", slug, {
-                          shouldValidate: true,
-                          shouldDirty: true,
-                        });
-                      }
-                    }}
-                    className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 flex items-center gap-1 cursor-pointer"
-                  >
-                    <RefreshCw size={11} /> Auto Generate
-                  </button>
-                </div>
-                <div className="relative flex items-center">
-                  <span className="absolute left-3 text-gray-400 text-xs font-medium pointer-events-none">
-                    /products/
-                  </span>
-                  <input
-                    {...form.register("slug")}
-                    className="w-full pl-20 pr-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 text-indigo-600 dark:text-indigo-400 font-mono text-xs font-semibold focus:bg-white focus:border-indigo-500 outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Category */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-700 dark:text-gray-300">
-                  Category <span className="text-red-500">*</span>
-                </label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Layers
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                      size={15}
-                    />
-                    <select
-                      {...form.register("categoryId")}
-                      className="w-full pl-8.5 pr-8 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 text-xs font-medium focus:bg-white focus:border-indigo-500 outline-none appearance-none cursor-pointer"
-                    >
-                      <option value="">Select a category...</option>
-                      {categories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.name}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                      {isLoadingCategories ? (
-                        <Loader2 size={13} className="animate-spin text-indigo-600" />
-                      ) : (
-                        <ChevronDown size={14} />
-                      )}
-                    </div>
-                  </div>
-                  <CategoryModal />
-                </div>
+                  {isPreviewOpen ? <EyeOff size={18} /> : <Eye size={18} className="text-neutral-400 group-hover:text-indigo-600" />}
+                  {isPreviewOpen ? "Hide Preview" : "Show Preview"}
+                </button>
+                <Link
+                  href={`/products/${watchedValues.slug}`}
+                  target="_blank"
+                  className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-neutral-700 bg-white dark:bg-gray-900 border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-all shadow-sm group"
+                >
+                  <ExternalLink size={18} className="text-neutral-400 group-hover:text-indigo-600" />
+                  View on Store
+                </Link>
               </div>
             </div>
-
-            {/* Description */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-700 dark:text-gray-300">
-                Product Description
-              </label>
-              <textarea
-                {...form.register("description")}
-                rows={4}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 placeholder-gray-400 text-xs leading-relaxed focus:bg-white focus:border-indigo-500 outline-none resize-none font-medium transition"
-                placeholder="Write an informative description highlighting key selling points, structure, and features..."
-              />
-              {form.formState.errors.description && (
-                <p className="text-red-500 text-xs">
-                  {form.formState.errors.description.message}
-                </p>
-              )}
-            </div>
           </div>
+        )}
 
-          {/* Card 2: Media & Product Image Gallery */}
-          <div className="bg-white dark:bg-gray-900 p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-2xs space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
-              <div>
-                <h2 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                  <ImageIcon size={16} className="text-indigo-600" /> Product Images & Gallery
+        <div className="px-6">
+          <form onSubmit={(e) => e.preventDefault()} className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            {/* --- LEFT COLUMN: Primary Details --- */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* General Info */}
+              <div className="bg-white dark:bg-neutral-900 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-sm transition-colors">
+                <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-6 flex items-center gap-2">
+                  <Info size={20} className="text-indigo-600" /> General Information
                 </h2>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  Upload cover photo and all color variant photos for interactive switching.
-                </p>
-              </div>
-              <span className="text-xs font-bold text-gray-600 bg-gray-100 dark:bg-gray-800 px-2.5 py-1 rounded-lg">
-                {watchedValues.images?.length || 0} Images
-              </span>
-            </div>
+                <div className="space-y-6">
+                  {/* Name */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                      Product Name
+                    </label>
+                    <input
+                      {...form.register("name")}
+                      onChange={handleNameChange}
+                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none transition-all font-medium"
+                    />
+                    {form.formState.errors.name && (
+                      <p className="text-red-500 text-xs">
+                        {form.formState.errors.name.message}
+                      </p>
+                    )}
+                  </div>
 
-            {/* Gallery Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5">
-              {/* Primary Image or Upload Slot */}
-              {watchedValues.images &&
-                watchedValues.images.map((imgUrl: string, idx: number) => {
-                  const isPrimary = watchedValues.image === imgUrl;
-                  return (
-                    <div
-                      key={idx}
-                      className={cn(
-                        "group relative aspect-square rounded-xl overflow-hidden border bg-gray-50 dark:bg-gray-800/60 flex items-center justify-center p-2 transition-all",
-                        isPrimary
-                          ? "border-indigo-600 ring-2 ring-indigo-600/20 shadow-sm"
-                          : "border-gray-200 dark:border-gray-700 hover:border-gray-400"
-                      )}
-                    >
-                      <Image
-                        src={imgUrl}
-                        alt={`Product image ${idx + 1}`}
-                        fill
-                        className="object-contain p-2"
-                        sizes="(max-width: 768px) 120px, 160px"
-                      />
-                      {isPrimary && (
-                        <span className="absolute top-2 left-2 bg-indigo-600 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-md shadow-xs pointer-events-none z-10 flex items-center gap-1">
-                          <Check size={10} strokeWidth={3} /> Cover
+                  {/* Slug */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 flex items-center gap-2">
+                      Slug <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative group flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500 text-sm font-medium">
+                          /products/
                         </span>
-                      )}
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 z-20">
-                        {!isPrimary && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              form.setValue("image", imgUrl, { shouldDirty: true })
-                            }
-                            title="Set as Cover"
-                            className="px-2 py-1 bg-white text-gray-900 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 text-[10px] font-bold shadow-xs cursor-pointer"
-                          >
-                            Set Cover
-                          </button>
-                        )}
+                        <input
+                          {...form.register("slug")}
+                          className="w-full pl-24 pr-10 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-indigo-600 dark:text-indigo-400 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none font-mono text-sm font-semibold"
+                        />
                         <button
                           type="button"
                           onClick={() => {
-                            const nextImgs = (watchedValues.images || []).filter(
-                              (_, i) => i !== idx
-                            );
-                            form.setValue("images", nextImgs, { shouldDirty: true });
-                            if (isPrimary) {
-                              form.setValue("image", nextImgs[0] || "", {
+                            const currentName = form.getValues("name");
+                            if (currentName) {
+                              const slug = generateSlug(currentName);
+                              form.setValue("slug", slug, {
+                                shouldValidate: true,
                                 shouldDirty: true,
                               });
                             }
                           }}
-                          title="Delete Image"
-                          className="p-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 shadow-xs cursor-pointer"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-indigo-600 transition-colors"
+                          title="Regenerate from Name"
                         >
-                          <Trash2 size={13} />
+                          <RefreshCw size={16} />
+                        </button>
+                      </div>
+
+                      {watchedValues.slug && (
+                        <Link
+                          href={`/products/${watchedValues.slug}`}
+                          target="_blank"
+                          className="p-3 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-800 text-indigo-600 transition-colors shrink-0"
+                        >
+                          <ExternalLink size={18} />
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Category */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                      Category <span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex gap-3">
+                      <div className="relative flex-1">
+                        <Layers
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+                          size={18}
+                        />
+                        <select
+                          {...form.register("categoryId")}
+                          className="w-full pl-10 pr-10 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none appearance-none transition-all cursor-pointer font-medium"
+                        >
+                          <option value="">Select a category...</option>
+                          {categories.map((cat) => (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.name}
+                            </option>
+                          ))}
+                        </select>
+                        {isLoadingCategories && (
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                            <Loader2
+                              className="animate-spin text-indigo-600"
+                              size={16}
+                            />
+                          </div>
+                        )}
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400">
+                          <ChevronDown size={16} />
+                        </div>
+                      </div>
+
+                      <div className="shrink-0">
+                        <CategoryModal />
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={fetchCategories}
+                        className="p-3 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-500 dark:text-neutral-400 transition-colors"
+                      >
+                        <RefreshCw size={18} />
+                      </button>
+                    </div>
+                    {form.formState.errors.categoryId && (
+                      <p className="text-red-500 text-xs">
+                        {form.formState.errors.categoryId.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Description */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                      Description
+                    </label>
+                    <textarea
+                      {...form.register("description")}
+                      rows={5}
+                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none resize-none font-medium transition-all"
+                      placeholder="Detailed description of the product..."
+                    />
+                    {form.formState.errors.description && (
+                      <p className="text-red-500 text-xs">
+                        {form.formState.errors.description.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Media Card */}
+              <div className="bg-white dark:bg-neutral-900 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-sm transition-colors">
+                <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-6">Media</h2>
+                <div className="space-y-4">
+                  {watchedValues.image ? (
+                    <div className="relative rounded-2xl overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800/30 group h-64 w-full flex items-center justify-center">
+                      <div className="relative h-full w-full">
+                        <Image
+                          src={watchedValues.image}
+                          alt="Product Image"
+                          fill
+                          className="object-contain p-4"
+                        />
+                      </div>
+                      <div className="absolute top-4 right-4">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            form.setValue("image", "", {
+                              shouldValidate: true,
+                              shouldDirty: true,
+                            })
+                          }
+                          className="bg-white dark:bg-neutral-900 text-red-500 p-2.5 rounded-xl shadow-lg border border-neutral-200 dark:border-neutral-800 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                        >
+                          <Trash2 size={18} />
                         </button>
                       </div>
                     </div>
-                  );
-                })}
-
-              {/* Upload Dropzone Slot */}
-              <div className="aspect-square rounded-xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/20 hover:bg-gray-100/60 dark:hover:bg-gray-800/50 transition flex flex-col items-center justify-center p-2 text-center">
-                <ImageUpload
-                  value={[]}
-                  disabled={isPending}
-                  onChange={(url) => {
-                    const currentImages = watchedValues.images || [];
-                    if (!currentImages.includes(url)) {
-                      form.setValue("images", [...currentImages, url], {
-                        shouldDirty: true,
-                      });
-                    }
-                    if (!watchedValues.image) {
-                      form.setValue("image", url, { shouldDirty: true });
-                    }
-                  }}
-                  onRemove={() => {}}
-                />
-              </div>
-            </div>
-
-            {/* Quick URL Adder Input */}
-            <div className="flex gap-2 pt-2">
-              <input
-                value={newImageUrl}
-                onChange={(e) => setNewImageUrl(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleAddImageUrl();
-                  }
-                }}
-                placeholder="Or paste direct image URL / file path (e.g. /AF75MBG-2048x1536.webp)"
-                className="flex-1 px-4 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 font-mono text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:bg-white focus:border-indigo-500 outline-none"
-              />
-              <button
-                type="button"
-                onClick={handleAddImageUrl}
-                className="px-4 py-2 bg-gray-900 hover:bg-black dark:bg-gray-100 dark:text-gray-900 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer shrink-0"
-              >
-                <Plus size={14} /> Add to Gallery
-              </button>
-            </div>
-          </div>
-
-          {/* Card 3: Variants & Specifications Matrix */}
-          <div className="bg-white dark:bg-gray-900 p-5 sm:p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-2xs space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
-              <h2 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                <Sliders size={16} className="text-indigo-600" /> Variants & Specifications
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Switch Type */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider block">
-                  Keyboard Switch Type
-                </label>
-                <div className="grid grid-cols-4 gap-2">
-                  {["Linear", "Tactile", "Clicky", "Optical"].map((type) => (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() =>
-                        form.setValue("switchType", type, { shouldDirty: true })
+                  ) : (
+                    <ImageUpload
+                      value={[]}
+                      disabled={isPending}
+                      onChange={(url) =>
+                        form.setValue("image", url, {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        })
                       }
-                      className={cn(
-                        "py-2 rounded-xl border text-xs font-bold transition cursor-pointer text-center",
-                        watchedValues.switchType === type
-                          ? "bg-gray-900 border-gray-900 text-white shadow-2xs dark:bg-white dark:text-gray-900"
-                          : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-gray-300"
-                      )}
-                    >
-                      {type}
-                    </button>
-                  ))}
+                      onRemove={() =>
+                        form.setValue("image", "", { shouldValidate: true })
+                      }
+                    />
+                  )}
+                  {form.formState.errors.image && (
+                    <p className="text-red-500 text-xs mt-2">
+                      {form.formState.errors.image.message}
+                    </p>
+                  )}
                 </div>
-                <input
-                  {...form.register("switchType")}
-                  placeholder="Custom switch specification (e.g. Reaper Switch)..."
-                  className="w-full px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-medium focus:bg-white focus:border-indigo-500 outline-none"
-                />
               </div>
 
-              {/* Available Colors */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider block">
-                  Color Options
-                </label>
-                <div className="flex flex-wrap gap-1.5 min-h-[36px] items-center">
-                  {watchedValues.colors?.map((color: string, index: number) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-1.5 px-3 py-1 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-semibold"
-                    >
-                      <span
-                        className="w-2.5 h-2.5 rounded-full border border-gray-300 shrink-0"
-                        style={{
-                          backgroundColor: color.toLowerCase().includes("white")
-                            ? "#fff"
-                            : color.toLowerCase().includes("gradient") ||
-                                color.toLowerCase().includes("black")
-                              ? "#1f2937"
-                              : color.toLowerCase(),
-                        }}
+              {/* Specifications Card */}
+              <div className="bg-white dark:bg-neutral-900 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-sm relative overflow-hidden transition-colors">
+                <div className="absolute top-0 right-0 p-4 opacity-[0.03] dark:opacity-[0.05] pointer-events-none">
+                  <Zap size={80} className="text-indigo-600" />
+                </div>
+                <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-6 flex items-center gap-2">
+                  <Zap size={20} className="text-indigo-600" /> Technical Specifications
+                </h2>
+                
+                <div className="space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Switch Type */}
+                    <div className="space-y-4">
+                      <label className="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest text-[10px] block">
+                        Keyboard Switch Type
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {["Linear", "Tactile", "Clicky", "Optical"].map((type) => (
+                          <button
+                            key={type}
+                            type="button"
+                            onClick={() => form.setValue("switchType", type, { shouldDirty: true })}
+                            className={cn(
+                              "px-4 py-3 rounded-xl border text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer",
+                              watchedValues.switchType === type
+                                ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100 dark:shadow-none"
+                                : "bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400 hover:border-indigo-200 dark:hover:border-indigo-900/30"
+                            )}
+                          >
+                            {watchedValues.switchType === type && <Zap size={14} fill="currentColor" />}
+                            {type}
+                          </button>
+                        ))}
+                      </div>
+                      <input 
+                        {...form.register("switchType")}
+                        placeholder="Other switch type..."
+                        className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold"
                       />
-                      <span className="text-gray-800 dark:text-gray-200">{color}</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const newColors = [...(watchedValues.colors || [])];
-                          newColors.splice(index, 1);
-                          form.setValue("colors", newColors, { shouldDirty: true });
-                        }}
-                        className="text-gray-400 hover:text-red-500 transition cursor-pointer"
-                      >
-                        <X size={13} />
-                      </button>
                     </div>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  <input
-                    id="color-input-edit"
-                    placeholder="e.g. Ice Blue, Black Gradient"
-                    className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:bg-white focus:border-indigo-500 outline-none"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        const input = document.getElementById(
-                          "color-input-edit"
-                        ) as HTMLInputElement;
-                        const val = input.value.trim();
-                        if (val) {
-                          const current = watchedValues.colors || [];
-                          if (!current.includes(val)) {
-                            form.setValue("colors", [...current, val], {
-                              shouldDirty: true,
-                            });
+
+                    {/* Colors */}
+                    <div className="space-y-4">
+                      <label className="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest text-[10px] block">
+                        Available Colors
+                      </label>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {watchedValues.colors?.map((color: string, index: number) => (
+                          <div 
+                            key={index}
+                            className="flex items-center gap-2 px-3 py-1.5 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg group animate-in fade-in zoom-in duration-200"
+                          >
+                            <div 
+                               className="w-3 h-3 rounded-full border border-neutral-300 dark:border-neutral-600"
+                               style={{ backgroundColor: color.toLowerCase() }}
+                            />
+                            <span className="text-xs font-bold text-neutral-700 dark:text-neutral-300 uppercase tracking-tighter">{color}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newColors = [...(watchedValues.colors || [])];
+                                newColors.splice(index, 1);
+                                form.setValue("colors", newColors, { shouldDirty: true });
+                              }}
+                              className="text-neutral-400 hover:text-red-500 transition-colors cursor-pointer"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ))}
+                        {(!watchedValues.colors || watchedValues.colors.length === 0) && (
+                          <p className="text-xs text-neutral-400 italic">No colors added yet.</p>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <input 
+                          id="color-input-edit"
+                          placeholder="Add color (e.g. Red, #FF0000)"
+                          className="flex-1 px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              const input = e.currentTarget;
+                              const value = input.value.trim();
+                              if (value) {
+                                const currentColors = watchedValues.colors || [];
+                                if (!currentColors.includes(value)) {
+                                  form.setValue("colors", [...currentColors, value], { shouldDirty: true });
+                                }
+                                input.value = "";
+                              }
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const input = document.getElementById("color-input-edit") as HTMLInputElement;
+                            const value = input.value.trim();
+                            if (value) {
+                              const currentColors = watchedValues.colors || [];
+                              if (!currentColors.includes(value)) {
+                                form.setValue("colors", [...currentColors, value], { shouldDirty: true });
+                              }
+                              input.value = "";
+                            }
+                          }}
+                          className="p-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-indigo-600 transition-all cursor-pointer"
+                        >
+                          <Plus size={18} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <hr className="border-neutral-100 dark:border-neutral-800" />
+
+                  {/* Technical Index Matrix */}
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <label className="text-sm font-black text-neutral-900 dark:text-white uppercase tracking-tighter block">
+                          Technical Index Matrix
+                        </label>
+                        <p className="text-xs text-neutral-500 dark:text-neutral-400">Edit parameters used in the comparison matrix.</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {Object.entries(watchedValues.specs || {}).map(([key, value]) => (
+                        <div key={key} className="flex items-center gap-2 p-3 bg-neutral-50 dark:bg-neutral-800/40 rounded-xl border border-neutral-100 dark:border-neutral-800 group">
+                           <div className="flex-1 min-w-0">
+                             <div className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest truncate">{key}</div>
+                             <div className="text-sm font-bold text-neutral-900 dark:text-white truncate">{value as string}</div>
+                           </div>
+                           <button
+                             type="button"
+                             onClick={() => {
+                               const currentSpecs = { ...(watchedValues.specs || {}) };
+                               delete currentSpecs[key];
+                               form.setValue("specs", currentSpecs, { shouldDirty: true });
+                             }}
+                             className="p-2 text-neutral-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                           >
+                              <X size={16} />
+                           </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3 p-4 bg-indigo-50/30 dark:bg-indigo-950/10 rounded-2xl border border-indigo-100/50 dark:border-indigo-900/30">
+                       <input 
+                        id="spec-key-edit"
+                        placeholder="Key (e.g. Brand)"
+                        className="flex-1 px-4 py-2 text-sm font-bold rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 outline-none focus:border-indigo-500"
+                       />
+                       <input 
+                        id="spec-value-edit"
+                        placeholder="Value (e.g. Logitech)"
+                        className="flex-1 px-4 py-2 text-sm font-bold rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 outline-none focus:border-indigo-500"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            const keyInput = document.getElementById("spec-key-edit") as HTMLInputElement;
+                            const valueInput = document.getElementById("spec-value-edit") as HTMLInputElement;
+                            const k = keyInput.value.trim();
+                            const v = valueInput.value.trim();
+                            if (k && v) {
+                              const currentSpecs = { ...(watchedValues.specs || {}) };
+                              currentSpecs[k] = v;
+                              form.setValue("specs", currentSpecs, { shouldDirty: true });
+                              keyInput.value = "";
+                              valueInput.value = "";
+                              keyInput.focus();
+                            }
                           }
-                          input.value = "";
-                        }
-                      }
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const input = document.getElementById(
-                        "color-input-edit"
-                      ) as HTMLInputElement;
-                      const val = input.value.trim();
-                      if (val) {
-                        const current = watchedValues.colors || [];
-                        if (!current.includes(val)) {
-                          form.setValue("colors", [...current, val], {
-                            shouldDirty: true,
-                          });
-                        }
-                        input.value = "";
-                      }
-                    }}
-                    className="px-4 py-2 bg-gray-900 hover:bg-black text-white rounded-xl text-xs font-bold transition cursor-pointer"
-                  >
-                    <Plus size={14} /> Add Color
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Technical Index Matrix (Specs) */}
-            <div className="pt-5 border-t border-gray-150 dark:border-gray-800 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                <div>
-                  <label className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider block">
-                    Technical Index Matrix (Specs)
-                  </label>
-                  <p className="text-[11px] text-gray-500">
-                    Hardware parameters automatically indexed in Quick Overview and Specification tables.
-                  </p>
-                </div>
-              </div>
-
-              {/* Quick Preset Badges (Unadded Parameters) */}
-              {STANDARD_SPEC_PRESETS.filter(
-                (preset) =>
-                  !watchedValues.specs ||
-                  !(
-                    preset.key in (watchedValues.specs as Record<string, unknown>) ||
-                    preset.label in (watchedValues.specs as Record<string, unknown>)
-                  )
-              ).length > 0 && (
-                <div className="space-y-1.5 p-3.5 bg-indigo-50/40 dark:bg-indigo-950/20 rounded-xl border border-indigo-100/60 dark:border-indigo-900/40">
-                  <span className="text-[11px] font-bold text-indigo-900 dark:text-indigo-300 flex items-center gap-1.5">
-                    <Sparkles size={13} className="text-indigo-600 dark:text-indigo-400" /> Click to Add Recommended Parameter:
-                  </span>
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {STANDARD_SPEC_PRESETS.filter(
-                      (preset) =>
-                        !watchedValues.specs ||
-                        !(
-                          preset.key in (watchedValues.specs as Record<string, unknown>) ||
-                          preset.label in (watchedValues.specs as Record<string, unknown>)
-                        )
-                    ).map((preset) => (
-                      <button
-                        key={preset.key}
-                        type="button"
-                        onClick={() => {
-                          const current = { ...(watchedValues.specs || {}) };
-                          current[preset.key] = "";
-                          form.setValue("specs", current, { shouldDirty: true });
                         }}
-                        className="px-2.5 py-1 bg-white dark:bg-gray-900 border border-indigo-200 dark:border-indigo-800 hover:border-indigo-500 hover:text-indigo-600 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-300 transition shadow-2xs flex items-center gap-1 cursor-pointer"
-                      >
-                        <Plus size={11} />
-                        <span>{preset.label}</span>
-                      </button>
-                    ))}
+                       />
+                       <button
+                         type="button"
+                         onClick={() => {
+                            const keyInput = document.getElementById("spec-key-edit") as HTMLInputElement;
+                            const valueInput = document.getElementById("spec-value-edit") as HTMLInputElement;
+                            const k = keyInput.value.trim();
+                            const v = valueInput.value.trim();
+                            if (k && v) {
+                              const currentSpecs = { ...(watchedValues.specs || {}) };
+                              currentSpecs[k] = v;
+                              form.setValue("specs", currentSpecs, { shouldDirty: true });
+                              keyInput.value = "";
+                              valueInput.value = "";
+                              keyInput.focus();
+                            }
+                         }}
+                         className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
+                       >
+                         <Plus size={16} /> Add
+                       </button>
+                    </div>
                   </div>
                 </div>
-              )}
+              </div>
+            </div>
 
-              {/* Active Specs Grid with Direct Editable Value Inputs */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {Object.entries(watchedValues.specs || {})
-                  .filter(
-                    ([key, value]) => key !== "colorMap" && typeof value !== "object"
-                  )
-                  .map(([key, value]) => {
-                    const preset = STANDARD_SPEC_PRESETS.find(
-                      (p) => p.key.toLowerCase() === key.toLowerCase() || p.label.toLowerCase() === key.toLowerCase()
-                    );
-                    const displayLabel = preset ? preset.label : key;
-                    const placeholder = preset ? preset.placeholder : `Enter ${key} specification...`;
-
-                    return (
-                      <div
-                        key={key}
-                        className="p-3 bg-gray-50/90 dark:bg-gray-800/70 rounded-xl border border-gray-200/90 dark:border-gray-700/80 space-y-1.5 transition-all focus-within:border-indigo-500 focus-within:bg-white dark:focus-within:bg-gray-900 shadow-2xs"
+            {/* --- RIGHT COLUMN: Sidebar Metadata & Settings --- */}
+            <div className="lg:col-span-1 space-y-8">
+              {/* Status & Scheduling */}
+              <div className="bg-white dark:bg-neutral-900 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-sm transition-colors">
+                <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-6 flex items-center gap-2">
+                  <RefreshCw size={20} className="text-indigo-600" /> Status & Scheduling
+                </h2>
+                <div className="space-y-6">
+                  {/* Active Toggle */}
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 block">
+                      Product Status
+                    </label>
+                    <div className="flex items-center gap-4">
+                      <button
+                        type="button"
+                        onClick={() => form.setValue("isActive", !watchedValues.isActive, { shouldDirty: true })}
+                        className={cn(
+                          "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2",
+                          watchedValues.isActive ? "bg-indigo-600" : "bg-neutral-200 dark:bg-neutral-700"
+                        )}
                       >
-                        <div className="flex items-center justify-between">
-                          <label className="text-[11px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
-                            {displayLabel}
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const currentSpecs = { ...(watchedValues.specs || {}) };
-                              delete currentSpecs[key];
-                              form.setValue("specs", currentSpecs, { shouldDirty: true });
-                            }}
-                            className="p-1 text-gray-400 hover:text-red-500 transition cursor-pointer rounded-md hover:bg-gray-200/60 dark:hover:bg-gray-800"
-                            title="Remove Spec"
-                          >
-                            <X size={13} />
-                          </button>
-                        </div>
-                        <input
-                          value={String(value || "")}
-                          onChange={(e) => {
-                            const currentSpecs = { ...(watchedValues.specs || {}) };
-                            currentSpecs[key] = e.target.value;
-                            form.setValue("specs", currentSpecs, { shouldDirty: true });
-                          }}
-                          placeholder={placeholder}
-                          className="w-full px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-semibold text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 outline-none"
+                        <span
+                          className={cn(
+                            "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white dark:bg-neutral-950 shadow ring-0 transition duration-200 ease-in-out",
+                            watchedValues.isActive ? "translate-x-5" : "translate-x-0"
+                          )}
                         />
-                      </div>
-                    );
-                  })}
-              </div>
+                      </button>
+                      <span className="text-sm font-bold text-neutral-900 dark:text-white">
+                        {watchedValues.isActive ? "Active" : "Disabled"}
+                      </span>
+                    </div>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                      Inactive products won't be visible to customers.
+                    </p>
+                  </div>
 
-              {/* Custom Parameter Adder */}
-              <div className="pt-2">
-                <span className="text-[11px] font-bold text-gray-600 dark:text-gray-400 block mb-1.5">
-                  Add Custom Parameter:
-                </span>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <input
-                    id="spec-key-edit"
-                    placeholder="Parameter Name (e.g. Polling Rate, Software)"
-                    className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:bg-white focus:border-indigo-500 outline-none font-medium"
-                  />
-                  <input
-                    id="spec-value-edit"
-                    placeholder="Value (e.g. 1000Hz, VIA / QMK Web Driver)"
-                    className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:bg-white focus:border-indigo-500 outline-none font-medium"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        const kInput = document.getElementById("spec-key-edit") as HTMLInputElement;
-                        const vInput = document.getElementById("spec-value-edit") as HTMLInputElement;
-                        const k = kInput?.value.trim();
-                        const v = vInput?.value.trim();
-                        if (k) {
-                          const current = { ...(watchedValues.specs || {}) };
-                          current[k] = v || "";
-                          form.setValue("specs", current, { shouldDirty: true });
-                          kInput.value = "";
-                          vInput.value = "";
-                        }
-                      }
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const kInput = document.getElementById("spec-key-edit") as HTMLInputElement;
-                      const vInput = document.getElementById("spec-value-edit") as HTMLInputElement;
-                      const k = kInput?.value.trim();
-                      const v = vInput?.value.trim();
-                      if (k) {
-                        const current = { ...(watchedValues.specs || {}) };
-                        current[k] = v || "";
-                        form.setValue("specs", current, { shouldDirty: true });
-                        kInput.value = "";
-                        vInput.value = "";
-                      }
-                    }}
-                    className="px-5 py-2 bg-gray-900 hover:bg-black text-white rounded-xl text-xs font-bold transition cursor-pointer shrink-0 flex items-center justify-center gap-1.5"
-                  >
-                    <Plus size={14} /> Add Parameter
-                  </button>
+                  {/* Scheduled Date */}
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 block">
+                      Scheduled Launch (Optional)
+                    </label>
+                    <input
+                      type="datetime-local"
+                      {...form.register("scheduledAt")}
+                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold transition-all"
+                    />
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                      Product will go live automatically at this time.
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
 
-        {/* --- RIGHT SIDEBAR COLUMN (lg:col-span-4) --- */}
-        <div className="lg:col-span-4 space-y-6">
-          {/* Card 1: Status & Publishing */}
-          <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-2xs space-y-4">
-            <h2 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2 pb-3 border-b border-gray-100 dark:border-gray-800">
-              <Sparkles size={16} className="text-indigo-600" /> Status & Visibility
-            </h2>
+              {/* Pricing & Inventory */}
+              <div className="bg-white dark:bg-neutral-900 p-6 sm:p-8 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-sm transition-colors">
+                <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-6">
+                  Pricing & Inventory
+                </h2>
+                <div className="space-y-6">
+                  {/* Price */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                      Price (USD)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 dark:text-neutral-400 font-bold">
+                        $
+                      </span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        disabled={isContentEditor}
+                        {...form.register("price")}
+                        className={cn(
+                          "w-full pl-10 pr-4 py-3 rounded-xl border font-bold text-lg outline-none transition-all",
+                          isContentEditor
+                            ? "bg-neutral-100 dark:bg-neutral-800 text-neutral-400 cursor-not-allowed border-neutral-200 dark:border-neutral-700"
+                            : "bg-neutral-50 dark:bg-neutral-800 focus:bg-white dark:focus:bg-neutral-900 border-neutral-200 dark:border-neutral-700 focus:border-indigo-500 text-neutral-900 dark:text-neutral-100"
+                        )}
+                      />
+                    </div>
+                    {isContentEditor && (
+                      <p className="text-xs text-amber-600 dark:text-amber-500 font-semibold mt-1.5">
+                        ⚠️ Price editing is locked for Content Editors.
+                      </p>
+                    )}
+                    {form.formState.errors.price && (
+                      <p className="text-red-500 text-xs mt-2">
+                        {form.formState.errors.price.message}
+                      </p>
+                    )}
+                  </div>
 
-            {/* Visibility Toggle */}
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs font-bold text-gray-900 dark:text-white">
-                  Store Visibility
-                </div>
-                <div className="text-[11px] text-gray-500">
-                  {watchedValues.isActive
-                    ? "Visible in catalog and search"
-                    : "Hidden from customers"}
+                  {/* Stock */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                      Stock Quantity
+                    </label>
+                    <input
+                      type="number"
+                      {...form.register("stock")}
+                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none font-bold"
+                    />
+                    {form.formState.errors.stock && (
+                      <p className="text-red-500 text-xs mt-2">
+                        {form.formState.errors.stock.message}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() =>
-                  form.setValue("isActive", !watchedValues.isActive, {
-                    shouldDirty: true,
-                  })
-                }
-                className={cn(
-                  "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
-                  watchedValues.isActive
-                    ? "bg-emerald-500"
-                    : "bg-gray-300 dark:bg-gray-700"
-                )}
-              >
-                <span
-                  className={cn(
-                    "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                    watchedValues.isActive ? "translate-x-5" : "translate-x-0"
-                  )}
-                />
-              </button>
-            </div>
 
-            {/* Scheduled Launch */}
-            <div className="space-y-1 pt-1">
-              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                Scheduled Launch (Optional)
-              </label>
-              <input
-                type="datetime-local"
-                {...form.register("scheduledAt")}
-                className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs font-medium focus:bg-white focus:border-indigo-500 outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Card 2: Pricing & Stock Inventory */}
-          <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-2xs space-y-4">
-            <h2 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2 pb-3 border-b border-gray-100 dark:border-gray-800">
-              <DollarSign size={16} className="text-indigo-600" /> Pricing & Inventory
-            </h2>
-
-            <div className="grid grid-cols-2 gap-3">
-              {/* Price */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-700 dark:text-gray-300">
-                  Price (USD) <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xs">
-                    $
-                  </span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    disabled={isContentEditor}
-                    {...form.register("price")}
+              {/* Advanced Technical Specs (Collapsible Accordion) */}
+              <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-sm overflow-hidden transition-colors">
+                <button
+                  type="button"
+                  onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+                  className="w-full p-6 sm:p-8 flex items-center justify-between text-left focus:outline-none transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800/30 cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <Cpu size={20} className="text-indigo-600" />
+                    <h2 className="text-lg font-bold text-neutral-900 dark:text-white">
+                      Advanced Tech Specs
+                    </h2>
+                  </div>
+                  <ChevronDown
+                    size={20}
                     className={cn(
-                      "w-full pl-7 pr-3 py-2 rounded-xl border text-sm font-bold outline-none",
-                      isContentEditor
-                        ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200"
-                        : "bg-gray-50/50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:bg-white focus:border-indigo-500 text-gray-900 dark:text-white"
+                      "text-neutral-500 transition-transform duration-300",
+                      isAdvancedOpen && "transform rotate-180"
                     )}
                   />
-                </div>
-              </div>
+                </button>
 
-              {/* Stock */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-700 dark:text-gray-300">
-                  Stock Units <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <Package
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    size={14}
-                  />
-                  <input
-                    type="number"
-                    {...form.register("stock")}
-                    className="w-full pl-8 pr-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800 text-gray-900 dark:text-white font-bold text-sm focus:bg-white focus:border-indigo-500 outline-none"
-                  />
-                </div>
+                {isAdvancedOpen && (
+                  <div className="p-6 sm:p-8 pt-0 border-t border-neutral-100 dark:border-neutral-800 space-y-6">
+                    <div className="grid grid-cols-1 gap-6 pt-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">Brand</label>
+                        <input 
+                          {...form.register("brand")}
+                          placeholder="e.g. Logitech, Razer"
+                          className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">SKU / Model</label>
+                        <input 
+                          {...form.register("sku")}
+                          placeholder="e.g. G-PRO-WL-01"
+                          className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">Availability Status</label>
+                        <div className="relative">
+                          <select
+                            {...form.register("availability")}
+                            className="w-full px-4 py-3 pr-10 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold appearance-none cursor-pointer"
+                          >
+                            <option value="In Stock">In Stock</option>
+                            <option value="Out of Stock">Out of Stock</option>
+                            <option value="Pre-Order">Pre-Order</option>
+                            <option value="Discontinued">Discontinued</option>
+                          </select>
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400">
+                            <ChevronDown size={16} />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">Sensor Technology</label>
+                        <input 
+                          {...form.register("sensor")}
+                          placeholder="e.g. HERO 25K, Focus Pro"
+                          className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">Max DPI / Sensitivity</label>
+                        <input 
+                          {...form.register("dpi")}
+                          placeholder="e.g. 25,600 DPI"
+                          className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">Product Weight</label>
+                        <input 
+                          {...form.register("weight")}
+                          placeholder="e.g. 63g (Ultra-light)"
+                          className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">Connection Type</label>
+                        <input 
+                          {...form.register("connectionType")}
+                          placeholder="e.g. LIGHTSPEED, Bluetooth"
+                          className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">Polling Rate</label>
+                        <input 
+                          {...form.register("pollingRate")}
+                          placeholder="e.g. 1000Hz, 8000Hz"
+                          className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">Warranty Period</label>
+                        <input 
+                          {...form.register("warranty")}
+                          placeholder="e.g. 2 Year Limited"
+                          className="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 focus:bg-white dark:focus:bg-neutral-900 focus:border-indigo-500 outline-none text-sm font-bold"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-
-            {/* Brand & SKU */}
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">
-                  Brand
-                </label>
-                <input
-                  {...form.register("brand")}
-                  placeholder="e.g. AULA"
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-medium focus:bg-white focus:border-indigo-500 outline-none"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">
-                  SKU
-                </label>
-                <input
-                  {...form.register("sku")}
-                  placeholder="e.g. AULA-F75"
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-mono font-medium focus:bg-white focus:border-indigo-500 outline-none"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Card 3: Advanced Hardware Specs (Collapsible) */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-2xs overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-              className="w-full p-4 flex items-center justify-between text-left focus:outline-none hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer"
-            >
-              <div className="flex items-center gap-2">
-                <Cpu size={16} className="text-indigo-600" />
-                <h3 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">
-                  Hardware & Connectivity Specs
-                </h3>
-              </div>
-              <span className="text-xs text-gray-400">
-                {isAdvancedOpen ? "Collapse" : "Expand"}
-              </span>
-            </button>
-
-            {isAdvancedOpen && (
-              <div className="p-4 pt-0 border-t border-gray-100 dark:border-gray-800 space-y-3 mt-2">
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-gray-600">
-                    Sensor Type
-                  </label>
-                  <input
-                    {...form.register("sensor")}
-                    placeholder="e.g. Optical Gaming Sensor"
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-medium focus:bg-white focus:border-indigo-500 outline-none"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-gray-600">
-                    Max DPI
-                  </label>
-                  <input
-                    {...form.register("dpi")}
-                    placeholder="e.g. 26,000 DPI"
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-medium focus:bg-white focus:border-indigo-500 outline-none"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-gray-600">
-                    Weight
-                  </label>
-                  <input
-                    {...form.register("weight")}
-                    placeholder="e.g. 980g (Solid Built)"
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-medium focus:bg-white focus:border-indigo-500 outline-none"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-gray-600">
-                    Connectivity
-                  </label>
-                  <input
-                    {...form.register("connectionType")}
-                    placeholder="e.g. Tri-Mode (2.4GHz / Bluetooth 5.0 / Type-C)"
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-medium focus:bg-white focus:border-indigo-500 outline-none"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-gray-600">
-                    Polling Rate
-                  </label>
-                  <input
-                    {...form.register("pollingRate")}
-                    placeholder="e.g. 1000Hz (1ms response)"
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-medium focus:bg-white focus:border-indigo-500 outline-none"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-gray-600">
-                    Warranty
-                  </label>
-                  <input
-                    {...form.register("warranty")}
-                    placeholder="e.g. 1 Year Official Brand Warranty"
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-xs font-medium focus:bg-white focus:border-indigo-500 outline-none"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
+          </form>
         </div>
-      </form>
 
-      {/* Slide-out Preview Drawer */}
-      {!isModal && (
-        <>
-          {/* Backdrop */}
-          {isPreviewOpen && (
-            <div 
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-90 animate-in fade-in duration-300"
-              onClick={() => setIsPreviewOpen(false)}
-            />
-          )}
-
-          <div className={cn(
-            "fixed inset-y-0 right-0 w-full sm:w-[450px] bg-white dark:bg-gray-900 shadow-2xl z-100 transition-transform duration-500 ease-in-out border-l border-gray-100 dark:border-gray-800 flex flex-col",
-            isPreviewOpen ? "translate-x-0" : "translate-x-full"
-          )}>
-            <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-50 dark:bg-indigo-950/40 rounded-lg text-indigo-600 dark:text-indigo-400">
-                  <Eye size={20} />
-                </div>
-                <h3 className="font-black text-xl text-neutral-900 dark:text-white tracking-tight">Live Preview</h3>
-              </div>
-              <button 
+        {/* Slide-out Preview Drawer */}
+        {!isModal && (
+          <>
+            {/* Backdrop */}
+            {isPreviewOpen && (
+              <div 
+                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-90 animate-in fade-in duration-300"
                 onClick={() => setIsPreviewOpen(false)}
-                className="p-2.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-all active:scale-95 group cursor-pointer"
-              >
-                <X size={20} className="text-neutral-400 group-hover:text-neutral-900 dark:group-hover:text-white" />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-neutral-50/50 dark:bg-neutral-950">
-              <div className="flex items-center gap-2 mb-2 text-gray-400 px-2">
-                <span className="text-[10px] font-black uppercase tracking-widest">Store Front View</span>
-              </div>
-              <div className="flex justify-center">
-                <div className="w-full max-w-sm ring-1 ring-gray-100 dark:ring-neutral-800 rounded-3xl overflow-hidden bg-white dark:bg-gray-900 shadow-xl shadow-indigo-500/5">
-                  <ProductCard
-                    data={{
-                      id: product.id,
-                      name: watchedValues.name || "Product Name",
-                      price: Number(watchedValues.price) || 0,
-                      image: watchedValues.image || null,
-                      images: watchedValues.images || [],
-                      description: watchedValues.description || null,
-                      stock: Number(watchedValues.stock),
-                      slug: watchedValues.slug || "slug",
-                      colors: watchedValues.colors || [],
-                      switchType: watchedValues.switchType || null,
-                      isActive: watchedValues.isActive ?? true,
-                      scheduledAt: watchedValues.scheduledAt ? new Date(watchedValues.scheduledAt) : null,
-                      specs: (watchedValues.specs || {}) as Record<string, string | number | boolean | null>,
-                      brand: watchedValues.brand || null,
-                      sku: watchedValues.sku || null,
-                      dpi: watchedValues.dpi || null,
-                      weight: watchedValues.weight || null,
-                      connectionType: watchedValues.connectionType || null,
-                      pollingRate: watchedValues.pollingRate || null,
-                      sensor: watchedValues.sensor || null,
-                      warranty: watchedValues.warranty || null,
-                      availability: watchedValues.availability || null,
-                      createdAt: product.createdAt,
-                      updatedAt: new Date(),
-                      categoryId: watchedValues.categoryId || null,
-                      isOnSale: product.isOnSale ?? false,
-                      salePrice: product.salePrice ?? null,
-                      saleEndDate: product.saleEndDate ?? null,
-                      category: {
-                        id: watchedValues.categoryId || "temp",
-                        name: categories.find((c) => c.id === watchedValues.categoryId)?.name || "Uncategorized",
-                        slug: "temp",
-                        description: null,
-                        image: null,
-                        parentId: null,
-                        isActive: true,
-                        isFeatured: false,
-                        seoTitle: null,
-                        seoDescription: null,
-                        createdAt: new Date(),
-                        updatedAt: new Date(),
-                      },
-                    }}
-                  />
-                </div>
-              </div>
-              
-              <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
-                <h4 className="text-xs font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Quick Stats</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-neutral-50 dark:bg-neutral-800/60 rounded-xl">
-                    <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-tight">Stock Level</p>
-                    <p className={cn("text-lg font-black", watchedValues.stock > 10 ? "text-emerald-600" : "text-amber-600")}>
-                      {watchedValues.stock} units
-                    </p>
-                  </div>
-                  <div className="p-4 bg-neutral-50 dark:bg-neutral-800/60 rounded-xl">
-                    <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-tight">Price Point</p>
-                    <p className="text-lg font-black text-neutral-900 dark:text-white">
-                      ${watchedValues.price}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Sticky Bottom Action Bar (Full Width within Container) */}
-      <div
-        className={cn(
-          "sticky bottom-0 -mx-4 md:-mx-6 -mb-4 md:-mb-6 px-6 py-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 flex items-center justify-between gap-4 z-40 shadow-lg",
-          isModal && "relative bottom-0 mx-0 mb-0 px-0 shadow-none border-t-0"
-        )}
-      >
-        {/* Left: Change Status Indicator */}
-        <div className="flex items-center gap-3">
-          <div
-            className={cn(
-              "flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all",
-              form.formState.isDirty
-                ? "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800"
-                : "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800"
+              />
             )}
-          >
-            <span className="relative flex h-2 w-2">
-              <span
-                className={cn(
+
+            <div className={cn(
+              "fixed inset-y-0 right-0 w-full sm:w-[450px] bg-white dark:bg-gray-900 shadow-2xl z-100 transition-transform duration-500 ease-in-out border-l border-gray-100 dark:border-gray-800 flex flex-col",
+              isPreviewOpen ? "translate-x-0" : "translate-x-full"
+            )}>
+              <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+                    <Eye size={20} />
+                  </div>
+                  <h3 className="font-black text-xl text-neutral-900 tracking-tight">Live Preview</h3>
+                </div>
+                <button 
+                  onClick={() => setIsPreviewOpen(false)}
+                  className="p-2.5 hover:bg-neutral-100 rounded-xl transition-all active:scale-95 group"
+                >
+                  <X size={20} className="text-neutral-400 group-hover:text-neutral-900" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-neutral-50/50">
+                <div className="flex items-center gap-2 mb-2 text-gray-400 px-2">
+                  <span className="text-[10px] font-black uppercase tracking-widest">Store Front View</span>
+                </div>
+                <div className="flex justify-center">
+                  <div className="w-full max-w-sm ring-1 ring-gray-100 rounded-3xl overflow-hidden bg-white dark:bg-gray-900 shadow-xl shadow-indigo-500/5">
+                    <ProductCard
+                      data={{
+                        id: product.id,
+                        name: watchedValues.name || "Product Name",
+                        price: Number(watchedValues.price) || 0,
+                        image: watchedValues.image || null,
+                        description: watchedValues.description || null,
+                        stock: Number(watchedValues.stock),
+                        slug: watchedValues.slug || "slug",
+                        colors: watchedValues.colors || [],
+                        switchType: watchedValues.switchType || null,
+                        isActive: watchedValues.isActive ?? true,
+                        scheduledAt: watchedValues.scheduledAt ? new Date(watchedValues.scheduledAt) : null,
+                        specs: (watchedValues.specs || {}) as Record<string, string | number | boolean | null>,
+                        brand: watchedValues.brand || null,
+                        sku: watchedValues.sku || null,
+                        dpi: watchedValues.dpi || null,
+                        weight: watchedValues.weight || null,
+                        connectionType: watchedValues.connectionType || null,
+                        pollingRate: watchedValues.pollingRate || null,
+                        sensor: watchedValues.sensor || null,
+                        warranty: watchedValues.warranty || null,
+                        availability: watchedValues.availability || null,
+                        createdAt: product.createdAt,
+                        updatedAt: new Date(),
+                        categoryId: watchedValues.categoryId || null,
+                        isOnSale: product.isOnSale ?? false,
+                        salePrice: product.salePrice ?? null,
+                        saleEndDate: product.saleEndDate ?? null,
+                        category: {
+                          id: watchedValues.categoryId || "temp",
+                          name: categories.find((c) => c.id === watchedValues.categoryId)?.name || "Uncategorized",
+                          slug: "temp",
+                          description: null,
+                          image: null,
+                          parentId: null,
+                          isActive: true,
+                          isFeatured: false,
+                          seoTitle: null,
+                          seoDescription: null,
+                          createdAt: new Date(),
+                          updatedAt: new Date(),
+                        },
+                      }}
+                    />
+                  </div>
+                </div>
+                
+                <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
+                  <h4 className="text-xs font-black uppercase tracking-widest text-indigo-600">Quick Stats</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-neutral-50 rounded-xl">
+                      <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-tight">Stock Level</p>
+                      <p className={cn("text-lg font-black", watchedValues.stock > 10 ? "text-emerald-600" : "text-amber-600")}>
+                        {watchedValues.stock} units
+                      </p>
+                    </div>
+                    <div className="p-4 bg-neutral-50 rounded-xl">
+                      <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-tight">Price Point</p>
+                      <p className="text-lg font-black text-neutral-900">
+                        ${watchedValues.price}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Glassmorphism Sticky Bottom Bar */}
+      <div className={cn(
+        "sticky bottom-6 mx-auto w-full max-w-[1400px] z-60 px-6",
+        isModal && "relative bottom-0 px-0 mt-10 z-0"
+      )}>
+        <div className={cn(
+          "bg-white dark:bg-gray-900/80 backdrop-blur-2xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-4 sm:p-5 rounded-[2rem] flex flex-col sm:flex-row items-center justify-between gap-4 ring-1 ring-black/5",
+          isModal && "rounded-2xl shadow-none border-neutral-100 bg-neutral-50/50 backdrop-blur-none"
+        )}>
+          <div className="flex items-center gap-4 pl-2">
+            <div className={cn(
+              "flex items-center gap-3 px-4 py-2 rounded-2xl transition-all duration-500",
+              form.formState.isDirty 
+                ? "bg-amber-50 text-amber-700 ring-1 ring-amber-200/50" 
+                : "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/50"
+            )}>
+              <div className="relative flex h-2 w-2">
+                <span className={cn(
                   "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75",
                   form.formState.isDirty ? "bg-amber-400" : "bg-emerald-400"
-                )}
-              />
-              <span
-                className={cn(
+                )}></span>
+                <span className={cn(
                   "relative inline-flex rounded-full h-2 w-2",
                   form.formState.isDirty ? "bg-amber-500" : "bg-emerald-500"
-                )}
-              />
-            </span>
-            <span>
-              {form.formState.isDirty ? "Unsaved changes" : "All changes saved"}
-            </span>
+                )}></span>
+              </div>
+              <span className="text-xs font-black uppercase tracking-widest">
+                {form.formState.isDirty ? "Unsaved Changes" : "Everything Saved"}
+              </span>
+            </div>
+            
+            {form.formState.isDirty && (
+              <button
+                type="button"
+                onClick={() => form.reset()}
+                className="text-xs font-bold text-neutral-400 hover:text-red-500 transition-colors flex items-center gap-1.5 px-2"
+              >
+                <RefreshCw size={14} />
+                Discard
+              </button>
+            )}
           </div>
 
-          {form.formState.isDirty && (
-            <button
-              type="button"
-              onClick={() => form.reset()}
-              className="text-xs font-semibold text-gray-500 hover:text-red-600 transition flex items-center gap-1 cursor-pointer px-2 py-1"
-            >
-              <RefreshCw size={12} /> Discard
-            </button>
-          )}
-        </div>
-
-        {/* Right: Save & Action Buttons */}
-        <div className="flex items-center gap-3">
-          {!isModal && (
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition cursor-pointer"
-            >
-              Cancel
-            </button>
-          )}
-          <button
-            onClick={form.handleSubmit(onSubmit)}
-            disabled={isPending || (!form.formState.isDirty && !isModal)}
-            className={cn(
-              "px-6 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 shadow-md cursor-pointer active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100",
-              form.formState.isDirty
-                ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-200 dark:shadow-none"
-                : "bg-gray-900 hover:bg-black dark:bg-gray-100 dark:text-gray-900 text-white"
+          <div className="flex gap-3 w-full sm:w-auto">
+            {!isModal && (
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="flex-1 sm:flex-none px-8 py-3.5 text-sm font-black text-neutral-600 bg-neutral-100/50 hover:bg-neutral-100 rounded-2xl transition-all active:scale-95"
+              >
+                Cancel
+              </button>
             )}
-          >
-            {isPending ? (
-              <>
-                <Loader2 className="animate-spin" size={15} />
-                <span>Saving Changes...</span>
-              </>
-            ) : (
-              <>
-                <Save size={15} />
-                <span>{isModal ? "Save Details" : "Save & Update Product"}</span>
-              </>
-            )}
-          </button>
+            <button
+              onClick={form.handleSubmit(onSubmit)}
+              disabled={isPending || (!form.formState.isDirty && !isModal)}
+              className={cn(
+                "flex-1 sm:flex-none px-12 py-3.5 text-sm font-black text-white rounded-2xl transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100",
+                form.formState.isDirty 
+                  ? "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200 hover:shadow-indigo-300" 
+                  : "bg-neutral-800 hover:bg-black shadow-neutral-200"
+              )}
+            >
+              {isPending ? (
+                <Loader2 className="animate-spin" size={20} />
+              ) : (
+                <Save size={20} />
+              )}
+              {isModal ? "Save Details" : (isPending ? "Updating..." : "Update Product")}
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -2,10 +2,11 @@
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
-import { OrderStatus, Prisma, UserRole } from "@prisma/client";
+import { OrderStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
+import { UserRole } from "@prisma/client";
 import { createAuditLog } from "./actions/audit-actions";
 import { logger } from "@/lib/logger";
 
@@ -30,8 +31,7 @@ const productSchema = z.object({
   description: z.string().min(10, "Description is too short"),
   price: z.coerce.number().min(0.01, "Price must be greater than 0"),
   stock: z.coerce.number().min(0, "Stock cannot be negative"),
-  image: z.string().optional().or(z.literal("")),
-  images: z.array(z.string()).default([]),
+  image: z.string().url("Invalid image URL").optional().or(z.literal("")),
   categoryId: z.string().min(1, "Category is required"),
   colors: z.array(z.string()).default([]),
   switchType: z.string().optional(),
@@ -46,7 +46,9 @@ const productSchema = z.object({
   availability: z.string().optional().nullable(),
   isActive: z.boolean().default(true),
   scheduledAt: z.string().optional().nullable(),
-  specs: z.record(z.string(), z.unknown()).optional(),
+  specs: z
+    .record(z.string(), z.string().or(z.number()).or(z.boolean()).nullable())
+    .optional(),
 });
 
 export type ProductFormValues = z.infer<typeof productSchema>;
@@ -84,7 +86,6 @@ export async function createProduct(data: ProductFormValues) {
         price: validatedData.price,
         stock: validatedData.stock,
         image: validatedData.image || null,
-        images: validatedData.images || [],
         categoryId: validatedData.categoryId,
         colors: validatedData.colors,
         switchType: validatedData.switchType,
@@ -101,7 +102,7 @@ export async function createProduct(data: ProductFormValues) {
         scheduledAt: validatedData.scheduledAt
           ? new Date(validatedData.scheduledAt)
           : null,
-        specs: (validatedData.specs as Prisma.InputJsonValue) || {},
+        specs: validatedData.specs || {},
       },
     });
 
@@ -178,7 +179,6 @@ export async function updateProduct(id: string, data: ProductFormValues) {
         price: validatedData.price,
         stock: validatedData.stock,
         image: validatedData.image || null,
-        images: validatedData.images || [],
         categoryId: validatedData.categoryId,
         colors: validatedData.colors,
         switchType: validatedData.switchType,
@@ -195,7 +195,7 @@ export async function updateProduct(id: string, data: ProductFormValues) {
         scheduledAt: validatedData.scheduledAt
           ? new Date(validatedData.scheduledAt)
           : null,
-        specs: (validatedData.specs as Prisma.InputJsonValue) || {},
+        specs: validatedData.specs || {},
       },
     });
 

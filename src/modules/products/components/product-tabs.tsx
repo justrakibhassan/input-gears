@@ -35,24 +35,18 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
   ];
 
   const specs = useMemo(() => {
-    const map = new Map<string, string | number>();
+    const list: { label: string; value: string | number }[] = [];
 
-    const addSpec = (label: string, value: string | number | null | undefined) => {
-      if (value !== null && value !== undefined && value !== "") {
-        map.set(label.trim(), value);
-      }
-    };
-
-    addSpec("Brand", product.brand);
-    addSpec("SKU / Model Code", product.sku);
-    addSpec("Switch Type", product.switchType);
-    addSpec("Connection Type", product.connectionType);
-    addSpec("Sensor", product.sensor);
-    addSpec("DPI / Resolution", product.dpi);
-    addSpec("Polling Rate", product.pollingRate);
-    addSpec("Weight", product.weight);
-    addSpec("Warranty", product.warranty);
-    addSpec("Availability", product.availability);
+    if (product.brand) list.push({ label: "Brand", value: product.brand });
+    if (product.sku) list.push({ label: "SKU / Model Code", value: product.sku });
+    if (product.switchType) list.push({ label: "Switch Type", value: product.switchType });
+    if (product.connectionType) list.push({ label: "Connection Type", value: product.connectionType });
+    if (product.sensor) list.push({ label: "Sensor", value: product.sensor });
+    if (product.dpi) list.push({ label: "DPI / Resolution", value: product.dpi });
+    if (product.pollingRate) list.push({ label: "Polling Rate", value: product.pollingRate });
+    if (product.weight) list.push({ label: "Weight", value: product.weight });
+    if (product.warranty) list.push({ label: "Warranty", value: product.warranty });
+    if (product.availability) list.push({ label: "Availability", value: product.availability });
 
     // Include custom JSON specs if provided, safely excluding colorMap or nested objects
     if (product.specs && typeof product.specs === "object") {
@@ -62,16 +56,13 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
         if (val !== null && val !== undefined && val !== "") {
           const formattedLabel = key
             .replace(/([A-Z])/g, " $1")
-            .replace(/^./, (str) => str.toUpperCase())
-            .trim();
-          if (!map.has(formattedLabel)) {
-            map.set(formattedLabel, String(val));
-          }
+            .replace(/^./, (str) => str.toUpperCase());
+          list.push({ label: formattedLabel, value: String(val) });
         }
       });
     }
 
-    return Array.from(map.entries()).map(([label, value]) => ({ label, value }));
+    return list;
   }, [product]);
 
   return (
@@ -125,7 +116,7 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
                     <tbody>
                       {specs.map((spec, index) => (
                         <tr
-                          key={`${spec.label}-${index}`}
+                          key={spec.label}
                           className={cn(
                             "transition-colors hover:bg-gray-50/50",
                             index !== specs.length - 1 && "border-b border-gray-50",
