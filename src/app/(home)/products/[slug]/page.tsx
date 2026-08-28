@@ -4,7 +4,7 @@ import ProductDetailsView from "@/modules/products/views/product-details-view";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 
-export const revalidate = 3600; // Revalidate every hour
+export const dynamic = "force-dynamic";
 
 export async function generateStaticParams() {
   const products = await prisma.product.findMany({

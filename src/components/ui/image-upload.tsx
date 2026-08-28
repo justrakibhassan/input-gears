@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState } from "react";
 import { CldUploadWidget } from "next-cloudinary";
 import Image from "next/image";
 import { Trash, CloudLightning, Image as ImageIcon } from "lucide-react";
@@ -10,13 +10,12 @@ import { CloudinaryResult } from "@/types/cloudinary";
 import { addToMediaLibrary } from "@/modules/admin/actions/media-actions";
 import { MediaLibraryModal } from "@/modules/admin/components/media-library-modal";
 
-const emptySubscribe = () => () => {};
-
 interface ImageUploadProps {
   disabled?: boolean;
   onChange: (value: string) => void;
   onRemove: (value: string) => void;
   value: string[];
+  maxFiles?: number;
 }
 
 export default function ImageUpload({
@@ -24,6 +23,7 @@ export default function ImageUpload({
   onChange,
   onRemove,
   value,
+  maxFiles = 20,
 }: ImageUploadProps) {
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME?.replace(/['"]/g, "");
@@ -37,7 +37,7 @@ export default function ImageUpload({
     if (result && typeof result === "object" && "info" in result) {
       const info = result.info as CloudinaryResult["info"];
 
-      if (info.secure_url) {
+      if (info && info.secure_url) {
         onChange(info.secure_url);
         // Automatically register to Media Library
         addToMediaLibrary(info.secure_url, info.original_filename || "");
@@ -87,7 +87,8 @@ export default function ImageUpload({
             onSuccess={onUpload}
             uploadPreset={uploadPreset}
             options={{
-              maxFiles: 1,
+              maxFiles: maxFiles,
+              multiple: true,
               sources: ["local", "url", "camera"],
               clientAllowedFormats: ["image"],
             }}

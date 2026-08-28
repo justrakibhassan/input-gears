@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, memo } from "react";
+import { useState, useMemo, useSyncExternalStore, memo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -98,66 +98,70 @@ const ProductDetailsView = memo(
     const userRole = (session?.user as { role?: string })?.role;
     const router = useRouter();
 
+    const isMounted = useSyncExternalStore(
+      () => () => {},
+      () => true,
+      () => false
+    );
+
     // Extract color mapping from specs if available safely
     const colorMap = useMemo<Record<string, ColorVariantMeta>>(() => {
-      if (product?.specs && typeof product.specs === "object") {
+      if (product.specs && typeof product.specs === "object") {
         const rawMap = (product.specs as Record<string, unknown>).colorMap;
         if (rawMap && typeof rawMap === "object") {
           return rawMap as Record<string, ColorVariantMeta>;
         }
       }
       return {};
-    }, [product?.specs]);
+    }, [product.specs]);
 
     const allImages = useMemo(() => {
       const list: string[] = [];
-      if (product?.image) list.push(product.image);
-      if (product?.images && Array.isArray(product.images)) {
+      if (product.image && typeof product.image === "string" && product.image.trim().length > 0) {
+        list.push(product.image);
+      }
+      if (product.images && Array.isArray(product.images)) {
         product.images.forEach((img) => {
-          if (img && !list.includes(img)) list.push(img);
+          if (img && typeof img === "string" && img.trim().length > 0 && !list.includes(img)) {
+            list.push(img);
+          }
         });
       }
-      // Add images from colorMap if not already in list
-      if (colorMap && typeof colorMap === "object") {
+      // If no images exist in product.image/images, fallback to colorMap images
+      if (list.length === 0 && colorMap && typeof colorMap === "object") {
         Object.values(colorMap).forEach((val) => {
-          if (val && typeof val === "object" && val.image && !list.includes(val.image)) {
+          if (val && typeof val === "object" && val.image && typeof val.image === "string" && val.image.trim().length > 0 && !list.includes(val.image)) {
             list.push(val.image);
           }
         });
       }
       if (list.length === 0) list.push("/placeholder.png");
       return list;
-    }, [product?.image, product?.images, colorMap]);
+    }, [product.image, product.images, colorMap]);
 
-    const [selectedImage, setSelectedImage] = useState(allImages[0]);
-    const [quantity, setQuantity] = useState(1);
     const validColors = useMemo(() => {
-      if (!product?.colors || !Array.isArray(product.colors)) return [];
-      return product.colors.filter((c) => typeof c === "string" && c.trim().length > 0);
-    }, [product?.colors]);
+      if (!product.colors || !Array.isArray(product.colors)) return [];
+      return product.colors.filter((c): c is string => typeof c === "string" && c.trim().length > 0);
+    }, [product.colors]);
 
+    const rawSpecs = useMemo(() => {
+      return (product.specs && typeof product.specs === "object" ? product.specs : {}) as Record<string, unknown>;
+    }, [product.specs]);
+
+    const [prevProduct, setPrevProduct] = useState(product);
+    const [selectedImage, setSelectedImage] = useState(allImages[0]);
     const [selectedColor, setSelectedColor] = useState<string | null>(
-      validColors[0] || null,
+      validColors[0] || null
     );
+    const [quantity, setQuantity] = useState(1);
     const [isAdding, setIsAdding] = useState(false);
     const [isAddedSuccess, setIsAddedSuccess] = useState(false);
-    const [isMounted, setIsMounted] = useState(false);
 
-    useEffect(() => {
-      const frame = requestAnimationFrame(() => setIsMounted(true));
-      return () => cancelAnimationFrame(frame);
-    }, []);
-
-    useEffect(() => {
-      if (allImages.length > 0) {
-        setSelectedImage(allImages[0]);
-      }
-      if (validColors.length > 0) {
-        setSelectedColor(validColors[0]);
-      } else {
-        setSelectedColor(null);
-      }
-    }, [validColors, allImages]);
+    if (prevProduct !== product) {
+      setPrevProduct(product);
+      setSelectedImage(allImages[0]);
+      setSelectedColor(validColors[0] || null);
+    }
 
     // Handle Color Change with automatic slider image update
     const handleSelectColor = (color: string | null) => {
@@ -178,15 +182,15 @@ const ProductDetailsView = memo(
       if (activeVariantMeta && typeof activeVariantMeta === "object" && activeVariantMeta.price) {
         return activeVariantMeta.price;
       }
-      return product?.isOnSale && product?.salePrice ? product.salePrice : (product?.price || 0);
-    }, [activeVariantMeta, product?.isOnSale, product?.salePrice, product?.price]);
+      return product.isOnSale && product.salePrice ? product.salePrice : (product.price || 0);
+    }, [activeVariantMeta, product.isOnSale, product.salePrice, product.price]);
 
     const regularPrice = useMemo(() => {
       if (activeVariantMeta && typeof activeVariantMeta === "object" && activeVariantMeta.regularPrice) {
         return activeVariantMeta.regularPrice;
       }
-      return product?.price || 0;
-    }, [activeVariantMeta, product?.price]);
+      return product.price || 0;
+    }, [activeVariantMeta, product.price]);
 
     const formattedPrice = useMemo(() => {
       return new Intl.NumberFormat("en-US", {
@@ -196,14 +200,14 @@ const ProductDetailsView = memo(
     }, [effectivePrice]);
 
     const discountedPrice = useMemo(() => {
-      if (product?.isOnSale && regularPrice > effectivePrice) {
+      if (product.isOnSale && regularPrice > effectivePrice) {
         return new Intl.NumberFormat("en-US", {
           style: "currency",
           currency: "USD",
         }).format(regularPrice);
       }
       return null;
-    }, [regularPrice, effectivePrice, product?.isOnSale]);
+    }, [regularPrice, effectivePrice, product.isOnSale]);
 
     const discountPercentage = useMemo(() => {
       if (regularPrice > effectivePrice) {
@@ -217,8 +221,8 @@ const ProductDetailsView = memo(
       if (activeVariantMeta && typeof activeVariantMeta === "object" && activeVariantMeta.inStock !== undefined) {
         return !activeVariantMeta.inStock;
       }
-      return product?.stock === 0;
-    }, [activeVariantMeta, product?.stock]);
+      return product.stock === 0;
+    }, [activeVariantMeta, product.stock]);
 
     // Slide Image Navigation Handlers
     const currentImageIndex = useMemo(() => {
@@ -288,7 +292,22 @@ const ProductDetailsView = memo(
           slug: product.slug,
           price: effectivePrice,
           image: selectedImage || product.image || "/placeholder.png",
-          category: product.category as any,
+          category: product.category
+            ? ({
+                id: "id" in product.category && typeof product.category.id === "string" ? product.category.id : "",
+                name: product.category.name,
+                slug: "slug" in product.category && typeof product.category.slug === "string" ? product.category.slug : "",
+                description: null,
+                image: null,
+                parentId: null,
+                isActive: true,
+                isFeatured: false,
+                seoTitle: null,
+                seoDescription: null,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              } as import("@/types/product").Category)
+            : null,
           colors: product.colors || [],
           switchType: product.switchType || undefined,
           specs: product.specs,
@@ -540,9 +559,14 @@ const ProductDetailsView = memo(
 
               {/* Rating Stars & Reviews Count */}
               <div className="flex items-center gap-2">
-                <div className="flex items-center text-amber-400">
+                <div className="flex items-center">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={13} fill="currentColor" strokeWidth={0} />
+                    <Star
+                      key={i}
+                      size={13}
+                      className={i < Math.round(averageRating || 5) ? "text-amber-400 fill-amber-400" : "text-gray-300 fill-gray-300"}
+                      strokeWidth={0}
+                    />
                   ))}
                 </div>
                 <span className="text-xs text-gray-500 font-medium">
@@ -556,19 +580,19 @@ const ProductDetailsView = memo(
                   Quick Overview:
                 </h3>
                 <ul className="space-y-1.5 font-normal">
-                  {product.specs && typeof product.specs === "object" && (product.specs as any).layout && (
+                  {rawSpecs.layout != null && typeof rawSpecs.layout !== "object" && (
                     <li className="flex items-start gap-1.5">
                       <span className="text-gray-400">•</span>
                       <span>
-                        <strong className="text-gray-800">Layout:</strong> {String((product.specs as any).layout)}
+                        <strong className="text-gray-800">Layout:</strong> {String(rawSpecs.layout)}
                       </span>
                     </li>
                   )}
-                  {product.specs && typeof product.specs === "object" && (product.specs as any).structure && (
+                  {rawSpecs.structure != null && typeof rawSpecs.structure !== "object" && (
                     <li className="flex items-start gap-1.5">
                       <span className="text-gray-400">•</span>
                       <span>
-                        <strong className="text-gray-800">Structure:</strong> {String((product.specs as any).structure)}
+                        <strong className="text-gray-800">Structure:</strong> {String(rawSpecs.structure)}
                       </span>
                     </li>
                   )}
@@ -596,11 +620,11 @@ const ProductDetailsView = memo(
                       </span>
                     </li>
                   )}
-                  {product.specs && typeof product.specs === "object" && (product.specs as any).battery && (
+                  {rawSpecs.battery != null && typeof rawSpecs.battery !== "object" && (
                     <li className="flex items-start gap-1.5">
                       <span className="text-gray-400">•</span>
                       <span>
-                        <strong className="text-gray-800">Battery:</strong> {String((product.specs as any).battery)}
+                        <strong className="text-gray-800">Battery:</strong> {String(rawSpecs.battery)}
                       </span>
                     </li>
                   )}

@@ -28,17 +28,21 @@ const ProductCard = memo(({ data }: ProductCardProps) => {
   // Multi-image list for interactive hover scrub on PC
   const allImages = useMemo(() => {
     const list: string[] = [];
-    if (data.image) list.push(data.image);
+    if (data.image && typeof data.image === "string" && data.image.trim().length > 0) {
+      list.push(data.image);
+    }
     if (data.images && Array.isArray(data.images)) {
       data.images.forEach((img) => {
-        if (img && !list.includes(img)) list.push(img);
+        if (img && typeof img === "string" && img.trim().length > 0 && !list.includes(img)) {
+          list.push(img);
+        }
       });
     }
-    if (data.specs && typeof data.specs === "object") {
+    if (list.length === 0 && data.specs && typeof data.specs === "object") {
       const rawMap = (data.specs as Record<string, unknown>).colorMap;
       if (rawMap && typeof rawMap === "object") {
         Object.values(rawMap as Record<string, { image?: string }>).forEach((val) => {
-          if (val && val.image && !list.includes(val.image)) {
+          if (val && val.image && typeof val.image === "string" && val.image.trim().length > 0 && !list.includes(val.image)) {
             list.push(val.image);
           }
         });

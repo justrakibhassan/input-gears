@@ -14,9 +14,7 @@ import {
   Info,
   Layers,
   ExternalLink,
-  CheckCircle2,
   Trash2,
-  Zap,
   Cpu,
   Plus,
   X,
@@ -165,13 +163,26 @@ export default function ProductEditForm({
   };
 
   const handleAddImageUrl = () => {
-    const val = newImageUrl.trim();
-    if (!val) return;
-    const current = watchedValues.images || [];
-    if (!current.includes(val)) {
-      form.setValue("images", [...current, val], { shouldDirty: true });
-      if (!watchedValues.image) {
-        form.setValue("image", val, { shouldDirty: true });
+    const raw = newImageUrl.trim();
+    if (!raw) return;
+    const urls = raw
+      .split(/[\n,]+/)
+      .map((u) => u.trim())
+      .filter((u) => u.length > 0);
+
+    const current = form.getValues("images") || [];
+    const newItems: string[] = [];
+    urls.forEach((u) => {
+      if (!current.includes(u) && !newItems.includes(u)) {
+        newItems.push(u);
+      }
+    });
+
+    if (newItems.length > 0) {
+      const nextImages = [...current, ...newItems];
+      form.setValue("images", nextImages, { shouldDirty: true, shouldValidate: true });
+      if (!form.getValues("image")) {
+        form.setValue("image", newItems[0], { shouldDirty: true, shouldValidate: true });
       }
     }
     setNewImageUrl("");
@@ -183,14 +194,7 @@ export default function ProductEditForm({
       const res = await updateProduct(product.id, data);
 
       if (res.success) {
-        toast.success(
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="text-green-500" size={18} />
-            <span className="font-semibold text-sm">
-              Product Updated Successfully!
-            </span>
-          </div>
-        );
+        toast.success("Product Updated Successfully!");
         if (onSuccess) {
           onSuccess();
         } else {
@@ -452,13 +456,13 @@ export default function ProductEditForm({
                         <button
                           type="button"
                           onClick={() => {
-                            const nextImgs = (watchedValues.images || []).filter(
-                              (_, i) => i !== idx
-                            );
-                            form.setValue("images", nextImgs, { shouldDirty: true });
+                            const currentImgs = form.getValues("images") || [];
+                            const nextImgs = currentImgs.filter((_, i) => i !== idx);
+                            form.setValue("images", nextImgs, { shouldDirty: true, shouldValidate: true });
                             if (isPrimary) {
                               form.setValue("image", nextImgs[0] || "", {
                                 shouldDirty: true,
+                                shouldValidate: true,
                               });
                             }
                           }}
@@ -477,15 +481,21 @@ export default function ProductEditForm({
                 <ImageUpload
                   value={[]}
                   disabled={isPending}
+                  maxFiles={20}
                   onChange={(url) => {
-                    const currentImages = watchedValues.images || [];
+                    const currentImages = form.getValues("images") || [];
                     if (!currentImages.includes(url)) {
-                      form.setValue("images", [...currentImages, url], {
+                      const nextImages = [...currentImages, url];
+                      form.setValue("images", nextImages, {
                         shouldDirty: true,
+                        shouldValidate: true,
                       });
-                    }
-                    if (!watchedValues.image) {
-                      form.setValue("image", url, { shouldDirty: true });
+                      if (!form.getValues("image")) {
+                        form.setValue("image", url, {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        });
+                      }
                     }
                   }}
                   onRemove={() => {}}

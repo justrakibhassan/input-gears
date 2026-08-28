@@ -22,7 +22,11 @@ import {
   Cpu,
   Save,
   Sparkles,
+  Image as ImageIcon,
+  Check,
+  Trash2,
 } from "lucide-react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import ProductCard from "@/modules/products/components/product-card";
@@ -105,6 +109,7 @@ export default function CreateProductPage() {
       price: 1,
       stock: 10,
       image: "",
+      images: [],
       categoryId: "",
       colors: [],
       switchType: "",
@@ -125,6 +130,33 @@ export default function CreateProductPage() {
   });
 
   const watchedValues = form.watch();
+  const [newImageUrl, setNewImageUrl] = useState("");
+
+  const handleAddImageUrl = () => {
+    const raw = newImageUrl.trim();
+    if (!raw) return;
+    const urls = raw
+      .split(/[\n,]+/)
+      .map((u) => u.trim())
+      .filter((u) => u.length > 0);
+
+    const current = form.getValues("images") || [];
+    const newItems: string[] = [];
+    urls.forEach((u) => {
+      if (!current.includes(u) && !newItems.includes(u)) {
+        newItems.push(u);
+      }
+    });
+
+    if (newItems.length > 0) {
+      const nextImages = [...current, ...newItems];
+      form.setValue("images", nextImages, { shouldDirty: true, shouldValidate: true });
+      if (!form.getValues("image")) {
+        form.setValue("image", newItems[0], { shouldDirty: true, shouldValidate: true });
+      }
+    }
+    setNewImageUrl("");
+  };
 
   // Fetch Categories
   const fetchCategories = async () => {
@@ -414,6 +446,136 @@ export default function CreateProductPage() {
                       </p>
                     )}
                   </div>
+                </div>
+              </div>
+
+              {/* Media & Product Image Gallery */}
+              <div className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-none space-y-5">
+                <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                      <ImageIcon size={20} className="text-indigo-600" /> Product Images & Gallery
+                    </h2>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Upload cover photo and all color variant photos for interactive switching.
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-gray-600 bg-gray-100 dark:bg-gray-800 px-2.5 py-1 rounded-lg">
+                    {watchedValues.images?.length || 0} Images
+                  </span>
+                </div>
+
+                {/* Gallery Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5">
+                  {watchedValues.images &&
+                    watchedValues.images.map((imgUrl: string, idx: number) => {
+                      const isPrimary = watchedValues.image === imgUrl;
+                      return (
+                        <div
+                          key={idx}
+                          className={cn(
+                            "group relative aspect-square rounded-xl overflow-hidden border bg-gray-50 dark:bg-gray-800/60 flex items-center justify-center p-2 transition-all",
+                            isPrimary
+                              ? "border-indigo-600 ring-2 ring-indigo-600/20 shadow-sm"
+                              : "border-gray-200 dark:border-gray-700 hover:border-gray-400"
+                          )}
+                        >
+                          <Image
+                            src={imgUrl}
+                            alt={`Product image ${idx + 1}`}
+                            fill
+                            className="object-contain p-2"
+                            sizes="(max-width: 768px) 120px, 160px"
+                          />
+                          {isPrimary && (
+                            <span className="absolute top-2 left-2 bg-indigo-600 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-md shadow-xs pointer-events-none z-10 flex items-center gap-1">
+                              <Check size={10} strokeWidth={3} /> Cover
+                            </span>
+                          )}
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 z-20">
+                            {!isPrimary && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  form.setValue("image", imgUrl, { shouldDirty: true })
+                                }
+                                title="Set as Cover"
+                                className="px-2 py-1 bg-white text-gray-900 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 text-[10px] font-bold shadow-xs cursor-pointer"
+                              >
+                                Set Cover
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const currentImgs = form.getValues("images") || [];
+                                const nextImgs = currentImgs.filter((_, i) => i !== idx);
+                                form.setValue("images", nextImgs, { shouldDirty: true, shouldValidate: true });
+                                if (isPrimary) {
+                                  form.setValue("image", nextImgs[0] || "", {
+                                    shouldDirty: true,
+                                    shouldValidate: true,
+                                  });
+                                }
+                              }}
+                              title="Delete Image"
+                              className="p-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 shadow-xs cursor-pointer"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                  {/* Upload Dropzone Slot */}
+                  <div className="aspect-square rounded-xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/20 hover:bg-gray-100/60 dark:hover:bg-gray-800/50 transition flex flex-col items-center justify-center p-2 text-center">
+                    <ImageUpload
+                      value={[]}
+                      disabled={isPending}
+                      maxFiles={20}
+                      onChange={(url) => {
+                        const currentImages = form.getValues("images") || [];
+                        if (!currentImages.includes(url)) {
+                          const nextImages = [...currentImages, url];
+                          form.setValue("images", nextImages, {
+                            shouldDirty: true,
+                            shouldValidate: true,
+                          });
+                          if (!form.getValues("image")) {
+                            form.setValue("image", url, {
+                              shouldDirty: true,
+                              shouldValidate: true,
+                            });
+                          }
+                        }
+                      }}
+                      onRemove={() => {}}
+                    />
+                  </div>
+                </div>
+
+                {/* Quick URL Adder Input */}
+                <div className="flex gap-2 pt-2">
+                  <input
+                    value={newImageUrl}
+                    onChange={(e) => setNewImageUrl(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddImageUrl();
+                      }
+                    }}
+                    placeholder="Or paste direct image URL / file path (e.g. /AF75MBG-2048x1536.webp)"
+                    className="flex-1 px-4 py-2.5 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 font-mono text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:bg-white focus:border-indigo-500 outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddImageUrl}
+                    className="px-4 py-2.5 bg-gray-900 hover:bg-black dark:bg-gray-100 dark:text-gray-900 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer shrink-0"
+                  >
+                    <Plus size={14} /> Add to Gallery
+                  </button>
                 </div>
               </div>
 
@@ -974,6 +1136,7 @@ export default function CreateProductPage() {
                           name: watchedValues.name || "Product Name",
                           price: Number(watchedValues.price) || 0,
                           image: watchedValues.image || null,
+                          images: watchedValues.images || [],
                           description: watchedValues.description || null,
                           stock: Number(watchedValues.stock),
                           slug: watchedValues.slug || "slug",

@@ -201,6 +201,8 @@ export async function updateProduct(id: string, data: ProductFormValues) {
 
     revalidatePath("/admin/products");
     revalidatePath(`/admin/products/${id}`);
+    revalidatePath(`/products/${updatedProduct.slug}`);
+    revalidatePath("/");
 
     if (oldProduct) {
       let details = `Updated product "${updatedProduct.name}"`;
