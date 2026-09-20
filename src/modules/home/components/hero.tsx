@@ -83,7 +83,7 @@ export default function HeroBanner({ slides }: HeroBannerProps) {
   return (
     <section className="w-full max-w-[1440px] mx-auto px-4 md:px-6 mt-4 md:mt-6">
       <div
-        className="relative w-full min-h-[380px] sm:min-h-[440px] md:min-h-[480px] lg:min-h-[540px] rounded-2xl md:rounded-3xl overflow-hidden shadow-md select-none group isolate border border-gray-100 dark:border-white/10 bg-zinc-950"
+        className="relative w-full aspect-[16/9] sm:aspect-[21/9] lg:aspect-[24/8] rounded-2xl md:rounded-3xl overflow-hidden shadow-md select-none group isolate border border-gray-100 dark:border-white/10 bg-zinc-950"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -123,14 +123,14 @@ export default function HeroBanner({ slides }: HeroBannerProps) {
                   <>
                     <div className="absolute inset-0 bg-black/30" />{" "}
                     {/* Overlay for readability */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-6 sm:p-8 md:p-12 max-w-4xl mx-auto">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-4 sm:p-8 md:p-12 max-w-4xl mx-auto">
                       {slide.subtitle && (
-                        <p className="text-xs sm:text-sm md:text-base font-semibold tracking-widest uppercase mb-2 md:mb-3 opacity-90 animate-in fade-in slide-in-from-bottom-2 duration-700">
+                        <p className="text-[10px] sm:text-xs md:text-sm lg:text-base font-semibold tracking-widest uppercase mb-1 sm:mb-2 md:mb-3 opacity-90 animate-in fade-in slide-in-from-bottom-2 duration-700">
                           {slide.subtitle}
                         </p>
                       )}
                       {slide.title && (
-                        <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100 drop-shadow-md">
+                        <h2 className="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-black tracking-tight animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100 drop-shadow-md">
                           {slide.title}
                         </h2>
                       )}
@@ -196,7 +196,7 @@ export default function HeroBanner({ slides }: HeroBannerProps) {
               <ChevronRight size={22} />
             </button>
 
-            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+            <div className="absolute bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 z-20 flex gap-1.5 sm:gap-2">
               {slides.map((_, i) => (
                 <button
                   key={i}
@@ -204,8 +204,8 @@ export default function HeroBanner({ slides }: HeroBannerProps) {
                     e.stopPropagation();
                     goToSlide(i, i > currentIndex ? 1 : -1);
                   }}
-                  className={`h-2 rounded-full transition-all cursor-pointer ${
-                    i === currentIndex ? "w-7 bg-white" : "w-2 bg-white/50 hover:bg-white/80"
+                  className={`h-1.5 sm:h-2 rounded-full transition-all cursor-pointer ${
+                    i === currentIndex ? "w-5 sm:w-7 bg-white" : "w-1.5 sm:w-2 bg-white/50 hover:bg-white/80"
                   }`}
                   aria-label={`Go to slide ${i + 1}`}
                 />
