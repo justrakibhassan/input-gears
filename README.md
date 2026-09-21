@@ -1,128 +1,113 @@
-# ⚡ Input Gears - Premium Gear for Productivity
+# ⚡ Input Gears - Premium Tech Gadget Store
 
-Welcome to **Input Gears**, a high-performance e-commerce platform built for tech enthusiasts. Experience a seamless shopping journey with a stunning, modern interface, robust back-office management, and state-of-the-art technology.
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-latest-blue?style=for-the-badge&logo=postgresql)](https://www.postgresql.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma)](https://www.prisma.io/)
+[![Stripe](https://img.shields.io/badge/Stripe-Payments-blueviolet?style=for-the-badge&logo=stripe)](https://stripe.com/)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge&logo=vercel)](https://inputgears.vercel.app/)
+
+Welcome to **Input Gears**, a high-performance e-commerce platform built for tech and peripheral enthusiasts. Experience a seamless shopping journey with instant product search, robust inventory management, and secure Stripe payment processing.
+
+---
+
+## 🔗 Live Experience
+
+- **Live Store:** [inputgears.vercel.app](https://inputgears.vercel.app/)
 
 ---
 
 ## 📸 Visual Preview
 
-![Input Gears Homepage](/public//input-gears.webp)
+<div align="center">
+  <img src="public/input-gears.webp" alt="Input Gears Homepage" width="100%" style="border-radius: 12px; margin-bottom: 20px;" />
+</div>
 
 ---
 
 ## 🚀 Core Features
 
 ### 🛒 E-Commerce Excellence
+- **Dynamic Product Catalog**: Instant search, category filtering, and responsive inventory display.
+- **Persistent Cart Experience**: Real-time cart state synchronization across page navigations with animated toast notifications.
+- **Smart Checkout Flow**: Integrated Stripe payment processing for fast, PCI-compliant transactions.
+- **Order Tracking**: Real-time status lifecycle management from "Pending" to "Delivered".
 
-- **Dynamic Product Catalog**: Browse premium peripherals with lightning-fast search and filtering.
-- **Seamless Cart Experience**: Real-time updates with synchronized glassmorphism toast notifications.
-- **Smart Checkout**: Integrated Stripe payment processing for secure and fast transactions.
-- **Order Management**: Track your productivity upgrades from "Pending" to "Delivered".
-
-### 🔐 Multi-Role Authentication
-
-- **Secure Auth**: Powered by **Better Auth** for robust session management and data security.
-- **User Dashboard**: Manage profiles, shipping addresses, and order history effortlessly.
+### 🔐 Multi-Role Authentication & Security
+- **Modern Auth Architecture**: Powered by **Better Auth** for secure session management and data isolation.
+- **Customer Dashboard**: Profile management, saved shipping addresses, and comprehensive order history.
 
 ### 🛠️ Professional Admin Suite
+- **Inventory Control**: Real-time CRUD operations for products with Cloudinary integration for optimized image delivery.
+- **Dynamic Marketing CMS**: Manage hero sliders and site-wide promotional banners dynamically.
+- **Order Fulfillment**: Dedicated admin control center to review, update, and manage customer shipments.
 
-- **Inventory Control**: Real-time product management (Create, Update, Delete) with Cloudinary integration for lightning-fast image delivery.
-- **Dynamic Content**: CMS-style control over hero slides and site-wide marketing banners.
-- **Order Oversight**: Comprehensive dashboard to process and monitor all customer orders.
-
-### 🎨 Premium Aesthetics
-
-- **Tailwind 4 & CSS Modules**: Utilizing the latest in styling technology for a fluid, responsive, and high-performance UI.
-- **Glassmorphism Design**: Elegant blur effects and semi-transparent elements for a premium feel.
-- **Dark Mode Support**: Native dark mode integration for late-night productivity sessions.
+### 🎨 Design & UI Architecture
+- **Tailwind CSS v4**: Fluid, responsive, and performance-first styling engine.
+- **Glassmorphism Accents**: Subtle background blurs and border highlights for a refined hardware aesthetic.
+- **Dual-Mode Theming**: Native dark and light mode support with smooth transitions.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Framework**: [Next.js 16 (App Router)](https://nextjs.org/)
-- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
-- **Database**: [PostgreSQL](https://www.postgresql.org/) with [Prisma ORM](https://www.prisma.io/)
-- **Authentication**: [Better Auth](https://better-auth.com/)
-- **Payments**: [Stripe](https://stripe.com/)
-- **State Management**: [Zustand](https://github.com/pmndrs/zustand)
-- **Image Hosting**: [Cloudinary](https://cloudinary.com/)
-- **Form Handling**: [React Hook Form](https://react-hook-form.com/) & [Zod](https://zod.dev/)
+| Layer | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Framework** | Next.js 15 (App Router, React 19) | Server components, Server Actions, Edge caching |
+| **Styling** | Tailwind CSS v4, Radix UI | Modern responsive UI primitives |
+| **Database** | PostgreSQL with Prisma ORM | Relational data persistence & migrations |
+| **Auth** | Better Auth | Session tokens and role-based permissions |
+| **Payments** | Stripe API | Secure card checkout & payment intents |
+| **State** | Zustand | Lightweight client-side cart and preference state |
+| **Media** | Cloudinary CDN | Asset optimization and cloud image hosting |
+| **Validation** | React Hook Form & Zod | End-to-end schema validation |
 
 ---
 
-## 📥 Getting Started
+## 📥 Local Development Setup
 
 ### Prerequisites
-
 - Node.js 18+
-- PostgreSQL instance
-- Stripe Account (for payments)
-- Cloudinary Account (for image uploads)
+- PostgreSQL database
+- Stripe & Cloudinary developer accounts
 
-### Installation
+### 1. Clone & Install
 
-1. **Clone the repository:**
+```bash
+git clone https://github.com/justrakibhassan/input-gears.git
+cd input-gears
+npm install
+```
 
-   ```bash
-   git clone https://github.com/rakibhassan01/input-gears.git
-   cd input-gears
-   ```
+### 2. Configure Environment
 
-2. **Install dependencies:**
+Create a `.env` file in the root directory:
 
-   ```bash
-   npm install
-   ```
+```env
+DATABASE_URL="your_postgresql_connection_string"
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="your_stripe_publishable_key"
+STRIPE_SECRET_KEY="your_stripe_secret_key"
+BETTER_AUTH_SECRET="your_auth_secret"
+CLOUDINARY_CLOUD_NAME="your_cloud_name"
+CLOUDINARY_API_KEY="your_api_key"
+CLOUDINARY_API_SECRET="your_api_secret"
+```
 
-3. **Environment Setup:**
+### 3. Database Migration & Run
 
-   Create a `.env` file in the root directory and add the following:
-
-   ```env
-   DATABASE_URL="your_postgresql_url"
-   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="your_stripe_key"
-   STRIPE_SECRET_KEY="your_stripe_secret"
-   BETTER_AUTH_SECRET="your_auth_secret"
-   CLOUDINARY_CLOUD_NAME="your_cloud_name"
-   CLOUDINARY_API_KEY="your_api_key"
-   CLOUDINARY_API_SECRET="your_api_secret"
-   ```
-
-4. **Database Initialization:**
-
-   ```bash
-   npx prisma generate
-   npx prisma db push
-   ```
-
-5. **Run the Development Server:**
-
-   ```bash
-   npm run dev
-   ```
-
-Open [http://localhost:3000](http://localhost:3000) to view the application.
-
----
-
-## 📁 Project Structure
-
-```text
-├── app/          # Next.js App Router (Admin & Home routes)
-├── components/   # UI Components (Radix UI, Shared components)
-├── context/      # React Context (Cart, Auth)
-├── lib/          # Utilities, Prisma client, Auth configuration
-├── prisma/       # Database Schema and Seeds
-└── public/       # Static Assets
+```bash
+npx prisma db push
+npm run dev
 ```
 
 ---
 
 ## 📄 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the MIT License.
 
 ---
 
-**Built with ❤️ by the Input Gears Team**
+## 👨‍💻 Author
+
+Designed and engineered with passion by [Rakib Hassan](https://rakibhassan.vercel.app).
