@@ -23,3 +23,31 @@ export function formatPrice(price: number) {
     currency: "USD",
   }).format(price);
 }
+
+/**
+ * Sanitizes URLs to prevent XSS attacks (e.g. javascript:, data:, vbscript: pseudo-protocols).
+ * Returns the URL if safe, or '#' if dangerous.
+ */
+export function sanitizeUrl(url?: string | null): string {
+  if (!url) return "#";
+  const trimmed = url.trim();
+  if (trimmed.startsWith("/") || trimmed.startsWith("#") || trimmed.startsWith("?")) {
+    return trimmed;
+  }
+  try {
+    const parsed = new URL(trimmed);
+    if (["http:", "https:", "mailto:", "tel:"].includes(parsed.protocol)) {
+      return trimmed;
+    }
+  } catch {
+    const lower = trimmed.toLowerCase();
+    if (
+      !lower.startsWith("javascript:") &&
+      !lower.startsWith("data:") &&
+      !lower.startsWith("vbscript:")
+    ) {
+      return trimmed;
+    }
+  }
+  return "#";
+}

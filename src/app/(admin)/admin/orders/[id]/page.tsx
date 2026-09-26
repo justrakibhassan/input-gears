@@ -26,6 +26,10 @@ export default async function OrderDetailsPage({
 }: OrderDetailsPageProps) {
   const { id } = await params;
 
+  if (!id || !/^[a-zA-Z0-9_-]+$/.test(id)) {
+    notFound();
+  }
+
   const order = await prisma.order.findUnique({
     where: { id },
     include: {

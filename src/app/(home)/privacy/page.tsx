@@ -1,8 +1,8 @@
-import Metadata from "next";
+import type { Metadata } from "next";
 import { ShieldCheck, Lock, Eye, FileText, Bell } from "lucide-react";
 
-export const metadata = {
-  title: "Privacy Policy | InputGears",
+export const metadata: Metadata = {
+  title: "Privacy Policy",
   description: "Read our privacy policy to understand how InputGears collects, uses, and protects your personal data.",
 };
 

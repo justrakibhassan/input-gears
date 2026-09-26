@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useEffect, useState, useMemo, useRef } from "react";
+import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
   Plus,
-  ShoppingCart,
   Zap,
   Box,
   Cpu,
@@ -17,15 +16,11 @@ import {
   Trash2,
   Printer,
   Share2,
-  Heart,
   Search,
   Loader2,
   CheckCircle,
 } from "lucide-react";
 import { useCompare, CompareItem } from "@/modules/products/hooks/use-compare";
-import { useCart } from "@/modules/cart/hooks/use-cart";
-import { useWishlist } from "@/modules/products/hooks/use-wishlist";
-import { useSession } from "@/lib/auth-client";
 import { getReviewStats } from "@/modules/reviews/actions";
 import { getProductById, getProductsByIds } from "@/modules/products/actions";
 import { cn } from "@/lib/utils";
@@ -93,9 +88,6 @@ const STATIC_GROUPS: SpecGroup[] = [
 
 export default function CompareView() {
   const compare = useCompare();
-  const cart = useCart();
-  const wishlist = useWishlist();
-  const { data: session } = useSession();
 
   const [isMounted, setIsMounted] = useState(false);
   const [showCopiedTooltip, setShowCopiedTooltip] = useState(false);
@@ -220,6 +212,7 @@ export default function CompareView() {
     setIsMounted(true);
   }, []);
 
+  const { updateItems } = compare;
   useEffect(() => {
     async function loadSharedProducts() {
       if (!urlItems) return;
@@ -236,7 +229,7 @@ export default function CompareView() {
             specs: (prod.specs as Record<string, string | number | boolean | null>) || null,
           }));
           
-          compare.updateItems(fetchedItems);
+          updateItems(fetchedItems);
         } else {
           toast.error("Failed to load shared products");
         }
@@ -248,7 +241,7 @@ export default function CompareView() {
     if (isMounted) {
       loadSharedProducts();
     }
-  }, [urlItems, isMounted]);
+  }, [urlItems, isMounted, updateItems]);
 
   // Click outside to close dropdowns
   useEffect(() => {
@@ -410,30 +403,6 @@ export default function CompareView() {
     }
   };
 
-  const handleAddToCart = (item: CompareItem) => {
-    cart.addItem({
-      id: item.id,
-      name: item.name,
-      slug: item.slug,
-      price: item.price,
-      image: item.image,
-      quantity: 1,
-      maxStock: 99,
-    }, !!session);
-  };
-
-  const handleToggleWishlist = (item: CompareItem) => {
-    wishlist.toggleItem({
-      id: item.id,
-      name: item.name,
-      slug: item.slug,
-      price: item.price,
-      image: item.image,
-      stock: 99,
-      category: item.category ? { name: item.category.name } : null
-    }, !!session);
-  };
-
   // Helper: determine dynamic spec groups
   const baseSpecGroups = useMemo(() => {
     const groups = [...STATIC_GROUPS];
@@ -490,7 +459,7 @@ export default function CompareView() {
   };
 
   // Check if a spec value differs among compared items
-  const isSpecDifferent = (key: string) => {
+  const isSpecDifferent = useCallback((key: string) => {
     if (displayedItems.length <= 1) return false;
     const firstVal = String(getDisplayValue(displayedItems[0], key)).trim().toLowerCase();
     for (let i = 1; i < displayedItems.length; i++) {
@@ -500,7 +469,7 @@ export default function CompareView() {
       }
     }
     return false;
-  };
+  }, [displayedItems]);
 
   // Check if average rating differs
   const isRatingDifferent = () => {
@@ -532,7 +501,7 @@ export default function CompareView() {
         keys: visibleKeys,
       };
     }).filter((group) => group.keys.length > 0); // hide empty groups
-  }, [baseSpecGroups, hideIdentical, compare.items]);
+  }, [baseSpecGroups, hideIdentical, isSpecDifferent]);
 
   const renderRatingStars = (productId: string) => {
     const stat = ratings[productId] || { averageRating: 0, totalReviews: 0 };

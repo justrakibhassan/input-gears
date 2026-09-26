@@ -4,7 +4,6 @@ import { useSession } from "@/lib/auth-client";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { LayoutDashboard, UserCheck } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 export default function AdminFloatingBar() {
   const { data: session } = useSession();

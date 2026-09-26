@@ -7,16 +7,18 @@ import { z } from "zod";
 
 const RESERVATION_DURATION_MS = 15 * 60 * 1000;
 
+const idPattern = /^[a-zA-Z0-9_-]+$/;
+
 // quantity is min(0) — never negative. A negative value would invert the
 // `decrement` below and inflate stock instead of consuming it.
 const cartPostSchema = z
   .object({
-    productId: z.string().min(1).optional(),
+    productId: z.string().trim().min(1).max(64).regex(idPattern).optional(),
     quantity: z.number().int().min(0).max(99).optional(),
     items: z
       .array(
         z.object({
-          id: z.string().min(1),
+          id: z.string().trim().min(1).max(64).regex(idPattern),
           quantity: z.number().int().min(0).max(99),
         }),
       )
@@ -202,11 +204,6 @@ export async function POST(req: Request) {
           { status: 400 },
         );
       }
-    }
-
-    interface CartInputItem {
-      id: string;
-      quantity: number;
     }
 
     // Handle batch sync (for guest to account migration) with stock reservation

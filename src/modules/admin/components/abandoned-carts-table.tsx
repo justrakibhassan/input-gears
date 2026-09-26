@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useMemo, useTransition } from "react";
+import React, { useState, useMemo } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { format, formatDistanceToNow } from "date-fns";
 import {
   ShoppingCart,
@@ -14,16 +13,9 @@ import {
   ChevronDown,
   Download,
   Package,
-  Sparkles,
-  Ticket,
-  Percent,
-  CheckCircle2,
-  ExternalLink,
   Loader2,
   X,
   Phone,
-  RotateCcw,
-  Tag,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";

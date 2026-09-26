@@ -7,11 +7,9 @@ import {
   Trash2,
   Layers,
   Loader2,
-  Package,
   Search,
   Copy,
   Check,
-  ExternalLink,
 } from "lucide-react";
 import { deleteCategory } from "@/modules/admin/actions";
 import { toast } from "sonner";

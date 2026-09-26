@@ -16,14 +16,6 @@ import {
   ExternalLink,
   Loader2,
   GripVertical,
-  Zap,
-  MousePointer2,
-  Cpu,
-  Headphones,
-  Laptop,
-  Keyboard,
-  Monitor,
-  Gamepad2,
   Search,
   ShoppingBag,
   Menu,
@@ -75,21 +67,6 @@ const slideSchema = z.object({
 
 const slidesFormSchema = z.object({
   slides: z.array(slideSchema),
-});
-
-const brandLogoSchema = z.object({
-  id: z.string().optional(),
-  name: z.string().min(1, "Name is required"),
-  image: z.string().min(1, "Image is required"),
-  isActive: z.boolean().default(true),
-});
-
-const themeSchema = z.object({
-  primaryColor: z.string(),
-  secondaryColor: z.string(),
-  bgColor: z.string(),
-  textColor: z.string(),
-  brandTickerSpeed: z.number().min(5).max(300),
 });
 
 // ✅ Type Definitions
@@ -203,7 +180,6 @@ interface AppearanceFormProps {
   // Watchers
   const watchedBar = barForm.watch();
   const watchedSlides = slidesForm.watch();
-  const watchedBrands = brandForm.watch();
   const watchedTopBarStart = barForm.watch("topBarStart");
 
   // --- Helper: Current DateTime for Min Attribute ---
@@ -738,6 +714,7 @@ interface AppearanceFormProps {
                     <div className="w-12 h-12 shrink-0">
                       {imgUrl ? (
                         <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-gray-100 group/img">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={imgUrl} alt="logo" className="w-full h-full object-cover" />
                           <button
                             type="button"
@@ -860,12 +837,14 @@ interface AppearanceFormProps {
                               {slide.image ? (
                                 <>
                                   {slide.image.startsWith("http") || slide.image.startsWith("/") || slide.image.startsWith("data:") ? (
+                                    /* eslint-disable-next-line @next/next/no-img-element */
                                     <img
                                       src={slide.image}
                                       className="w-full h-full object-cover"
                                       alt="Preview"
                                     />
                                   ) : (
+                                    /* eslint-disable-next-line @next/next/no-img-element */
                                     <img
                                       src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/q_auto,f_auto/${slide.image}`}
                                       className="w-full h-full object-cover"

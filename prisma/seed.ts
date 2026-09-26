@@ -235,6 +235,53 @@ async function main() {
     ],
   });
 
+  // 5. Demo orders for last 7 days so admin revenue chart has real data
+  // Uses real Order rows — getRevenueAnalytics() reads these, no dummy data.
+  const demoProducts = await prisma.product.findMany({
+    take: 4,
+    select: { id: true, name: true, price: true, image: true },
+  });
+
+  if (demoProducts.length > 0) {
+    for (let dayOffset = 6; dayOffset >= 0; dayOffset--) {
+      const ordersThatDay = dayOffset % 3 === 0 ? 2 : 1;
+      for (let k = 0; k < ordersThatDay; k++) {
+        const p = demoProducts[(dayOffset + k) % demoProducts.length];
+        const qty = (dayOffset % 2) + 1;
+        const createdAt = new Date();
+        createdAt.setDate(createdAt.getDate() - dayOffset);
+        createdAt.setHours(10 + k * 3, 15, 0, 0);
+        const orderNumber = `IG25DEMO${dayOffset}${k}${Date.now().toString().slice(-4)}`;
+        await prisma.order.create({
+          data: {
+            orderNumber: `${orderNumber}${Math.floor(Math.random() * 900 + 100)}`,
+            name: "Demo Customer",
+            phone: "01700000000",
+            address: "Demo Street, Dhaka",
+            email: "demo@inputgears.local",
+            totalAmount: Math.round(p.price * qty * 100) / 100,
+            status: "DELIVERED",
+            paymentStatus: "PAID",
+            paymentMethod: "COD",
+            createdAt,
+            items: {
+              create: [
+                {
+                  productId: p.id,
+                  name: p.name,
+                  price: p.price,
+                  quantity: qty,
+                  image: p.image,
+                },
+              ],
+            },
+          },
+        });
+      }
+    }
+    console.log("✅ Demo orders seeded for revenue chart");
+  }
+
   console.log("✅ Seeding completed!");
 }
 

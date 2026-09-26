@@ -6,8 +6,6 @@ import { useRouter } from "next/navigation";
 import {
   Mail,
   MoreHorizontal,
-  Trash2,
-  Loader2,
   User,
   Shield,
   Ban,
@@ -72,11 +70,6 @@ export default function TeamTable({ staff }: TeamTableProps) {
 
     return matchesSearch && matchesTab;
   });
-
-  const getTabCount = (role: "ALL" | UserRole) => {
-    if (role === "ALL") return staff.length;
-    return staff.filter((m) => m.role === role).length;
-  };
 
   // Demote Staff Member to USER (Regular Customer)
   const handleDemoteConfirm = () => {

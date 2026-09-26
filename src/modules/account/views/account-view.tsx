@@ -15,9 +15,7 @@ import {
   Shield,
   BadgeCheck,
   ChevronRight,
-  ShoppingCart,
   ShoppingBag,
-  ExternalLink,
   LogOut,
   User as UserIcon,
 } from "lucide-react";

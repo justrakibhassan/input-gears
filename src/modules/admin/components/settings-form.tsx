@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 import {
   Store,
@@ -8,7 +9,6 @@ import {
   Bell,
   Save,
   CreditCard,
-  Ticket,
   Truck,
   Paintbrush,
   Lock,
@@ -22,7 +22,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { updateMaintenanceMode, updateTaxRate } from "@/modules/admin/actions";
-import CouponManager from "./coupon-manager";
 import ShippingZoneManager from "./shipping-zone-manager";
 import { Coupon, ShippingZone } from "@prisma/client";
 import { useTheme } from "next-themes";
@@ -597,9 +596,9 @@ export default function SettingsForm({ initialData }: SettingsFormProps) {
                     Last 5 login attempts to your account.
                   </p>
                 </div>
-                <a href="#" className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1 transition-colors">
+                <Link href="/admin/audit-logs" className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1 transition-colors">
                   View all in audit logs <ArrowRight size={16} />
-                </a>
+                </Link>
               </div>
               
               <div className="space-y-4">

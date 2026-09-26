@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { OrderStatus, Prisma, UserRole } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag, unstable_cache } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { createAuditLog } from "./actions/audit-actions";
@@ -404,40 +404,47 @@ interface HeroSlideInput {
 }
 
 // --- 1. Get Data ---
-export async function getStoreAppearance() {
-  const settings = await prisma.siteSettings.findUnique({
-    where: { id: "general" },
-  });
+export const getStoreAppearance = unstable_cache(
+  async () => {
+    const settings = await prisma.siteSettings.findUnique({
+      where: { id: "general" },
+    });
 
-  // --- Top Bar Logic (Kept as is) ---
-  let isTopBarActive = settings?.topBarActive ?? false;
+    // --- Top Bar Logic (Kept as is) ---
+    let isTopBarActive = settings?.topBarActive ?? false;
 
-  if (settings?.topBarStart || settings?.topBarEnd) {
-    const now = new Date();
-    if (settings.topBarStart && now < settings.topBarStart)
-      isTopBarActive = false;
-    if (settings.topBarEnd && now > settings.topBarEnd) isTopBarActive = false;
+    if (settings?.topBarStart || settings?.topBarEnd) {
+      const now = new Date();
+      if (settings.topBarStart && now < settings.topBarStart)
+        isTopBarActive = false;
+      if (settings.topBarEnd && now > settings.topBarEnd) isTopBarActive = false;
+    }
+
+    const finalSettings = settings
+      ? { ...settings, topBarActive: isTopBarActive }
+      : null;
+
+    // --- Hero Slides (Simple Fetch) ---
+    const slides = await prisma.heroSlide.findMany({
+      orderBy: { order: "asc" },
+    });
+
+    const brandLogos = await prisma.brandLogo.findMany({
+      orderBy: { order: "asc" },
+    });
+
+    return {
+      settings: finalSettings,
+      slides: slides,
+      brandLogos,
+    };
+  },
+  ["store-appearance"],
+  {
+    revalidate: 300,
+    tags: ["store-appearance"],
   }
-
-  const finalSettings = settings
-    ? { ...settings, topBarActive: isTopBarActive }
-    : null;
-
-  // --- Hero Slides (Simple Fetch) ---
-  const slides = await prisma.heroSlide.findMany({
-    orderBy: { order: "asc" },
-  });
-
-  const brandLogos = await prisma.brandLogo.findMany({
-    orderBy: { order: "asc" },
-  });
-
-  return {
-    settings: finalSettings,
-    slides: slides,
-    brandLogos,
-  };
-}
+);
 
 interface TopBarInput {
   text: string;
@@ -480,16 +487,30 @@ export async function updateTopBar(data: TopBarInput) {
   });
 
   revalidatePath("/");
+  updateTag("store-appearance");
   return { success: true };
 }
+const heroSlideSchema = z.object({
+  title: z.string().trim().max(120).optional().default(""),
+  subtitle: z.string().trim().max(200).optional().nullable(),
+  image: z.string().trim().min(1).max(500),
+  link: z.string().trim().max(500).optional().nullable(),
+});
+
 // --- 3. Update Hero Slides (Reverted to Simple Version) ---
 export async function updateHeroSlides(slides: HeroSlideInput[]) {
   await requireRole(["SUPER_ADMIN", "CONTENT_EDITOR"]);
+  const validated = z.array(heroSlideSchema).max(10).parse(slides);
+  for (const s of validated) {
+    if (s.link && !(s.link.startsWith("/") || /^https?:\/\//.test(s.link))) {
+      throw new Error("Hero link must be a relative path or http(s) URL");
+    }
+  }
   await prisma.heroSlide.deleteMany();
 
-  if (slides.length > 0) {
+  if (validated.length > 0) {
     await prisma.heroSlide.createMany({
-      data: slides.map((s, i) => ({
+      data: validated.map((s, i) => ({
         title: s.title || "",
         subtitle: s.subtitle,
         image: s.image,
@@ -501,6 +522,7 @@ export async function updateHeroSlides(slides: HeroSlideInput[]) {
   }
 
   revalidatePath("/");
+  updateTag("store-appearance");
   return { success: true };
 }
 
@@ -527,6 +549,7 @@ export async function updateBrandLogos(brands: BrandLogoInput[]) {
   }
 
   revalidatePath("/");
+  updateTag("store-appearance");
   return { success: true };
 }
 
@@ -891,6 +914,14 @@ export async function getCoupons() {
   }
 }
 
+const couponSchema = z.object({
+  code: z.string().trim().min(3).max(32).regex(/^[A-Za-z0-9_-]+$/),
+  type: z.enum(["PERCENTAGE", "FIXED"]),
+  value: z.coerce.number().positive().max(100000),
+  expiresAt: z.coerce.date().refine((d) => d > new Date(), "Expiry must be in the future"),
+  usageLimit: z.coerce.number().int().positive().max(1000000).optional(),
+});
+
 export async function createCoupon(data: {
   code: string;
   type: "PERCENTAGE" | "FIXED";
@@ -899,20 +930,24 @@ export async function createCoupon(data: {
   usageLimit?: number;
 }) {
   try {
-    await requireRole(["SUPER_ADMIN", "MANAGER"]);
+    const session = await requireRole(["SUPER_ADMIN", "MANAGER"]);
+    const validated = couponSchema.parse(data);
+    if (validated.type === "PERCENTAGE" && validated.value > 100) {
+      return { success: false, message: "Percentage coupon cannot exceed 100%" };
+    }
     await prisma.coupon.create({
       data: {
-        ...data,
-        code: data.code.toUpperCase(),
+        ...validated,
+        code: validated.code.toUpperCase(),
       },
     });
 
     await createAuditLog({
-      adminId: (await requireRole(["SUPER_ADMIN", "MANAGER"])).user.id,
+      adminId: session.user.id,
       action: "COUPON_CREATE",
       entityType: "COUPON",
-      entityId: data.code,
-      details: `Created coupon "${data.code}" with value ${data.value} (${data.type})`,
+      entityId: validated.code,
+      details: `Created coupon "${validated.code}" with value ${validated.value} (${validated.type})`,
     });
 
     return { success: true };
@@ -954,19 +989,6 @@ export async function getRevenueAnalytics() {
   try {
     await requireRole(["SUPER_ADMIN"]);
 
-    // --- DEMO DUMMY DATA FOR REVENUE OVERVIEW ---
-    return [
-      { name: "Mon", revenue: 4200 },
-      { name: "Tue", revenue: 3800 },
-      { name: "Wed", revenue: 5500 },
-      { name: "Thu", revenue: 2900 },
-      { name: "Fri", revenue: 1950 },
-      { name: "Sat", revenue: 6200 },
-      { name: "Sun", revenue: 4800 },
-    ];
-
-    /* 
-    // --- REAL PRODUCTION DATA FETCHING (UNCOMMENT FOR PRODUCTION) ---
     const last7Days = Array.from({ length: 7 }, (_, i) => {
       const d = new Date();
       d.setDate(d.getDate() - (6 - i));
@@ -1006,18 +1028,9 @@ export async function getRevenueAnalytics() {
     });
 
     return chartData;
-    */
   } catch (error) {
     logger.error("Get Revenue Analytics Error:", error);
-    return [
-      { name: "Mon", revenue: 4200 },
-      { name: "Tue", revenue: 3800 },
-      { name: "Wed", revenue: 5500 },
-      { name: "Thu", revenue: 2900 },
-      { name: "Fri", revenue: 1950 },
-      { name: "Sat", revenue: 6200 },
-      { name: "Sun", revenue: 4800 },
-    ];
+    return [];
   }
 }
 
@@ -1176,31 +1189,39 @@ export async function getStockLogs(limit: number = 50) {
 
 // --- 12. Shipping & Tax Settings Actions ---
 
+const shippingZoneSchema = z.object({
+  id: z.string().min(1).max(64).optional(),
+  name: z.string().trim().min(2).max(64),
+  charge: z.coerce.number().min(0).max(100000),
+});
+
 export async function upsertShippingZone(data: { id?: string; name: string; charge: number }) {
   try {
     const session = await requireRole(["SUPER_ADMIN"]);
-    
-    if (data.id) {
+    const validated = shippingZoneSchema.parse(data);
+    const { id, name, charge } = validated;
+
+    if (id) {
       await prisma.shippingZone.update({
-        where: { id: data.id },
+        where: { id },
         data: {
-          name: data.name,
-          charge: data.charge,
+          name,
+          charge,
         },
       });
-      
+
       await createAuditLog({
         adminId: session.user.id,
         action: "UPDATE_SHIPPING_ZONE",
         entityType: "SHIPPING_ZONE",
-        entityId: data.id,
-        details: `Updated shipping zone "${data.name}" to ${data.charge}`,
+        entityId: id,
+        details: `Updated shipping zone "${name}" to ${charge}`,
       });
     } else {
       const zone = await prisma.shippingZone.create({
         data: {
-          name: data.name,
-          charge: data.charge,
+          name,
+          charge,
         },
       });
 
@@ -1209,7 +1230,7 @@ export async function upsertShippingZone(data: { id?: string; name: string; char
         action: "CREATE_SHIPPING_ZONE",
         entityType: "SHIPPING_ZONE",
         entityId: zone.id,
-        details: `Created shipping zone "${data.name}" with charge ${data.charge}`,
+        details: `Created shipping zone "${name}" with charge ${charge}`,
       });
     }
 
@@ -1251,11 +1272,12 @@ export async function deleteShippingZone(id: string) {
 export async function updateTaxRate(rate: number) {
   try {
     const session = await requireRole(["SUPER_ADMIN"]);
-    
+    const validatedRate = z.coerce.number().min(0).max(100).parse(rate);
+
     await prisma.siteSettings.upsert({
       where: { id: "general" },
-      update: { taxRate: rate },
-      create: { id: "general", taxRate: rate, maintenanceMode: false },
+      update: { taxRate: validatedRate },
+      create: { id: "general", taxRate: validatedRate, maintenanceMode: false },
     });
 
     await createAuditLog({
@@ -1263,7 +1285,7 @@ export async function updateTaxRate(rate: number) {
       action: "UPDATE_TAX_RATE",
       entityType: "SETTINGS",
       entityId: "general",
-      details: `Updated global tax rate to ${rate}%`,
+      details: `Updated global tax rate to ${validatedRate}%`,
     });
 
     revalidatePath("/admin/settings");

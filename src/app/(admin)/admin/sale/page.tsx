@@ -1,6 +1,8 @@
 import { getAllProductsForSaleManager } from "@/modules/admin/actions";
 import SaleManager from "@/modules/admin/components/sale-manager";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Sale Manager — Admin",
 };

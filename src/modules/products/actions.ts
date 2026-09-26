@@ -2,12 +2,22 @@
 
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { z } from "zod";
+
+const idPattern = /^[a-zA-Z0-9_-]+$/;
+const idSchema = z.string().trim().min(1).max(64).regex(idPattern);
+const idsSchema = z.array(idSchema).min(1).max(100);
 
 export async function getProductById(id: string) {
+  const parsed = idSchema.safeParse(id);
+  if (!parsed.success) {
+    return { success: false, error: "Invalid product identifier" };
+  }
+
   try {
     const product = await prisma.product.findUnique({
-      where: { id, isActive: true },
-      include: { category: true }
+      where: { id: parsed.data, isActive: true },
+      include: { category: true },
     });
     if (!product) {
       return { success: false, error: "Product not found" };
@@ -20,10 +30,15 @@ export async function getProductById(id: string) {
 }
 
 export async function getProductsByIds(ids: string[]) {
+  const parsed = idsSchema.safeParse(ids);
+  if (!parsed.success) {
+    return { success: false, error: "Invalid product identifiers" };
+  }
+
   try {
     const products = await prisma.product.findMany({
       where: {
-        id: { in: ids },
+        id: { in: parsed.data },
         isActive: true,
       },
       include: { category: true },

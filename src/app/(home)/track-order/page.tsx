@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Package, CheckCircle2, Clock, Truck, AlertCircle, ShoppingBag, ArrowRight } from "lucide-react";
+import { Search, CheckCircle2, Truck, AlertCircle, ShoppingBag } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -56,7 +55,7 @@ export default function TrackOrderPage() {
         setOrder(data);
         toast.success("Order status retrieved!");
       }
-    } catch (err) {
+    } catch {
       toast.error("Failed to fetch order status. Please try again.");
     } finally {
       setLoading(false);

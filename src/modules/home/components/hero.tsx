@@ -12,6 +12,7 @@ import Image from "next/image";
 import { CldImage } from "next-cloudinary";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { sanitizeUrl } from "@/lib/utils";
 
 // --- Types ---
 export interface HeroSlide {
@@ -158,7 +159,7 @@ export default function HeroBanner({ slides }: HeroBannerProps) {
                 >
                   {slide.link ? (
                     <Link
-                      href={slide.link}
+                      href={sanitizeUrl(slide.link)}
                       className="block w-full h-full relative cursor-pointer"
                     >
                       {SlideContent}

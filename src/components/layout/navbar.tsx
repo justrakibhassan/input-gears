@@ -12,18 +12,9 @@ import {
   ChevronRight,
   Zap,
   ShoppingBag,
-  Keyboard,
-  Mouse,
-  Headphones,
-  Monitor,
-  Cpu,
   ArrowLeftRight,
-  ChevronDown,
-  LucideIcon,
   Plus,
   Minus,
-  Tag,
-  Truck,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import UserNav from "../../modules/auth/components/user-nav";
@@ -67,14 +58,6 @@ interface CategoryNode {
   children: CategoryNode[];
 }
 
-const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  keyboards: Keyboard,
-  mice: Mouse,
-  audio: Headphones,
-  monitors: Monitor,
-  accessories: Cpu,
-};
-
 interface SearchResult {
   id: string;
   name: string;
@@ -97,7 +80,7 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
-  const [categories, setCategories] = useState<CategoryWithBrands[]>(initialCategories);
+  const [categories] = useState<CategoryWithBrands[]>(initialCategories);
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
 
   const { data: session, isPending } = useSession();
@@ -144,30 +127,35 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Live Search Logic
+  // Live Search Logic with abort so slow responses can't overwrite newer ones
   useEffect(() => {
-    const fetchResults = async () => {
-      if (searchQuery.length < 2) {
-        setSearchResults([]);
-        setShowResults(false);
-        return;
-      }
-
+    if (searchQuery.length < 2) {
+      setSearchResults([]);
+      setShowResults(false);
+      return;
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
       setIsSearchLoading(true);
       try {
-        const res = await fetch(`/api/products/search?q=${encodeURIComponent(searchQuery)}`);
+        const res = await fetch(`/api/products/search?q=${encodeURIComponent(searchQuery)}`, {
+          signal: controller.signal,
+        });
         const data = await res.json();
-        setSearchResults(data);
-        setShowResults(true);
+        if (!controller.signal.aborted) {
+          setSearchResults(Array.isArray(data) ? data : []);
+          setShowResults(true);
+        }
       } catch (error) {
-        console.error("Search fetch failed:", error);
+        if ((error as Error)?.name !== "AbortError") console.error("Search fetch failed:", error);
       } finally {
-        setIsSearchLoading(false);
+        if (!controller.signal.aborted) setIsSearchLoading(false);
       }
+    }, 300);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
     };
-
-    const timer = setTimeout(fetchResults, 300);
-    return () => clearTimeout(timer);
   }, [searchQuery]);
 
   useEffect(() => {
@@ -412,7 +400,6 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
         >
           <div className="max-w-[1440px] mx-auto px-4 sm:px-8 h-full flex items-center justify-start gap-7">
             {categories.map((cat) => {
-              const Icon = CATEGORY_ICONS[cat.slug] || Cpu;
               const isActive = activeMegaMenu === cat.slug;
 
               return (
@@ -533,8 +520,8 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
                     </Link>
                   ) : null}
                   <div className="flex justify-center gap-4 text-[11px] text-gray-600 font-medium uppercase tracking-tighter">
-                    <Link href="/support" onClick={() => setIsMobileMenuOpen(false)}>Support</Link>
-                    <Link href="/tracking" onClick={() => setIsMobileMenuOpen(false)}>Orders</Link>
+                    <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)}>Support</Link>
+                    <Link href="/track-order" onClick={() => setIsMobileMenuOpen(false)}>Orders</Link>
                     <Link href="/privacy" onClick={() => setIsMobileMenuOpen(false)}>Privacy</Link>
                   </div>
                 </div>

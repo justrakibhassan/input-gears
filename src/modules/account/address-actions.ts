@@ -5,6 +5,9 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { AddressFormValues, addressSchema } from "./address-schema";
+import { z } from "zod";
+
+const idSchema = z.string().trim().min(1).max(64).regex(/^[a-zA-Z0-9_-]+$/);
 
 // --- Actions ---
 
@@ -65,6 +68,8 @@ export async function saveAddress(data: AddressFormValues) {
 
 // 3. Delete
 export async function deleteAddress(id: string) {
+  const validatedId = idSchema.parse(id);
+
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -78,7 +83,7 @@ export async function deleteAddress(id: string) {
   if (!user) throw new Error("Unauthorized");
 
   const result = await prisma.address.deleteMany({
-    where: { id, userId: user.id },
+    where: { id: validatedId, userId: user.id },
   });
 
   if (result.count === 0) throw new Error("Not found");
@@ -89,6 +94,8 @@ export async function deleteAddress(id: string) {
 
 // 4. Set Default
 export async function setDefaultAddress(id: string) {
+  const validatedId = idSchema.parse(id);
+
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -107,7 +114,7 @@ export async function setDefaultAddress(id: string) {
       data: { isDefault: false },
     }),
     prisma.address.update({
-      where: { id, userId: user.id },
+      where: { id: validatedId, userId: user.id },
       data: { isDefault: true },
     }),
   ]);

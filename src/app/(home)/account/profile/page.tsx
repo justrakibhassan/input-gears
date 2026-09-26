@@ -3,7 +3,7 @@ import ProfileForm from "@/modules/account/views/profile-form";
 import { redirect } from "next/navigation";
 
 export const metadata = {
-  title: "Profile Settings | InputGears",
+  title: "Profile Settings",
 };
 
 export default async function ProfilePage() {

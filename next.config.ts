@@ -1,10 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  reactStrictMode: false,
+  reactStrictMode: true,
   experimental: {
-    workerThreads: false,
-    cpus: 2,
+    serverActions: {
+      bodySizeLimit: "1mb",
+    },
   },
   images: {
     qualities: [75, 80, 90],
@@ -30,6 +31,10 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: [
           {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+          {
             key: "X-Content-Type-Options",
             value: "nosniff",
           },
@@ -47,12 +52,30 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Permissions-Policy",
-            value: "geolocation=(), microphone=(), camera=()",
+            value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",
           },
           {
             key: "Content-Security-Policy",
             value:
               "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://upload-widget.cloudinary.com https://widget.cloudinary.com https://js.stripe.com; style-src 'self' 'unsafe-inline' https://upload-widget.cloudinary.com; img-src 'self' https: data: blob:; font-src 'self' https:; connect-src 'self' https:; frame-src 'self' https://upload-widget.cloudinary.com https://widget.cloudinary.com https://js.stripe.com https://hooks.stripe.com; frame-ancestors 'none';",
+          },
+        ],
+      },
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/images/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=604800",
           },
         ],
       },

@@ -1,6 +1,7 @@
 
 
 import React from "react";
+import Image from "next/image";
 import {
   Zap,
   MousePointer2,
@@ -53,7 +54,14 @@ export default async function BrandTicker() {
             >
               <div className="text-gray-600 group-hover/item:text-indigo-600 transition-colors duration-300 w-8 h-8 md:w-10 md:h-10 relative flex items-center justify-center">
                 {brand.image ? (
-                  <img src={brand.image} alt={brand.name} className="max-w-full max-h-full object-contain grayscale opacity-80 group-hover/item:grayscale-0 group-hover/item:opacity-100 transition-all duration-300" />
+                  <Image
+                    src={brand.image}
+                    alt={brand.name}
+                    width={40}
+                    height={40}
+                    unoptimized
+                    className="max-w-full max-h-full object-contain grayscale opacity-80 group-hover/item:grayscale-0 group-hover/item:opacity-100 transition-all duration-300"
+                  />
                 ) : (
                   (() => {
                     const FallbackIcon = fallbackIcons[brand.name.toUpperCase()] || Package;

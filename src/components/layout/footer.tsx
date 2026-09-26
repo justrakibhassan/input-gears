@@ -1,5 +1,7 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import {
   Github,
   Twitter,
@@ -22,7 +24,6 @@ interface FooterColumn {
 
 interface SocialLink {
   platform: string;
-  href: string;
   icon: React.ElementType;
 }
 
@@ -50,24 +51,25 @@ const FOOTER_LINKS: FooterColumn[] = [
   {
     title: "InputGears",
     links: [
-      { label: "Gaming Keyboards", href: "/keyboards" },
-      { label: "High Precision Mice", href: "/mice" },
-      { label: "Pro Audio", href: "/audio" },
-      { label: "Monitors", href: "/monitors" },
+      { label: "Gaming Keyboards", href: "/products?category=keyboards" },
+      { label: "High Precision Mice", href: "/products?category=mice" },
+      { label: "Pro Audio", href: "/products?category=audio" },
+      { label: "Monitors", href: "/products?category=monitors" },
     ],
   },
 ];
 
 const SOCIAL_LINKS: SocialLink[] = [
-  { platform: "Twitter", href: "#", icon: Twitter },
-  { platform: "GitHub", href: "#", icon: Github },
-  { platform: "LinkedIn", href: "#", icon: Linkedin },
+  { platform: "GitHub", icon: Github },
+  { platform: "Twitter", icon: Twitter },
+  { platform: "LinkedIn", icon: Linkedin },
 ];
 
 // --- Components ---
 
 export function Footer() {
   const currentYear: number = new Date().getFullYear();
+  const [email, setEmail] = useState("");
 
   return (
     <footer className="w-full bg-zinc-950 border-t border-zinc-800 text-zinc-400 font-sans">
@@ -126,14 +128,23 @@ export function Footer() {
             </p>
             <form
               className="flex flex-col gap-2"
-              onSubmit={(e: React.FormEvent<HTMLFormElement>) =>
-                e.preventDefault()
-              }
+              onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
+                e.preventDefault();
+                if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                  toast.error("Please enter a valid email");
+                  return;
+                }
+                toast.success("Thanks for subscribing!");
+                setEmail("");
+              }}
             >
               <div className="relative">
                 <input
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
+                  aria-label="Email for newsletter"
                   className="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg py-2.5 px-4 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all"
                 />
                 <button
@@ -158,16 +169,17 @@ export function Footer() {
           </div>
 
           {/* Social Icons */}
-          <div className="flex items-center gap-4 order-1 md:order-2">
+          <div className="flex items-center gap-3 order-1 md:order-2">
             {SOCIAL_LINKS.map((item) => (
-              <a
+              <button
                 key={item.platform}
-                href={item.href}
-                className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-full transition-all duration-300 border border-transparent hover:border-zinc-700"
+                type="button"
+                onClick={() => toast.info(`${item.platform} channel coming soon!`)}
+                className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-full transition-all duration-300 border border-transparent hover:border-zinc-700 cursor-pointer"
                 aria-label={item.platform}
               >
                 <item.icon className="w-4 h-4" />
-              </a>
+              </button>
             ))}
           </div>
         </div>
