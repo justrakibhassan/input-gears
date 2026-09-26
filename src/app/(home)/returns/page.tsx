@@ -1,7 +1,7 @@
 import { RotateCcw, ShieldAlert, CheckCircle2, Truck, HelpCircle } from "lucide-react";
 
 export const metadata = {
-  title: "Return & Refund Policy | InputGears",
+  title: "Return & Refund Policy",
   description: "Learn about our 7-day hassle-free return and refund policy at InputGears.",
 };
 
@@ -20,7 +20,7 @@ export default function ReturnsPage() {
             Return & Refund Policy
           </h1>
           <p className="text-sm sm:text-base text-gray-500 max-w-xl mx-auto font-medium">
-            We want you to love your gear. If something isn't right, we offer a straightforward 7-day replacement & refund process.
+            We want you to love your gear. If something isn&apos;t right, we offer a straightforward 7-day replacement & refund process.
           </p>
         </div>
 

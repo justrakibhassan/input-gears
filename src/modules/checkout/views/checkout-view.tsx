@@ -80,6 +80,7 @@ export default function CheckoutForm() {
   const [selectedZoneId, setSelectedZoneId] = useState<string>("");
   const [zones, setZones] = useState<ShippingZone[]>([]);
   const [quote, setQuote] = useState<Quote | null>(null);
+  const [intentRetry, setIntentRetry] = useState(0);
 
   useEffect(() => {
     fetch("/api/checkout-settings")
@@ -176,9 +177,9 @@ export default function CheckoutForm() {
       cancelled = true;
     };
     // paymentIntentId is intentionally omitted: it's an output of this effect,
-    // and including it would loop.
+    // and including it would loop. intentRetry forces a manual retry.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cartKey, appliedCoupon, selectedZoneId, paymentMethod, cart.items.length]);
+  }, [cartKey, appliedCoupon, selectedZoneId, paymentMethod, cart.items.length, intentRetry]);
 
   if (isSuccess) {
     return <CheckoutSkeleton />;
@@ -224,6 +225,11 @@ export default function CheckoutForm() {
     quote,
     paymentIntentId,
     intentError,
+    onRetryPayment: () => {
+      setIntentError(null);
+      setClientSecret("");
+      setIntentRetry((n) => n + 1);
+    },
   };
 
   // Elements can only mount once a client secret exists, so card payments
@@ -254,6 +260,7 @@ interface CheckoutContentProps {
   quote: Quote;
   paymentIntentId: string | null;
   intentError: string | null;
+  onRetryPayment: () => void;
 }
 
 
@@ -269,6 +276,7 @@ function CheckoutContent({
   quote,
   paymentIntentId,
   intentError,
+  onRetryPayment,
 }: CheckoutContentProps) {
   const stripe = useStripe();
   const elements = useElements();
@@ -801,7 +809,7 @@ function CheckoutContent({
                   <p className="mt-1 text-red-600">{intentError}</p>
                   <button
                     type="button"
-                    onClick={() => setPaymentMethod("stripe")}
+                    onClick={onRetryPayment}
                     className="mt-3 rounded-lg bg-red-600 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-red-700 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
                   >
                     Try again

@@ -33,10 +33,38 @@ export const auth = betterAuth({
     },
   },
 
-  // 3. Security & Rate Limiting
+  // 3. Session Configuration
+  session: {
+    expiresIn: 60 * 60 * 24 * 7, // 7 days
+    updateAge: 60 * 60 * 24, // 1 day
+  },
+
+  // 4. Security & Rate Limiting
   rateLimit: {
-    window: 60, // 60 seconds
-    max: 1000, // relaxed max requests
+    enabled: true,
+    window: 60,
+    max: 60,
+    customRules: {
+      "/sign-in/email": {
+        window: 60,
+        max: 5,
+      },
+      "/sign-up/email": {
+        window: 60,
+        max: 5,
+      },
+      "/forget-password": {
+        window: 60,
+        max: 3,
+      },
+      "/reset-password": {
+        window: 60,
+        max: 5,
+      },
+    },
+  },
+  advanced: {
+    useSecureCookies: process.env.NODE_ENV === "production",
   },
   trustedOrigins: [
     process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000",

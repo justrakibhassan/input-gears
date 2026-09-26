@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { sanitizeUrl } from "@/lib/utils";
 
 interface TopAnnouncementProps {
   data: {
@@ -22,7 +23,7 @@ export default function TopAnnouncement({ data }: TopAnnouncementProps) {
           <>
             {" — "}
             <Link
-              href={data.topBarLink}
+              href={sanitizeUrl(data.topBarLink)}
               className="inline-block text-gray-400 border-b border-gray-400 pb-0.5 cursor-pointer hover:text-white transition"
             >
               Shop Now

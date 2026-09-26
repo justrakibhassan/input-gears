@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCart, Check, Heart, Search, ArrowLeftRight, Package, AlertTriangle } from "lucide-react";
+import { ShoppingCart, Check, Heart, Search, ArrowLeftRight, Package } from "lucide-react";
 import { useCart, CartItem } from "@/modules/cart/hooks/use-cart";
 import { useState, useEffect, memo, useMemo } from "react";
 import { useWishlist } from "@/modules/products/hooks/use-wishlist";

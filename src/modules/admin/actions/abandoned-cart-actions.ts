@@ -98,7 +98,9 @@ export async function sendCartRecoveryEmail({
 
   try {
     // In production, integrate with Resend / transactional email provider
-    console.log(`[Cart Recovery] Sent recovery email to ${userEmail} (${userName}) with code: ${couponCode || "NONE"}, discount: ${discountPercent || 0}%`);
+    console.log(
+      `[Cart Recovery] Sent recovery email to ${userEmail} (${userName || "Customer"}, user: ${userId}) with code: ${couponCode || "NONE"}, discount: ${discountPercent || 0}%, msg: ${customMessage || "default"}`
+    );
 
     return {
       success: true,

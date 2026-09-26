@@ -15,15 +15,10 @@ import {
   Box,
   X,
   Loader2,
-  Filter,
-  RefreshCw,
-  Calendar,
   Layers,
-  History,
   PauseCircle,
   FileEdit,
   CheckCircle2,
-  Search,
   Package,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";

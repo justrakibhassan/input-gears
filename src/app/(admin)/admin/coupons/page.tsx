@@ -2,6 +2,8 @@ import { getCoupons } from "@/modules/admin/actions";
 import CouponManager from "@/modules/admin/components/coupon-manager";
 import { Coupon } from "@prisma/client";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Coupons & Discounts — Admin",
 };

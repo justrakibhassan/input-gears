@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface ProductFiltersProps {
   categories: { id: string; name: string }[];
@@ -44,11 +44,13 @@ export default function ProductFilters({ categories, brands }: ProductFiltersPro
 
   // Local state for price slider to keep slider handle movements buttery smooth
   const [priceRange, setPriceRange] = useState<[number, number]>([minPrice ?? 0, maxPrice ?? 2000]);
+  const [prevPrices, setPrevPrices] = useState({ min: minPrice, max: maxPrice });
 
   // Sync local state when url query params change (e.g. on reset or direct navigation)
-  useEffect(() => {
+  if (prevPrices.min !== minPrice || prevPrices.max !== maxPrice) {
+    setPrevPrices({ min: minPrice, max: maxPrice });
     setPriceRange([minPrice ?? 0, maxPrice ?? 2000]);
-  }, [minPrice, maxPrice]);
+  }
 
   const activeFiltersCount = [category, brand, minPrice, maxPrice, sort !== "newest" ? sort : null].filter(Boolean).length;
 

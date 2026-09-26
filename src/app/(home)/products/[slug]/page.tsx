@@ -4,7 +4,9 @@ import ProductDetailsView from "@/modules/products/views/product-details-view";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
+
+const slugPattern = /^[a-zA-Z0-9_-]+$/;
 
 export async function generateStaticParams() {
   const products = await prisma.product.findMany({
@@ -29,6 +31,12 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const params = await props.params;
   const { slug } = params;
 
+  if (!slug || !slugPattern.test(slug)) {
+    return {
+      title: "Product Not Found",
+    };
+  }
+
   const product = await prisma.product.findUnique({
     where: { slug },
     select: { name: true, description: true },
@@ -36,13 +44,17 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
 
   if (!product) {
     return {
-      title: "Product Not Found | InputGears",
+      title: "Product Not Found",
     };
   }
 
+  const safeName =
+    product.name.length > 45 ? `${product.name.slice(0, 42)}...` : product.name;
+
   return {
-    title: `${product.name} | InputGears`,
-    description: product.description?.substring(0, 160) || `Buy ${product.name} at InputGears.`,
+    title: safeName,
+    description:
+      product.description?.substring(0, 160) || `Buy ${product.name} at Input Gears.`,
     openGraph: {
       title: product.name,
       description: product.description?.substring(0, 160),
@@ -55,6 +67,10 @@ export default async function ProductDetailsPage(props: PageProps) {
   // 2. Must await params
   const params = await props.params;
   const { slug } = params;
+
+  if (!slug || !slugPattern.test(slug)) {
+    notFound();
+  }
 
   // 3. Fetch product from DB
   const productFromDb = await prisma.product.findUnique({

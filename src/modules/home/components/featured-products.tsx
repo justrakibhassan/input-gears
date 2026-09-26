@@ -3,24 +3,36 @@ import ProductCard from "../../products/components/product-card";
 import { Product } from "@/types/product";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { unstable_cache } from "next/cache";
+
+const getFeaturedProductsCached = unstable_cache(
+  async () => {
+    return await prisma.product.findMany({
+      where: {
+        isActive: true,
+        OR: [
+          { scheduledAt: null },
+          { scheduledAt: { lte: new Date() } },
+        ],
+      },
+      take: 10,
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        category: true,
+      },
+    });
+  },
+  ["featured-products"],
+  {
+    revalidate: 60,
+    tags: ["products", "featured-products"],
+  }
+);
 
 export default async function FeaturedProducts() {
-  const products = await prisma.product.findMany({
-    where: {
-      isActive: true,
-      OR: [
-        { scheduledAt: null },
-        { scheduledAt: { lte: new Date() } },
-      ],
-    },
-    take: 10,
-    orderBy: {
-      createdAt: "desc",
-    },
-    include: {
-      category: true,
-    },
-  });
+  const products = await getFeaturedProductsCached();
 
   if (products.length === 0) return null;
 

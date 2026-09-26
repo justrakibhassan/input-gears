@@ -1,7 +1,7 @@
 import AccountWishlistView from "@/modules/account/views/account-wishlist-view";
 
 export const metadata = {
-  title: "My Wishlist | InputGears",
+  title: "My Wishlist",
   description: "View and manage your favorite gadgets and gears.",
 };
 

@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Sale — Input Gears",
+  title: "Sale & Deals",
   description: "Shop our best deals on keyboards, mice, headsets and more. Limited time offers on premium gaming gear.",
 };
 

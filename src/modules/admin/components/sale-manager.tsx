@@ -15,8 +15,6 @@ import {
   AlertCircle,
   Tag,
   ExternalLink,
-  DollarSign,
-  Clock,
   Flame,
 } from "lucide-react";
 import { updateProductSale, bulkUpdateSale } from "@/modules/admin/actions";

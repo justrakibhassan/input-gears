@@ -1,14 +1,11 @@
 "use client";
 
-import { useState, useSyncExternalStore, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { useAdminTheme } from "@/store/use-admin-theme";
-import { useWishlist } from "@/modules/products/hooks/use-wishlist";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -16,11 +13,8 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  PackagePlus,
   List,
-  LogOut,
   Layers,
-  Loader2,
   Paintbrush,
   Zap,
   Star,
@@ -33,8 +27,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { UserRole } from "@prisma/client";
-
-const emptySubscribe = () => () => {};
 
 const sidebarGroups: {
   group: string;
@@ -174,13 +166,10 @@ interface AdminSidebarProps {
 
 export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const { compactSidebar, setCompactSidebar, sidebarColor, accentColor } = useAdminTheme();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const { data: session } = authClient.useSession();
   const userRole = (session?.user as { role?: UserRole })?.role;
   const pathname = usePathname();
-  const router = useRouter();
 
   useEffect(() => {
     const timer = setTimeout(() => setMounted(true), 0);
@@ -190,20 +179,6 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const isCollapsed = mounted ? compactSidebar : false;
   const currentSidebarColor = mounted ? sidebarColor : "#111827";
   const currentAccentColor = mounted ? accentColor : "#4f46e5";
-
-  const handleSignOut = async () => {
-    setIsLoggingOut(true);
-    try {
-      useWishlist.getState().clearWishlist();
-      await authClient.signOut();
-      toast.success("Logged out successfully");
-      router.replace("/sign-in");
-    } catch (error) {
-      console.error("Logout Error:", error);
-      toast.error("Failed to log out");
-      setIsLoggingOut(false);
-    }
-  };
 
   return (
     <aside
@@ -259,7 +234,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       {/* 2. Navigation Items */}
       <nav className={cn("flex-1 py-6 px-3 space-y-2 scrollbar-hide", isCollapsed ? "overflow-visible" : "overflow-y-auto overflow-x-hidden")}>
         {sidebarGroups.map((group, groupIdx) => {
-          const visibleItems = isMounted ? group.items.filter((item) =>
+          const visibleItems = mounted ? group.items.filter((item) =>
             userRole && item.roles.includes(userRole)
           ) : [];
 

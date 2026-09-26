@@ -37,7 +37,7 @@ export default function ContactPage() {
         <div className="text-center space-y-4 mb-14">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-widest">
             <MessageSquare size={14} />
-            <span>We'd Love to Hear From You</span>
+            <span>We&apos;d Love to Hear From You</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-black text-gray-900 tracking-tight">
             Contact Support & Sales

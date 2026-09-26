@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Mail,
-  Phone,
   Calendar,
   Shield,
   ShoppingBag,
@@ -21,7 +20,6 @@ import {
   Clock,
   Loader2,
 } from "lucide-react";
-import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { toggleBanUser } from "@/modules/admin/actions";
 import { cn } from "@/lib/utils";
@@ -315,7 +313,7 @@ export default function CustomerDetailsClient({ user }: CustomerDetailsClientPro
               </div>
             ) : (
               <div className="relative pl-6 border-l-2 border-gray-100 dark:border-gray-800 ml-3 space-y-6">
-                {user.orders.map((order, orderIdx) => (
+                {user.orders.map((order) => (
                   <div key={order.id} className="relative group/item">
                     {/* Timeline Node Bullet */}
                     <div className="absolute -left-[31px] top-1.5 h-4.5 w-4.5 rounded-full border bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 flex items-center justify-center transition-colors group-hover/item:border-indigo-600">

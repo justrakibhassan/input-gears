@@ -109,7 +109,7 @@ export default async function ProductView({
         ...p,
         category: p.categoryName ? { id: p.categoryId!, name: p.categoryName } : null
       })) as Product[];
-    } catch (rawError) {
+    } catch {
       // Fallback to standard Prisma search query if raw query or similarity extension fails
       products = (await prisma.product.findMany({
         where,

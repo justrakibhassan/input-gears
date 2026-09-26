@@ -1,7 +1,9 @@
+/* eslint-disable @next/next/no-img-element */
 import { ImageResponse } from 'next/og';
 import { prisma } from "@/lib/prisma";
 
 export const runtime = 'edge';
+export const revalidate = 86400;
 
 export const alt = 'Product Image';
 export const size = {
@@ -154,6 +156,11 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         </div>
       </div>
     ),
-    { ...size }
+    {
+      ...size,
+      headers: {
+        "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800",
+      },
+    }
   );
 }

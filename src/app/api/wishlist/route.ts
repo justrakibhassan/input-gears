@@ -3,6 +3,21 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { headers } from "next/headers";
+import { z } from "zod";
+
+const idPattern = /^[a-zA-Z0-9_-]+$/;
+
+const wishlistPostSchema = z
+  .object({
+    productId: z.string().trim().min(1).max(64).regex(idPattern).optional(),
+    productIds: z
+      .array(z.string().trim().min(1).max(64).regex(idPattern))
+      .max(100)
+      .optional(),
+  })
+  .refine((data) => data.productId !== undefined || data.productIds !== undefined, {
+    message: "Either productId or productIds is required",
+  });
 
 export async function GET() {
   try {
@@ -58,8 +73,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await req.json();
-    const { productId, productIds } = body;
+    const rawBody = await req.json().catch(() => null);
+    const parsed = wishlistPostSchema.safeParse(rawBody);
+
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    }
+
+    const { productId, productIds } = parsed.data;
 
     // Handle single item add
     if (productId) {

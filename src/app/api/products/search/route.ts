@@ -1,14 +1,20 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
+import { z } from "zod";
+
+const searchQuerySchema = z.string().trim().min(1).max(100);
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const query = searchParams.get("q");
+  const rawQuery = searchParams.get("q");
 
-  if (!query) {
+  const parsed = searchQuerySchema.safeParse(rawQuery);
+  if (!parsed.success) {
     return NextResponse.json([]);
   }
+
+  const query = parsed.data;
 
   try {
     // Fuzzy matching with Postgres similarity

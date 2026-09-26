@@ -570,7 +570,7 @@ const ProductDetailsView = memo(
                   ))}
                 </div>
                 <span className="text-xs text-gray-500 font-medium">
-                  ({totalReviews > 0 ? `${totalReviews} customer reviews` : "9 customer reviews"})
+                  ({totalReviews > 0 ? `${totalReviews} customer reviews` : "No reviews yet"})
                 </span>
               </div>
 

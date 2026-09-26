@@ -75,6 +75,15 @@ export async function POST(req: Request) {
     if (paymentIntentId) {
       const existing = await stripe.paymentIntents.retrieve(paymentIntentId);
 
+      // Ownership check: prevent one user updating another user's intent.
+      const ownerId = existing.metadata?.userId || "";
+      if (ownerId && ownerId !== (userId ?? "")) {
+        return NextResponse.json({ error: "Invalid payment session" }, { status: 403 });
+      }
+      if (existing.currency !== "usd") {
+        return NextResponse.json({ error: "Invalid payment session" }, { status: 400 });
+      }
+
       if (existing.status === "succeeded") {
         return NextResponse.json(
           { error: "This payment has already been completed" },

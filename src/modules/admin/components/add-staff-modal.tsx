@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Loader2, Mail, Shield, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { addTeamMember } from "@/modules/admin/actions";
-import { UserRole } from "@prisma/client";
 
 const addStaffSchema = z.object({
   email: z.string().email("Please enter a valid email address"),

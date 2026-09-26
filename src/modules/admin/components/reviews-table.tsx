@@ -41,7 +41,7 @@ export interface ReviewItem {
 
 interface ReviewsTableProps {
   initialReviews: ReviewItem[];
-  counts: {
+  counts?: {
     ALL: number;
     PENDING: number;
     APPROVED: number;
@@ -49,7 +49,7 @@ interface ReviewsTableProps {
   };
 }
 
-export default function ReviewsTable({ initialReviews, counts }: ReviewsTableProps) {
+export default function ReviewsTable({ initialReviews }: ReviewsTableProps) {
   const router = useRouter();
   const [reviews, setReviews] = useState<ReviewItem[]>(initialReviews);
   const [filter, setFilter] = useState<"ALL" | "PENDING" | "APPROVED" | "REJECTED">("ALL");

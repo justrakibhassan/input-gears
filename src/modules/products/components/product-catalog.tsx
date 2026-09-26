@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect, memo } from "react";
+import { useState, memo, useSyncExternalStore } from "react";
 import { LayoutGrid, Grid3X3, List, TableProperties } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Product } from "@/types/product";
 import ProductCard from "./product-card";
 import ProductRowCard from "./product-row-card";
 import ProductTableView from "./product-table-view";
+
+const emptySubscribe = () => () => {};
 
 interface ProductCatalogProps {
   products: Product[];
@@ -15,22 +17,30 @@ interface ProductCatalogProps {
 
 type ViewMode = "grid" | "compact-grid" | "list" | "table";
 
-const ProductCatalog = memo(({ products, showFilters = true }: ProductCatalogProps) => {
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
+const getInitialViewMode = (): ViewMode => {
+  if (typeof window === "undefined") return "grid";
+  try {
     const savedMode = localStorage.getItem("input-gears-view-mode");
     if (savedMode && ["grid", "compact-grid", "list", "table"].includes(savedMode)) {
       const isMobile = window.innerWidth < 640;
       if (isMobile) {
-        setViewMode(savedMode === "compact-grid" || savedMode === "grid" ? "grid" : "list");
-      } else {
-        setViewMode(savedMode as ViewMode);
+        return savedMode === "compact-grid" || savedMode === "grid" ? "grid" : "list";
       }
+      return savedMode as ViewMode;
     }
-  }, []);
+  } catch {
+    // ignore localStorage access error in restrictive environments
+  }
+  return "grid";
+};
+
+const ProductCatalog = memo(({ products, showFilters = true }: ProductCatalogProps) => {
+  const [viewMode, setViewMode] = useState<ViewMode>(getInitialViewMode);
+  const isMounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);

@@ -7,11 +7,14 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { logger } from "@/lib/logger";
 
+const idPattern = /^[a-zA-Z0-9_-]+$/;
+const idSchema = z.string().trim().min(1).max(64).regex(idPattern);
+
 const reviewSchema = z.object({
-  productId: z.string().min(1),
-  rating: z.number().min(1).max(5),
-  comment: z.string().optional(),
-  images: z.array(z.string()).default([]),
+  productId: idSchema,
+  rating: z.number().int().min(1).max(5),
+  comment: z.string().trim().max(2000).optional(),
+  images: z.array(z.string()).max(10).default([]),
 });
 
 async function requireAdmin() {
@@ -75,9 +78,10 @@ export async function submitReview(data: z.infer<typeof reviewSchema>) {
 
 export async function getProductReviews(productId: string) {
   try {
+    const validProductId = idSchema.parse(productId);
     const reviews = await prisma.review.findMany({
       where: {
-        productId,
+        productId: validProductId,
         status: "APPROVED",
       },
       include: {
@@ -102,9 +106,10 @@ export async function getProductReviews(productId: string) {
 
 export async function getReviewStats(productId: string) {
   try {
+    const validProductId = idSchema.parse(productId);
     const stats = await prisma.review.aggregate({
       where: {
-        productId,
+        productId: validProductId,
         status: "APPROVED",
       },
       _avg: {
@@ -170,9 +175,10 @@ export async function updateReviewStatus(
 ) {
   try {
     await requireAdmin();
+    const validReviewId = idSchema.parse(reviewId);
 
     const review = await prisma.review.update({
-      where: { id: reviewId },
+      where: { id: validReviewId },
       data: { status },
     });
 
@@ -188,9 +194,10 @@ export async function updateReviewStatus(
 export async function deleteReview(reviewId: string) {
   try {
     await requireAdmin();
+    const validReviewId = idSchema.parse(reviewId);
 
     const review = await prisma.review.delete({
-      where: { id: reviewId },
+      where: { id: validReviewId },
     });
 
     revalidatePath("/admin/reviews");

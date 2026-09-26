@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import AccountReviewsView from "@/modules/account/views/reviews-view";
 
 export const metadata = {
-  title: "My Reviews | InputGears",
+  title: "My Reviews",
   description: "View and manage the reviews you have submitted for products.",
 };
 

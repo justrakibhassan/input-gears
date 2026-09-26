@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import CompareView from "@/modules/products/views/compare-view";
 
 export const metadata = {
-  title: "Compare Products | INPUTGEARS",
+  title: "Compare Products",
   description: "Compare your favorite gadgets and gear side by side.",
 };
 

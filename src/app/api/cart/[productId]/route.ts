@@ -7,6 +7,10 @@ import { z } from "zod";
 
 const RESERVATION_DURATION_MS = 15 * 60 * 1000;
 
+const paramSchema = z.object({
+  productId: z.string().trim().min(1).max(64).regex(/^[a-zA-Z0-9_-]+$/),
+});
+
 const patchSchema = z.object({
   quantity: z.number().int().min(0).max(99),
 });
@@ -24,8 +28,15 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { productId } = await params;
-    const parsed = patchSchema.safeParse(await req.json());
+    const rawParams = await params;
+    const parsedParams = paramSchema.safeParse(rawParams);
+
+    if (!parsedParams.success) {
+      return NextResponse.json({ error: "Invalid product identifier" }, { status: 400 });
+    }
+
+    const { productId } = parsedParams.data;
+    const parsed = patchSchema.safeParse(await req.json().catch(() => null));
 
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid quantity" }, { status: 400 });
@@ -124,7 +135,14 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { productId } = await params;
+    const rawParams = await params;
+    const parsedParams = paramSchema.safeParse(rawParams);
+
+    if (!parsedParams.success) {
+      return NextResponse.json({ error: "Invalid product identifier" }, { status: 400 });
+    }
+
+    const { productId } = parsedParams.data;
 
     await prisma.$transaction(async (tx) => {
       const existingCartItem = await tx.cartItem.findUnique({

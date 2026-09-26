@@ -3,6 +3,8 @@ import { getStockLogs } from "@/modules/admin/actions";
 import Link from "next/link";
 import { ArrowLeft, Box } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function InventoryHistoryPage() {
   const logs = await getStockLogs(100);
 
