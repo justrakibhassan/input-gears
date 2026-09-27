@@ -36,7 +36,10 @@ interface PlaceOrderFormData {
 
 const placeOrderSchema = z.object({
   fullName: z.string().min(2),
-  phone: z.string().min(11),
+  phone: z
+    .string()
+    .min(7)
+    .regex(/^[0-9+\-\s()]{7,20}$/, "Valid phone number required"),
   address: z.string().min(10),
   email: z.string().email("Valid email is required"),
 });
@@ -182,3 +185,42 @@ export async function placeOrder(
     return { success: false, error: errorMessage };
   }
 }
+
+export async function saveCheckoutAddress(data: {
+  fullName: string;
+  phone: string;
+  address: string;
+}) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+    if (!session?.user?.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const count = await prisma.address.count({
+      where: { userId: session.user.id },
+    });
+
+    await prisma.address.create({
+      data: {
+        userId: session.user.id,
+        name: data.fullName,
+        phone: data.phone,
+        street: data.address,
+        city: "Main",
+        zip: "00000",
+        country: "United States",
+        isDefault: count === 0,
+        type: "HOME",
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    logger.error("Failed to save checkout address", error);
+    return { success: false, error: "Failed to save address" };
+  }
+}
+

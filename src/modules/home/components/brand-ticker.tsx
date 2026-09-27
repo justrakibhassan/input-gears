@@ -46,7 +46,7 @@ export default async function BrandTicker() {
         <div className="absolute top-0 left-0 w-20 md:w-32 h-full bg-linear-to-r from-white via-white/70 to-transparent z-10 pointer-events-none" />
         <div className="absolute top-0 right-0 w-20 md:w-32 h-full bg-linear-to-l from-white via-white/70 to-transparent z-10 pointer-events-none" />
 
-        <div className="flex whitespace-nowrap animate-ticker group-hover:[animation-play-state:paused]">
+        <div className="flex whitespace-nowrap animate-ticker group-hover:[animation-play-state:paused] motion-reduce:animate-none">
           {tickerItems.map((brand, index) => (
             <div
               key={`${brand.id}-${index}`}

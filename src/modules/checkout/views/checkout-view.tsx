@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { useForm, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useCart } from "@/modules/cart/hooks/use-cart";
@@ -26,15 +26,22 @@ import {
   Phone,
   Mail,
   ShoppingCart,
+  Tag,
+  X,
+  CheckCircle2,
+  Ticket,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import CheckoutSkeleton from "../components/checkout-skeleton";
-import { placeOrder, validateCoupon } from "../actions";
-import { Tag, X, CheckCircle2, Ticket } from "lucide-react";
+import { placeOrder, validateCoupon, saveCheckoutAddress } from "../actions";
+import { getUserAddresses } from "@/modules/account/address-actions";
 
 const checkoutSchema = z.object({
   fullName: z.string().min(2, "Name is required"),
-  phone: z.string().min(11, "Valid phone number required"),
+  phone: z
+    .string()
+    .min(7, "Valid phone number required")
+    .regex(/^[0-9+\-\s()]{7,20}$/, "Valid phone number required"),
   email: z.string().email("Valid email is required"),
   address: z.string().min(10, "Full shipping address is required"),
 });
@@ -287,21 +294,29 @@ function CheckoutContent({
   const [isProcessing, setIsProcessing] = useState(false);
 
   const [couponCode, setCouponCode] = useState("");
+  const [couponInputError, setCouponInputError] = useState<string | null>(null);
   const [isValidating, setIsValidating] = useState(false);
+  const [saveAddressToAccount, setSaveAddressToAccount] = useState(false);
 
   const handleApplyCoupon = async () => {
     if (!couponCode) return;
     setIsValidating(true);
+    setCouponInputError(null);
     try {
       const res = await validateCoupon(couponCode);
       if (res.success && res.coupon) {
         setAppliedCoupon(res.coupon as AppliedCoupon);
         toast.success(`Coupon "${res.coupon.code}" applied!`);
+        setCouponInputError(null);
       } else {
-        toast.error(res.message || "Invalid coupon");
+        const msg = res.message || "Invalid coupon";
+        setCouponInputError(msg);
+        toast.error(msg);
       }
     } catch {
-      toast.error("Failed to validate coupon");
+      const msg = "Failed to validate coupon";
+      setCouponInputError(msg);
+      toast.error(msg);
     } finally {
       setIsValidating(false);
     }
@@ -309,10 +324,10 @@ function CheckoutContent({
 
   const removeCoupon = () => {
     setAppliedCoupon(null);
-    setCouponCode("");
+    setCouponInputError(null);
   };
 
-  const form = useForm({
+  const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       fullName: "",
@@ -325,15 +340,62 @@ function CheckoutContent({
 
   useEffect(() => {
     if (session?.user) {
-      form.setValue("fullName", session.user.name);
-      form.setValue("email", session.user.email);
+      if (!form.getValues("fullName")) {
+        form.setValue("fullName", session.user.name || "");
+      }
+      if (!form.getValues("email")) {
+        form.setValue("email", session.user.email || "");
+      }
+
+      getUserAddresses()
+        .then((addrs) => {
+          if (addrs && addrs.length > 0) {
+            const defaultAddr = addrs.find((a) => a.isDefault) || addrs[0];
+            if (defaultAddr) {
+              if (!form.getValues("phone") && defaultAddr.phone) {
+                form.setValue("phone", defaultAddr.phone);
+              }
+              if (!form.getValues("address") && defaultAddr.street) {
+                const parts = [
+                  defaultAddr.street,
+                  defaultAddr.city,
+                  defaultAddr.state,
+                  defaultAddr.zip,
+                ].filter(Boolean);
+                form.setValue("address", parts.join(", "));
+              }
+            }
+          }
+        })
+        .catch(() => {});
     }
   }, [session, form]);
+
+  const onInvalid = (errors: FieldErrors<CheckoutFormValues>) => {
+    const errorKeys = Object.keys(errors) as (keyof CheckoutFormValues)[];
+    if (errorKeys.length > 0) {
+      const firstKey = errorKeys[0];
+      const el = document.getElementById(`checkout-${firstKey}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.focus();
+      }
+      toast.error(errors[firstKey]?.message || "Please complete all required fields");
+    }
+  };
 
   const onSubmit = async (data: CheckoutFormValues) => {
     setIsProcessing(true);
 
     try {
+      if (saveAddressToAccount && session?.user) {
+        saveCheckoutAddress({
+          fullName: data.fullName,
+          phone: data.phone,
+          address: data.address,
+        }).catch(() => {});
+      }
+
       if (paymentMethod === "cod") {
         const result = await placeOrder(
           data,
@@ -398,14 +460,13 @@ function CheckoutContent({
   const isFormValid = form.formState.isValid;
   const canPayByCard = paymentMethod === "stripe" && Boolean(stripe && paymentIntentId);
 
-
   return (
     <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Secure Checkout</h1>
 
       <div className="lg:grid lg:grid-cols-12 lg:gap-12 items-start">
         <div className="lg:col-span-7 space-y-8">
-          <form id="checkout-form" onSubmit={form.handleSubmit(onSubmit)}>
+          <form id="checkout-form" onSubmit={form.handleSubmit(onSubmit, onInvalid)} noValidate>
             <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-sm">
               <div className="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
                 <MapPin className="text-indigo-600" />
@@ -474,7 +535,7 @@ function CheckoutContent({
                         "w-full rounded-xl border-gray-200 border bg-gray-50/30 pl-11 pr-4 py-3 text-sm outline-none focus:border-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 transition-all",
                         form.formState.errors.phone && "border-red-500"
                       )}
-                      placeholder="017..."
+                      placeholder="+1 (555) 234-5678"
                     />
                   </div>
                   {form.formState.errors.phone && (
@@ -553,7 +614,7 @@ function CheckoutContent({
                       "w-full rounded-xl border-gray-200 border bg-gray-50/30 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500 transition-all resize-none",
                       form.formState.errors.address && "border-red-500"
                     )}
-                    placeholder="House, Road, City..."
+                    placeholder="123 Market St, Suite 400, San Francisco, CA 94103"
                   />
                   {form.formState.errors.address && (
                     <p
@@ -563,6 +624,21 @@ function CheckoutContent({
                     >
                       {form.formState.errors.address.message}
                     </p>
+                  )}
+
+                  {session?.user && (
+                    <label className="flex items-center gap-2.5 mt-3 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        id="checkout-save-address"
+                        checked={saveAddressToAccount}
+                        onChange={(e) => setSaveAddressToAccount(e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                      />
+                      <span className="text-xs text-gray-600 font-medium">
+                        Save this address to my account for future orders
+                      </span>
+                    </label>
                   )}
                 </div>
 
@@ -722,25 +798,40 @@ function CheckoutContent({
               {/* Coupon Section */}
               <div className="mb-6">
                 {!appliedCoupon ? (
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <Ticket size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <input
-                        type="text"
-                        value={couponCode}
-                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                        placeholder="Promo Code"
-                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-indigo-500 transition-all font-medium uppercase placeholder:normal-case"
-                      />
+                  <div>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Ticket size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="text"
+                          value={couponCode}
+                          onChange={(e) => {
+                            setCouponCode(e.target.value.toUpperCase());
+                            if (couponInputError) setCouponInputError(null);
+                          }}
+                          placeholder="Promo Code"
+                          className={cn(
+                            "w-full pl-10 pr-4 py-2 bg-gray-50 border rounded-xl text-sm outline-none focus:border-indigo-500 transition-all font-medium uppercase placeholder:normal-case",
+                            couponInputError || quote.couponError
+                              ? "border-red-400 bg-red-50/20"
+                              : "border-gray-200"
+                          )}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleApplyCoupon}
+                        disabled={!couponCode || isValidating}
+                        className="px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-bold disabled:bg-gray-200 disabled:text-gray-400 transition-all hover:bg-indigo-600 min-w-[80px] flex items-center justify-center"
+                      >
+                        {isValidating ? <Loader2 size={16} className="animate-spin" /> : "Apply"}
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleApplyCoupon}
-                      disabled={!couponCode || isValidating}
-                      className="px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-bold disabled:bg-gray-200 disabled:text-gray-400 transition-all hover:bg-indigo-600 min-w-[80px] flex items-center justify-center"
-                    >
-                      {isValidating ? <Loader2 size={16} className="animate-spin" /> : "Apply"}
-                    </button>
+                    {(couponInputError || quote.couponError) && (
+                      <p className="mt-1.5 text-xs font-medium text-red-600 animate-in fade-in">
+                        {couponInputError || quote.couponError}
+                      </p>
+                    )}
                   </div>
                 ) : (
                   <div className="flex items-center justify-between p-3 bg-emerald-50 border border-emerald-100 rounded-xl animate-in zoom-in-95 duration-200">
@@ -841,13 +932,28 @@ function CheckoutContent({
                 form="checkout-form"
                 disabled={
                   isProcessing ||
-                  !isFormValid ||
                   (paymentMethod === "stripe" && !canPayByCard)
                 }
+                onClick={async () => {
+                  if (!isFormValid) {
+                    const isValid = await form.trigger();
+                    if (!isValid) {
+                      const errors = form.formState.errors;
+                      const errorKeys = Object.keys(errors) as (keyof CheckoutFormValues)[];
+                      if (errorKeys.length > 0) {
+                        const firstKey = errorKeys[0];
+                        const el = document.getElementById(`checkout-${firstKey}`);
+                        if (el) {
+                          el.scrollIntoView({ behavior: "smooth", block: "center" });
+                          el.focus();
+                        }
+                      }
+                    }
+                  }
+                }}
                 className={cn(
                   "w-full mt-6 py-4 rounded-xl font-bold text-lg shadow-lg transition-all flex items-center justify-center focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2",
                   isProcessing ||
-                    !isFormValid ||
                     (paymentMethod === "stripe" && !canPayByCard)
                     ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                     : "bg-gray-900 text-white hover:bg-indigo-600 hover:shadow-indigo-500/30 active:scale-[0.98]"
@@ -865,8 +971,8 @@ function CheckoutContent({
               </button>
 
               {!isFormValid && (
-                <p className="mt-3 text-center text-xs text-gray-500">
-                  Complete your delivery details to continue.
+                <p className="mt-3 text-center text-xs text-gray-400 font-medium">
+                  Click to review missing delivery details
                 </p>
               )}
 

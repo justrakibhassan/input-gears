@@ -15,6 +15,7 @@ interface SearchResult {
   price: number;
   image: string | null;
   category?: { name: string } | null;
+  categoryName?: string | null;
 }
 
 const TRENDING_SEARCHES = [
@@ -229,9 +230,9 @@ export default function MobileSearchModal() {
                         <h4 className="text-xs font-semibold text-gray-900 line-clamp-1 group-hover:text-indigo-600 transition-colors">
                           {product.name}
                         </h4>
-                        {product.category && (
+                        {(product.category?.name || product.categoryName) && (
                           <span className="text-[10px] text-gray-600 uppercase font-medium">
-                            {product.category.name}
+                            {product.category?.name || product.categoryName}
                           </span>
                         )}
                         <p className="text-xs font-bold text-gray-900 mt-0.5">

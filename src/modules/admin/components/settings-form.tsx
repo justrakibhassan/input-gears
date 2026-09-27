@@ -183,7 +183,7 @@ export default function SettingsForm({ initialData }: SettingsFormProps) {
                     </label>
                     <input
                       type="text"
-                      defaultValue="+880 1XXX-XXXXXX"
+                      defaultValue="+1 (555) 234-GEAR"
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-800 focus:border-indigo-500 outline-none transition-all"
                     />
                   </div>

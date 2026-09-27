@@ -99,7 +99,7 @@ export default async function ProductView({
         ${minPrice ? Prisma.sql`AND p.price >= ${parseFloat(minPrice)}` : Prisma.empty}
         ${maxPrice ? Prisma.sql`AND p.price <= ${parseFloat(maxPrice)}` : Prisma.empty}
         ORDER BY similarity(p.name, ${q}) DESC
-        LIMIT 40
+        LIMIT 40 -- TODO: cursor pagination for scale (e.g. keyset pagination with similarity/id cursor)
       `);
       
       type RawProductResult = Product & { categoryId?: string; categoryName?: string };
@@ -117,6 +117,7 @@ export default async function ProductView({
         include: {
           category: true,
         },
+        // TODO: cursor pagination for scale (e.g. cursor: { id: cursorId }, skip: 1)
         take: 40,
       })) as unknown as Product[];
     }
@@ -127,8 +128,45 @@ export default async function ProductView({
       include: {
         category: true,
       },
+      // TODO: cursor pagination for scale (e.g. cursor: { id: cursorId }, skip: 1)
       take: 40,
     })) as unknown as Product[];
+  }
+
+  // Attach approved review stats & handle rating sort
+  const productIds = products.map((p) => p.id);
+  if (productIds.length > 0) {
+    const reviewStats = await prisma.review.groupBy({
+      by: ["productId"],
+      where: { productId: { in: productIds }, status: "APPROVED" },
+      _avg: { rating: true },
+      _count: { rating: true },
+    });
+    const statsMap = new Map(
+      reviewStats.map((s) => [
+        s.productId,
+        {
+          averageRating: s._avg.rating || 0,
+          totalReviews: s._count.rating || 0,
+        },
+      ])
+    );
+    products = products.map((p) => {
+      const stats = statsMap.get(p.id);
+      return {
+        ...p,
+        averageRating: stats ? Number(stats.averageRating.toFixed(1)) : 0,
+        totalReviews: stats ? stats.totalReviews : 0,
+      };
+    });
+
+    if (sort === "rating") {
+      products.sort(
+        (a, b) =>
+          ((b.averageRating || 0) - (a.averageRating || 0)) ||
+          ((b.totalReviews || 0) - (a.totalReviews || 0))
+      );
+    }
   }
 
   return (

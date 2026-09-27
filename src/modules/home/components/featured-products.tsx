@@ -43,10 +43,10 @@ export default async function FeaturedProducts() {
         <div className="flex items-end justify-between mb-6 sm:mb-8 pb-3 border-b border-gray-100 gap-4">
           <div>
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 tracking-tight">
-              Featured Gears
+              New Arrivals
             </h2>
             <p className="text-xs sm:text-sm text-gray-500 font-normal mt-0.5">
-              Explore our top-selling and high-performance peripherals
+              Explore the latest high-performance peripherals and gear
             </p>
           </div>
 

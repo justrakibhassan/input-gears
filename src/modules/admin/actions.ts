@@ -446,32 +446,44 @@ export const getStoreAppearance = unstable_cache(
   }
 );
 
-interface TopBarInput {
-  text: string;
-  link: string;
-  isActive: boolean;
-  // UI logic field
-  useSchedule: boolean;
-  topBarStart?: string;
-  topBarEnd?: string;
-}
+const topBarSchema = z.object({
+  text: z.string().trim().max(250).default(""),
+  link: z.string().trim().max(500).optional().nullable(),
+  isActive: z.boolean().default(false),
+  useSchedule: z.boolean().optional().default(false),
+  topBarStart: z.string().optional().nullable(),
+  topBarEnd: z.string().optional().nullable(),
+});
+
+export type TopBarInput = z.input<typeof topBarSchema>;
 
 // --- 2. Update Top Bar ---
-export async function updateTopBar(data: TopBarInput) {
+export async function updateTopBar(input: TopBarInput) {
   await requireRole(["SUPER_ADMIN"]);
-  // Logic:
-  // Handle scheduling
+  const data = topBarSchema.parse(input);
+
+  if (
+    data.link &&
+    data.link.trim() !== "" &&
+    !(data.link.startsWith("/") || /^https?:\/\//.test(data.link))
+  ) {
+    throw new Error("Top bar link must be a relative path or http(s) URL");
+  }
 
   const startDate =
-    data.useSchedule && data.topBarStart ? new Date(data.topBarStart) : null;
+    data.useSchedule && data.topBarStart && !isNaN(Date.parse(data.topBarStart))
+      ? new Date(data.topBarStart)
+      : null;
   const endDate =
-    data.useSchedule && data.topBarEnd ? new Date(data.topBarEnd) : null;
+    data.useSchedule && data.topBarEnd && !isNaN(Date.parse(data.topBarEnd))
+      ? new Date(data.topBarEnd)
+      : null;
 
   await prisma.siteSettings.upsert({
     where: { id: "general" },
     update: {
       topBarText: data.text,
-      topBarLink: data.link,
+      topBarLink: data.link && data.link.trim() !== "" ? data.link : null,
       topBarActive: data.isActive,
       topBarStart: startDate,
       topBarEnd: endDate,
@@ -479,7 +491,7 @@ export async function updateTopBar(data: TopBarInput) {
     create: {
       id: "general",
       topBarText: data.text,
-      topBarLink: data.link,
+      topBarLink: data.link && data.link.trim() !== "" ? data.link : null,
       topBarActive: data.isActive,
       topBarStart: startDate,
       topBarEnd: endDate,
@@ -527,21 +539,26 @@ export async function updateHeroSlides(slides: HeroSlideInput[]) {
 }
 
 // --- Brand Logos Actions ---
-export interface BrandLogoInput {
-  name: string;
-  image: string;
-  isActive?: boolean;
-}
+const brandLogoItemSchema = z.object({
+  name: z.string().trim().min(1, "Brand name is required").max(100),
+  image: z.string().trim().min(1, "Brand logo image is required").max(500),
+  isActive: z.boolean().optional(),
+});
+
+const brandLogoSchema = z.array(brandLogoItemSchema).max(50);
+export type BrandLogoInput = z.input<typeof brandLogoItemSchema>;
 
 export async function updateBrandLogos(brands: BrandLogoInput[]) {
   await requireRole(["SUPER_ADMIN", "CONTENT_EDITOR"]);
+  const validated = brandLogoSchema.parse(brands);
+
   await prisma.brandLogo.deleteMany();
 
-  if (brands.length > 0) {
+  if (validated.length > 0) {
     await prisma.brandLogo.createMany({
-      data: brands.map((b, i) => ({
+      data: validated.map((b, i) => ({
         name: b.name,
-        image: b.image || "",
+        image: b.image,
         isActive: b.isActive ?? true,
         order: i,
       })),
@@ -624,16 +641,12 @@ export async function updateProductStatus(id: string, status: ProductStatus) {
   try {
     const session = await requireRole(["SUPER_ADMIN", "MANAGER"]);
 
-    const data =
-      status === "active"
-        ? { isActive: true, scheduledAt: null }
-        : status === "paused"
-        ? { isActive: false, scheduledAt: null }
-        : { isActive: false, scheduledAt: null }; // draft: same as paused for now
-
     await prisma.product.update({
       where: { id },
-      data,
+      data: {
+        isActive: status === "active",
+        scheduledAt: null,
+      },
     });
 
     revalidatePath("/admin/products");

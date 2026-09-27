@@ -74,8 +74,8 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900">Call Us</h3>
-                    <p className="text-gray-500">+880 (1700) 000-000</p>
-                    <p className="text-xs text-gray-400">Sat - Thu (10:00 AM - 8:00 PM)</p>
+                    <p className="text-gray-500">+1 (555) 234-GEAR</p>
+                    <p className="text-xs text-gray-400">Mon - Fri (9:00 AM - 6:00 PM EST)</p>
                   </div>
                 </div>
 
@@ -85,7 +85,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900">Headquarters</h3>
-                    <p className="text-gray-500">Level 5, Tech Hub Tower, Dhaka, Bangladesh</p>
+                    <p className="text-gray-500">100 Tech Hub Way, Suite 500, San Francisco, CA 94107</p>
                   </div>
                 </div>
 

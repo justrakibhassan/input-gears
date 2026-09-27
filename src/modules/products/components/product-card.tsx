@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCart, Check, Heart, Search, ArrowLeftRight, Star } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useCart, CartItem } from "@/modules/cart/hooks/use-cart";
 import { MouseEventHandler, useState, useEffect, memo, useMemo } from "react";
 import { useWishlist } from "@/modules/products/hooks/use-wishlist";
@@ -12,7 +13,10 @@ import { QuickViewModal } from "./quick-view-modal";
 import { Product } from "@/types/product";
 
 interface ProductCardProps {
-  data: Product;
+  data: Product & {
+    averageRating?: number;
+    totalReviews?: number;
+  };
 }
 
 const ProductCard = memo(({ data }: ProductCardProps) => {
@@ -358,6 +362,33 @@ const ProductCard = memo(({ data }: ProductCardProps) => {
         </div>
       </div>
 
+      {/* Tiny scrub dots under image */}
+      {allImages.length > 1 && (
+        <div
+          className="flex items-center justify-center gap-1.5 pt-1.5 pb-0.5"
+          aria-label="Image gallery dots"
+        >
+          {allImages.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setActiveImageIndex(i);
+              }}
+              aria-label={`View image ${i + 1}`}
+              className={cn(
+                "rounded-full transition-all duration-200 cursor-pointer",
+                i === activeImageIndex
+                  ? "w-3.5 h-1.5 bg-gray-900"
+                  : "w-1.5 h-1.5 bg-gray-300 hover:bg-gray-400"
+              )}
+            />
+          ))}
+        </div>
+      )}
+
       {/* Product Content Details (Borderless, Compact, Centered - Clean Readable Typography) */}
       <div className="pt-2 px-1 pb-1 flex flex-col items-center text-center flex-1">
         {/* Product Title */}
@@ -375,12 +406,28 @@ const ProductCard = memo(({ data }: ProductCardProps) => {
           </p>
         )}
 
-        {/* 5-Star Rating (Centered) */}
-        <div className="flex items-center justify-center gap-0.5 my-1 text-amber-400">
-          {[...Array(5)].map((_, i) => (
-            <Star key={i} size={12} fill="currentColor" strokeWidth={0} />
-          ))}
-        </div>
+        {/* Rating Display (Only if real reviews exist) */}
+        {Boolean(data.totalReviews && data.totalReviews > 0) && (
+          <div className="flex items-center justify-center gap-1 my-1 text-amber-400">
+            <div className="flex items-center gap-0.5">
+              {[...Array(5)].map((_, i) => {
+                const isFilled = i < Math.round(data.averageRating || 0);
+                return (
+                  <Star
+                    key={i}
+                    size={12}
+                    fill={isFilled ? "currentColor" : "none"}
+                    className={isFilled ? "text-amber-400" : "text-gray-300"}
+                    strokeWidth={isFilled ? 0 : 1.5}
+                  />
+                );
+              })}
+            </div>
+            <span className="text-[11px] font-semibold text-gray-500 tabular-nums">
+              ({data.totalReviews})
+            </span>
+          </div>
+        )}
 
         {/* Price Display (Centered - Clear Bold Dark Price) */}
         <div className="mt-auto flex items-baseline justify-center gap-2 flex-wrap">

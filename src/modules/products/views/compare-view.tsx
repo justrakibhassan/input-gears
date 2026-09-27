@@ -505,6 +505,11 @@ export default function CompareView() {
 
   const renderRatingStars = (productId: string) => {
     const stat = ratings[productId] || { averageRating: 0, totalReviews: 0 };
+    if (!stat.totalReviews || stat.totalReviews === 0) {
+      return (
+        <span className="text-zinc-400 text-xs font-medium">No reviews</span>
+      );
+    }
     const rating = stat.averageRating;
     const rounded = Math.round(rating);
     
@@ -514,6 +519,7 @@ export default function CompareView() {
           {"★".repeat(rounded) + "☆".repeat(5 - rounded)}
         </span>
         <span className="text-zinc-650 font-bold ml-1">{rating > 0 ? rating.toFixed(1) : "0.0"}</span>
+        <span className="text-zinc-400 text-[10px] font-normal">({stat.totalReviews})</span>
       </div>
     );
   };

@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { toast } from "sonner";
 import { useCart } from "@/modules/cart/hooks/use-cart";
 import { useSession } from "@/lib/auth-client";
+import { AlertModal } from "@/components/ui/alert-modal";
 import {
   Trash2,
   Minus,
@@ -18,23 +21,41 @@ import {
 export default function CartView() {
   const cart = useCart();
   const { data: session } = useSession();
+  const [draftQuantities, setDraftQuantities] = useState<Record<string, string>>({});
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false);
 
   const subtotal = cart.items.reduce(
     (sum, item) => sum + Number(item.price) * item.quantity,
     0
   );
   const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
-  const shipping = subtotal > 1000 ? 0 : 60;
-  const total = subtotal + shipping;
 
-  const handleQuantityChange = (id: string, value: string) => {
-    const numValue = parseInt(value);
-    if (isNaN(numValue) || numValue < 1) return;
-    cart.updateQuantity(id, numValue, !!session);
+  const handleQuantityDraftChange = (id: string, value: string) => {
+    setDraftQuantities((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleClearCart = () => {
+  const handleQuantityBlur = (id: string, maxStock: number) => {
+    const raw = draftQuantities[id];
+    if (raw === undefined) return;
+
+    let num = parseInt(raw, 10);
+    if (isNaN(num) || num < 1) {
+      num = 1;
+    } else if (num > maxStock) {
+      toast.error(`Only ${maxStock} available in stock`);
+      num = maxStock;
+    }
+    cart.updateQuantity(id, num, !!session);
+    setDraftQuantities((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
+
+  const handleConfirmClearCart = () => {
     cart.clearCart();
+    setIsClearModalOpen(false);
   };
 
   if (cart.items.length === 0) {
@@ -100,6 +121,11 @@ export default function CartView() {
                       <h3 className="font-bold text-gray-900 text-lg leading-tight hover:text-indigo-600 transition-colors line-clamp-2">
                         <Link href={`/products/${item.slug}`}>{item.name}</Link>
                       </h3>
+                      {item.color && (
+                        <p className="text-xs font-semibold text-indigo-600 mt-0.5">
+                          Variant: {item.color}
+                        </p>
+                      )}
                       <p className="text-gray-500 text-sm mt-1.5 font-medium">
                         ${item.price.toFixed(2)}{" "}
                         <span className="text-gray-300 px-1">×</span>{" "}
@@ -115,11 +141,14 @@ export default function CartView() {
                   <div className="flex items-end justify-between mt-4">
                     <div className="flex items-center gap-1 bg-gray-50 rounded-xl p-1 border border-gray-200">
                       <button
-                        onClick={() =>
-                          cart.updateQuantity(item.id, item.quantity - 1, !!session)
-                        }
+                        onClick={() => {
+                          if (item.quantity > 1) {
+                            cart.updateQuantity(item.id, item.quantity - 1, !!session);
+                          }
+                        }}
                         disabled={item.quantity <= 1}
                         className="w-8 h-8 flex items-center justify-center text-gray-600 bg-white shadow-sm rounded-lg hover:text-indigo-600 disabled:opacity-50 disabled:shadow-none transition-all"
+                        aria-label="Decrease quantity"
                       >
                         <Minus size={14} strokeWidth={2.5} />
                       </button>
@@ -127,18 +156,34 @@ export default function CartView() {
                         type="number"
                         min="1"
                         max={item.maxStock}
-                        value={item.quantity}
-                        onChange={(e) =>
-                          handleQuantityChange(item.id, e.target.value)
+                        value={
+                          draftQuantities[item.id] !== undefined
+                            ? draftQuantities[item.id]
+                            : item.quantity
                         }
+                        onChange={(e) =>
+                          handleQuantityDraftChange(item.id, e.target.value)
+                        }
+                        onBlur={() => handleQuantityBlur(item.id, item.maxStock)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            (e.target as HTMLInputElement).blur();
+                          }
+                        }}
                         className="w-10 text-center bg-transparent border-none text-sm font-bold text-gray-900 focus:ring-0 p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none"
+                        aria-label={`Quantity for ${item.name}`}
                       />
                       <button
-                        onClick={() =>
-                          cart.updateQuantity(item.id, item.quantity + 1, !!session)
-                        }
+                        onClick={() => {
+                          if (item.quantity < item.maxStock) {
+                            cart.updateQuantity(item.id, item.quantity + 1, !!session);
+                          } else {
+                            toast.error(`Only ${item.maxStock} available in stock`);
+                          }
+                        }}
                         disabled={item.quantity >= item.maxStock}
                         className="w-8 h-8 flex items-center justify-center text-gray-600 bg-white shadow-sm rounded-lg hover:text-indigo-600 disabled:opacity-50 disabled:shadow-none transition-all"
+                        aria-label="Increase quantity"
                       >
                         <Plus size={14} strokeWidth={2.5} />
                       </button>
@@ -146,10 +191,11 @@ export default function CartView() {
 
                     <button
                       onClick={() => cart.removeItem(item.id, !!session)}
-                      className="flex items-center gap-1.5 text-xs font-medium text-gray-400 hover:text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg transition-colors"
+                      className="flex items-center gap-1.5 text-xs font-semibold text-red-500 hover:text-red-700 bg-red-50/70 hover:bg-red-50 px-3 py-2 rounded-lg transition-colors border border-red-100/50"
+                      aria-label={`Remove ${item.name} from cart`}
                     >
-                      <Trash2 size={16} />
-                      <span className="hidden sm:inline">Remove</span>
+                      <Trash2 size={15} className="shrink-0 text-red-500" />
+                      <span>Remove</span>
                     </button>
                   </div>
                 </div>
@@ -170,12 +216,21 @@ export default function CartView() {
             </Link>
 
             <button
-              onClick={handleClearCart}
-              className="text-sm font-medium text-red-500 hover:text-red-700 hover:bg-red-50 px-4 py-2 rounded-lg transition-colors"
+              onClick={() => setIsClearModalOpen(true)}
+              className="text-sm font-semibold text-red-500 hover:text-red-700 hover:bg-red-50 px-4 py-2 rounded-lg transition-colors"
             >
               Clear Cart
             </button>
           </div>
+
+          <AlertModal
+            isOpen={isClearModalOpen}
+            onClose={() => setIsClearModalOpen(false)}
+            onConfirm={handleConfirmClearCart}
+            title="Clear Shopping Cart"
+            description="Are you sure you want to remove all items from your cart? This will also release any reserved inventory."
+            variant="danger"
+          />
         </div>
 
         <div className="lg:col-span-4 mt-8 lg:mt-0 relative h-full">
@@ -190,35 +245,31 @@ export default function CartView() {
               <div className="space-y-4 text-sm relative z-10">
                 <div className="flex justify-between text-gray-500 font-medium">
                   <span>Subtotal</span>
-                  <span className="text-gray-900">${subtotal.toFixed(2)}</span>
+                  <span className="text-gray-900 font-semibold">${subtotal.toFixed(2)}</span>
                 </div>
 
-                <div className="flex justify-between text-gray-500 font-medium">
-                  <span>Shipping</span>
-                  {shipping === 0 ? (
-                    <span className="text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded text-xs uppercase tracking-wide">
-                      Free
-                    </span>
-                  ) : (
-                    <span className="text-gray-900">
-                      ${shipping.toFixed(2)}
-                    </span>
-                  )}
+                <div className="flex justify-between text-gray-500 font-medium items-center">
+                  <span>Estimated Shipping</span>
+                  <span className="text-xs text-indigo-600 font-semibold bg-indigo-50/80 px-2.5 py-1 rounded-full">
+                    Calculated at checkout
+                  </span>
                 </div>
 
                 <div className="border-t border-dashed border-gray-200 my-4" />
 
-                <div className="flex justify-between items-end">
-                  <span className="text-base font-bold text-gray-900">
-                    Total
-                  </span>
+                <div className="flex justify-between items-baseline">
+                  <div>
+                    <span className="text-base font-bold text-gray-900">
+                      Estimated Total
+                    </span>
+                    <p className="text-[11px] text-gray-400 font-medium">
+                      Shipping & taxes calculated at checkout
+                    </p>
+                  </div>
                   <div className="text-right">
                     <span className="text-3xl font-extrabold text-indigo-600 tracking-tight">
-                      ${total.toFixed(2)}
+                      ${subtotal.toFixed(2)}
                     </span>
-                    <p className="text-[10px] text-gray-400 mt-1 font-medium">
-                      Taxes & shipping calculated at checkout
-                    </p>
                   </div>
                 </div>
               </div>

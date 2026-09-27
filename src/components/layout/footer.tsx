@@ -4,10 +4,10 @@ import Link from "next/link";
 import { toast } from "sonner";
 import {
   Github,
-  Twitter,
   Linkedin,
+  Globe,
   ArrowRight,
-  Settings,
+  Zap,
 } from "lucide-react";
 
 // --- Type Definitions (Strict Type Safety) ---
@@ -25,6 +25,7 @@ interface FooterColumn {
 interface SocialLink {
   platform: string;
   icon: React.ElementType;
+  href: string;
 }
 
 // --- Data Configuration ---
@@ -37,14 +38,16 @@ const FOOTER_LINKS: FooterColumn[] = [
       { label: "Sale Deals", href: "/sale" },
       { label: "Compare Gears", href: "/compare" },
       { label: "Track Order", href: "/track-order" },
+      { label: "Order History", href: "/account/orders" },
     ],
   },
   {
     title: "Customer Service",
     links: [
       { label: "Contact Us", href: "/contact" },
-      { label: "Privacy Policy", href: "/privacy" },
+      { label: "My Addresses", href: "/account/addresses" },
       { label: "Return Policy", href: "/returns" },
+      { label: "Privacy Policy", href: "/privacy" },
       { label: "My Account", href: "/account" },
     ],
   },
@@ -60,9 +63,9 @@ const FOOTER_LINKS: FooterColumn[] = [
 ];
 
 const SOCIAL_LINKS: SocialLink[] = [
-  { platform: "GitHub", icon: Github },
-  { platform: "Twitter", icon: Twitter },
-  { platform: "LinkedIn", icon: Linkedin },
+  { platform: "GitHub", icon: Github, href: "https://github.com/justrakibhassan" },
+  { platform: "LinkedIn", icon: Linkedin, href: "https://www.linkedin.com/in/justrakibhassan" },
+  { platform: "Portfolio", icon: Globe, href: "https://rakibhassan.vercel.app" },
 ];
 
 // --- Components ---
@@ -82,8 +85,8 @@ export function Footer() {
               href="/"
               className="flex items-center gap-2 text-white group w-fit"
             >
-              <div className="p-2 bg-zinc-900 rounded-lg border border-zinc-800 group-hover:border-indigo-500/50 transition-colors">
-                <Settings className="w-6 h-6 text-indigo-500 animate-[spin_10s_linear_infinite]" />
+              <div className="p-2 bg-indigo-600/20 text-indigo-400 rounded-lg border border-indigo-500/30 group-hover:border-indigo-400 transition-colors shadow-xs shadow-indigo-500/20">
+                <Zap size={20} fill="currentColor" />
               </div>
               <span className="text-xl font-bold tracking-tight">
                 Input Gears
@@ -171,15 +174,16 @@ export function Footer() {
           {/* Social Icons */}
           <div className="flex items-center gap-3 order-1 md:order-2">
             {SOCIAL_LINKS.map((item) => (
-              <button
+              <a
                 key={item.platform}
-                type="button"
-                onClick={() => toast.info(`${item.platform} channel coming soon!`)}
-                className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-full transition-all duration-300 border border-transparent hover:border-zinc-700 cursor-pointer"
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-full transition-all duration-300 border border-transparent hover:border-zinc-700"
                 aria-label={item.platform}
               >
                 <item.icon className="w-4 h-4" />
-              </button>
+              </a>
             ))}
           </div>
         </div>

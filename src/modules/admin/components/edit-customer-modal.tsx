@@ -17,8 +17,8 @@ const userSchema = z.object({
     .string()
     .optional()
     .nullable()
-    .refine((val) => !val || /^\d+$/.test(val), {
-      message: "Phone number must contain only digits",
+    .refine((val) => !val || /^[0-9+\-\s()]{7,20}$/.test(val), {
+      message: "Phone number format is invalid",
     }),
 });
 
@@ -165,7 +165,7 @@ export default function EditCustomerModal({
                         />
                         <input
                           {...form.register("phone")}
-                          placeholder="+880 1xxx-xxxxxx"
+                          placeholder="+1 (555) 234-5678"
                           className="w-full h-11 bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800 border rounded-xl pl-12 pr-4 text-sm font-semibold focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 transition-all outline-none text-gray-900 dark:text-white"
                         />
                       </div>
