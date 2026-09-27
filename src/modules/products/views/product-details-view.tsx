@@ -29,7 +29,6 @@ import {
   Settings,
   Truck,
   ShieldCheck,
-  Store,
   X,
   Star,
 } from "lucide-react";
@@ -77,9 +76,64 @@ function getDisplayColorName(color: string | null): string {
   return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
 }
 
+const KNOWN_SWATCH_COLORS: Record<string, string> = {
+  black: "#18181b",
+  "matte black": "#18181b",
+  midnight: "#0f172a",
+  white: "#f8fafc",
+  "chalk white": "#f8fafc",
+  platinum: "#e2e8f0",
+  silver: "#cbd5e1",
+  gray: "#6b7280",
+  grey: "#6b7280",
+  "space gray": "#374151",
+  "space grey": "#374151",
+  charcoal: "#1f2937",
+  blue: "#3b82f6",
+  navy: "#1e3a8a",
+  "navy blue": "#1e3a8a",
+  cyan: "#06b6d4",
+  teal: "#0d9488",
+  red: "#ef4444",
+  crimson: "#dc2626",
+  rose: "#f43f5e",
+  pink: "#ec4899",
+  purple: "#a855f7",
+  violet: "#8b5cf6",
+  lavender: "#c084fc",
+  green: "#22c55e",
+  emerald: "#10b981",
+  forest: "#166534",
+  "forest green": "#166534",
+  yellow: "#eab308",
+  amber: "#f59e0b",
+  orange: "#f97316",
+  coral: "#fb7185",
+  gold: "#eab308",
+  bronze: "#b45309",
+};
+
+function getSwatchColorHex(color: string): string {
+  if (!color) return "#64748b";
+  const normalized = color.toLowerCase().trim();
+  if (KNOWN_SWATCH_COLORS[normalized]) {
+    return KNOWN_SWATCH_COLORS[normalized];
+  }
+  for (const [key, hex] of Object.entries(KNOWN_SWATCH_COLORS)) {
+    if (normalized.includes(key)) {
+      return hex;
+    }
+  }
+  if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(normalized)) {
+    return normalized;
+  }
+  return "#475569";
+}
+
 interface ColorVariantMeta {
   image?: string;
   inStock?: boolean;
+  stock?: number;
   price?: number;
   regularPrice?: number;
 }
@@ -170,8 +224,19 @@ const ProductDetailsView = memo(
 
       // Check if this color has a mapped image
       const mapped = colorMap[color];
-      if (mapped && typeof mapped === "object" && mapped.image && allImages.includes(mapped.image)) {
-        setSelectedImage(mapped.image);
+      if (mapped && typeof mapped === "object") {
+        if (mapped.image && allImages.includes(mapped.image)) {
+          setSelectedImage(mapped.image);
+        }
+        const variantStock =
+          mapped.inStock === false
+            ? 0
+            : typeof mapped.stock === "number"
+              ? mapped.stock
+              : (product?.stock ?? 0);
+        if (variantStock > 0 && quantity > variantStock) {
+          setQuantity(variantStock);
+        }
       }
     };
 
@@ -216,13 +281,20 @@ const ProductDetailsView = memo(
       return null;
     }, [regularPrice, effectivePrice]);
 
-    // Variant stock check
-    const isVariantOutOfStock = useMemo(() => {
-      if (activeVariantMeta && typeof activeVariantMeta === "object" && activeVariantMeta.inStock !== undefined) {
-        return !activeVariantMeta.inStock;
+    // Variant stock calculation: unify variant stock & product stock
+    const effectiveMaxStock = useMemo(() => {
+      if (activeVariantMeta && typeof activeVariantMeta === "object") {
+        if (activeVariantMeta.inStock === false) return 0;
+        if (typeof activeVariantMeta.stock === "number") {
+          return Math.max(0, activeVariantMeta.stock);
+        }
       }
-      return product.stock === 0;
-    }, [activeVariantMeta, product.stock]);
+      return Math.max(0, product?.stock ?? 0);
+    }, [activeVariantMeta, product?.stock]);
+
+    const isVariantOutOfStock = useMemo(() => {
+      return effectiveMaxStock === 0;
+    }, [effectiveMaxStock]);
 
     // Slide Image Navigation Handlers
     const currentImageIndex = useMemo(() => {
@@ -261,9 +333,9 @@ const ProductDetailsView = memo(
 
     // Quantity Handlers
     const incrementQty = () =>
-      setQuantity((prev) => (prev < (product?.stock || 99) ? prev + 1 : prev));
+      setQuantity((prev) => (prev < effectiveMaxStock ? prev + 1 : prev));
     const decrementQty = () =>
-      setQuantity((prev) => (prev > 1 ? prev - 1 : prev));
+      setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
     const handleToggleWishlist = () => {
       if (!product) return;
@@ -325,7 +397,7 @@ const ProductDetailsView = memo(
     };
 
     const handleAddToCart = () => {
-      if (!product || isVariantOutOfStock || product.stock === 0) return;
+      if (!product || isVariantOutOfStock || effectiveMaxStock === 0) return;
       setIsAdding(true);
 
       setTimeout(() => {
@@ -336,8 +408,9 @@ const ProductDetailsView = memo(
             slug: product.slug,
             price: effectivePrice,
             image: selectedImage || product.image || "/placeholder.png",
-            quantity: quantity,
-            maxStock: product.stock,
+            color: selectedColor || undefined,
+            quantity: Math.min(quantity, effectiveMaxStock),
+            maxStock: effectiveMaxStock,
           },
           !!session,
         );
@@ -349,7 +422,7 @@ const ProductDetailsView = memo(
     };
 
     const handleBuyNow = () => {
-      if (!product || isVariantOutOfStock || product.stock === 0) return;
+      if (!product || isVariantOutOfStock || effectiveMaxStock === 0) return;
       cart.addItem(
         {
           id: product.id,
@@ -357,18 +430,31 @@ const ProductDetailsView = memo(
           slug: product.slug,
           price: effectivePrice,
           image: selectedImage || product.image || "/placeholder.png",
-          quantity: quantity,
-          maxStock: product.stock,
+          color: selectedColor || undefined,
+          quantity: Math.min(quantity, effectiveMaxStock),
+          maxStock: effectiveMaxStock,
         },
         !!session,
       );
       router.push("/cart");
     };
 
-    const handleCopyLink = () => {
-      if (typeof window !== "undefined") {
-        navigator.clipboard.writeText(window.location.href);
-        toast.success("Link copied to clipboard!");
+    const handleCopyLink = async () => {
+      if (typeof window === "undefined") return;
+      const url = window.location.href;
+      try {
+        if (navigator?.clipboard?.writeText) {
+          await navigator.clipboard.writeText(url);
+          toast.success("Link copied to clipboard!");
+        } else {
+          throw new Error("Clipboard API unavailable");
+        }
+      } catch {
+        try {
+          window.prompt("Copy product link:", url);
+        } catch {
+          toast.error("Unable to copy link to clipboard");
+        }
       }
     };
 
@@ -515,17 +601,17 @@ const ProductDetailsView = memo(
               )}
 
               {/* Fast Delivery Pill Banner */}
-              <div className="w-full rounded-2xl bg-[#a31c1c] text-white px-4 py-3 flex items-center justify-between shadow-xs">
+              <div className="w-full rounded-2xl bg-zinc-900 border border-zinc-800 text-white px-4 py-3 flex items-center justify-between shadow-xs">
                 <div className="space-y-0.5 text-xs font-semibold leading-tight">
                   <p className="text-white font-bold text-xs sm:text-[13px]">
                     Fast delivery within 24-48 Hours
                   </p>
-                  <p className="text-[10.5px] text-white/80 font-normal">
+                  <p className="text-[10.5px] text-zinc-400 font-normal">
                     (Depending on location)
                   </p>
                 </div>
-                <div className="flex items-center gap-1 px-2.5 py-1 bg-white/20 backdrop-blur-xs rounded-full text-[10.5px] font-bold text-white shrink-0">
-                  <Truck size={12} />
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-indigo-500/20 border border-indigo-400/30 rounded-full text-[11px] font-bold text-indigo-300 shrink-0">
+                  <Truck size={13} className="text-indigo-400" />
                   <span>Express</span>
                 </div>
               </div>
@@ -559,19 +645,27 @@ const ProductDetailsView = memo(
 
               {/* Rating Stars & Reviews Count */}
               <div className="flex items-center gap-2">
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={13}
-                      className={i < Math.round(averageRating || 5) ? "text-amber-400 fill-amber-400" : "text-gray-300 fill-gray-300"}
-                      strokeWidth={0}
-                    />
-                  ))}
-                </div>
-                <span className="text-xs text-gray-500 font-medium">
-                  ({totalReviews > 0 ? `${totalReviews} customer reviews` : "No reviews yet"})
-                </span>
+                {totalReviews > 0 ? (
+                  <>
+                    <div className="flex items-center">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          size={13}
+                          className={i < Math.round(averageRating) ? "text-amber-400 fill-amber-400" : "text-gray-300 fill-gray-300"}
+                          strokeWidth={0}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-xs text-gray-500 font-medium">
+                      ({totalReviews} customer reviews)
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-xs text-gray-400 font-medium">
+                    No reviews yet
+                  </span>
+                )}
               </div>
 
               {/* Quick Overview (Clean Minimal Specs List) */}
@@ -685,15 +779,7 @@ const ProductDetailsView = memo(
                           <span
                             className="w-2.5 h-2.5 rounded-full border border-gray-300 shadow-2xs shrink-0"
                             style={{
-                              backgroundColor: color.toLowerCase().includes("white")
-                                ? "#ffffff"
-                                : color.toLowerCase().includes("blue")
-                                  ? "#60a5fa"
-                                  : color.toLowerCase().includes("red")
-                                    ? "#ef4444"
-                                    : color.toLowerCase().includes("gradient") || color.toLowerCase().includes("black")
-                                      ? "#1f2937"
-                                      : color.toLowerCase(),
+                              backgroundColor: getSwatchColorHex(color),
                             }}
                           />
                           <span>{displayName}</span>
@@ -741,7 +827,7 @@ const ProductDetailsView = memo(
                       onClick={incrementQty}
                       aria-label="Increase quantity"
                       className="w-8 h-9 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition disabled:opacity-30 cursor-pointer"
-                      disabled={quantity >= (product.stock || 99) || isVariantOutOfStock}
+                      disabled={quantity >= effectiveMaxStock || isVariantOutOfStock}
                     >
                       <Plus className="w-3.5 h-3.5" strokeWidth={2} />
                     </button>
@@ -883,22 +969,6 @@ const ProductDetailsView = memo(
                   </div>
                   <p className="text-[11px] text-gray-500 pl-6 leading-relaxed">
                     Direct courier delivery to your specified address.
-                  </p>
-                </div>
-
-                {/* Store Pickup */}
-                <div className="space-y-1 pt-2.5 border-t border-gray-200/70">
-                  <div className="flex items-center justify-between text-xs font-semibold text-gray-900">
-                    <div className="flex items-center gap-2">
-                      <Store size={15} className="text-gray-500 shrink-0" />
-                      <span>Store Pickup</span>
-                    </div>
-                    <span className="text-[11px] text-gray-900 font-bold uppercase">
-                      Free
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-gray-500 pl-6 leading-relaxed">
-                    Collect directly from our store locations.
                   </p>
                 </div>
 

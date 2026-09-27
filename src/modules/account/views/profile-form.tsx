@@ -228,14 +228,9 @@ function GeneralInfoForm({ user }: ProfileFormProps) {
               <input
                 {...form.register("phone")}
                 type="tel"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                onInput={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  target.value = target.value.replace(/\D/g, "");
-                }}
+                inputMode="tel"
                 className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl text-sm font-semibold transition-all duration-200 bg-gray-50/30 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none"
-                placeholder="017xxxxxxxx"
+                placeholder="+1 (555) 234-5678"
               />
             </div>
             {form.formState.errors.phone && (

@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useCallback,
   useRef,
+  useSyncExternalStore,
   TouchEvent,
 } from "react";
 import Link from "next/link";
@@ -31,9 +32,31 @@ interface HeroBannerProps {
 const AUTO_SLIDE_INTERVAL = 5000;
 const MIN_SWIPE_DISTANCE = 50;
 
+function subscribeReducedMotion(callback: () => void) {
+  if (typeof window === "undefined") return () => {};
+  const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+  mediaQuery.addEventListener("change", callback);
+  return () => mediaQuery.removeEventListener("change", callback);
+}
+
+function getReducedMotionSnapshot() {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function getReducedMotionServerSnapshot() {
+  return false;
+}
+
 export default function HeroBanner({ slides }: HeroBannerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const prefersReducedMotion = useSyncExternalStore(
+    subscribeReducedMotion,
+    getReducedMotionSnapshot,
+    getReducedMotionServerSnapshot
+  );
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // --- Touch States ---
@@ -57,12 +80,12 @@ export default function HeroBanner({ slides }: HeroBannerProps) {
 
   // --- Autoplay ---
   useEffect(() => {
-    if (slides.length <= 1) return;
+    if (slides.length <= 1 || isPaused || prefersReducedMotion) return;
     timerRef.current = setTimeout(() => nextSlide(), AUTO_SLIDE_INTERVAL);
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [currentIndex, nextSlide, slides.length]);
+  }, [currentIndex, nextSlide, slides.length, isPaused, prefersReducedMotion]);
 
   // --- Touch Handlers ---
   const onTouchStart = (e: TouchEvent<HTMLDivElement>) => {
@@ -79,12 +102,37 @@ export default function HeroBanner({ slides }: HeroBannerProps) {
     if (distance < -MIN_SWIPE_DISTANCE) prevSlide();
   };
 
-  if (!slides || slides.length === 0) return null;
+  if (!slides || slides.length === 0) {
+    return (
+      <section className="w-full max-w-[1440px] mx-auto px-4 md:px-6 mt-4 md:mt-6">
+        <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] lg:aspect-[24/8] rounded-2xl md:rounded-3xl overflow-hidden shadow-md select-none isolate border border-gray-100 dark:border-white/10 bg-gradient-to-br from-zinc-950 via-indigo-950/80 to-zinc-900 flex flex-col items-center justify-center text-center p-6 sm:p-12 text-white">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-500/20 via-transparent to-transparent pointer-events-none" />
+          <span className="text-[10px] sm:text-xs md:text-sm font-bold tracking-widest uppercase text-indigo-400 mb-2">
+            Engineered For Performance
+          </span>
+          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight max-w-3xl drop-shadow-md">
+            Elevate Your Setup With Precision Gear
+          </h1>
+          <p className="mt-3 text-xs sm:text-sm md:text-base text-gray-300 max-w-xl">
+            Custom mechanical keyboards, ultra-light wireless mice, and audiophile sound.
+          </p>
+          <Link
+            href="/products"
+            className="mt-6 px-6 py-2.5 sm:px-8 sm:py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-95 text-xs sm:text-sm"
+          >
+            Shop All Gears
+          </Link>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="w-full max-w-[1440px] mx-auto px-4 md:px-6 mt-4 md:mt-6">
       <div
         className="relative w-full aspect-[16/9] sm:aspect-[21/9] lg:aspect-[24/8] rounded-2xl md:rounded-3xl overflow-hidden shadow-md select-none group isolate border border-gray-100 dark:border-white/10 bg-zinc-950"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -104,7 +152,7 @@ export default function HeroBanner({ slides }: HeroBannerProps) {
                     src={slide.image}
                     alt={slide.title || "Banner Image"}
                     fill
-                    priority={index === 0}
+                    priority={index < 2}
                     className="object-cover object-center"
                     sizes="(max-width: 768px) 100vw, 1440px"
                   />
@@ -113,7 +161,7 @@ export default function HeroBanner({ slides }: HeroBannerProps) {
                     src={slide.image}
                     alt={slide.title || "Banner Image"}
                     fill
-                    priority={index === 0}
+                    priority={index < 2}
                     className="object-cover object-center"
                     sizes="(max-width: 768px) 100vw, 1440px"
                   />
@@ -146,15 +194,31 @@ export default function HeroBanner({ slides }: HeroBannerProps) {
                 <motion.div
                   key={slide.id || index}
                   custom={direction}
-                  initial={{ opacity: 0, x: direction > 0 ? 100 : -100, scale: 0.95 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: direction > 0 ? -100 : 100, scale: 1.05 }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 30,
-                    opacity: { duration: 0.4 },
-                  }}
+                  initial={
+                    prefersReducedMotion
+                      ? { opacity: 0 }
+                      : { opacity: 0, x: direction > 0 ? 100 : -100, scale: 0.95 }
+                  }
+                  animate={
+                    prefersReducedMotion
+                      ? { opacity: 1 }
+                      : { opacity: 1, x: 0, scale: 1 }
+                  }
+                  exit={
+                    prefersReducedMotion
+                      ? { opacity: 0 }
+                      : { opacity: 0, x: direction > 0 ? -100 : 100, scale: 1.05 }
+                  }
+                  transition={
+                    prefersReducedMotion
+                      ? { duration: 0.2 }
+                      : {
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 30,
+                          opacity: { duration: 0.4 },
+                        }
+                  }
                   className="absolute inset-0 w-full h-full z-10"
                 >
                   {slide.link ? (

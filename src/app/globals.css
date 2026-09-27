@@ -124,6 +124,12 @@
   animation: ticker 50s linear infinite;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .animate-ticker {
+    animation: none;
+  }
+}
+
 /* Small-laptop breakpoint. Every `mini:` usage in the product catalog mirrors
    its sibling `xl:` value, so this has to sit below the 1280px `xl` cutoff to
    have any effect — it reaches the wide grid a little earlier. */

@@ -200,6 +200,7 @@ export default function ProductFilters({ categories, brands }: ProductFiltersPro
             { id: "newest", label: "Newest Arrivals" },
             { id: "price_asc", label: "Price: Low to High" },
             { id: "price_desc", label: "Price: High to Low" },
+            { id: "rating", label: "Highest Rated" },
           ].map((option) => (
             <button
               key={option.id}

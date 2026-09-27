@@ -349,7 +349,7 @@ model Address {
   city    String
   state   String?
   zip     String
-  country String  @default("Bangladesh")
+  country String  @default("United States")
 
   isDefault Boolean @default(false)
   type      String  @default("HOME") 

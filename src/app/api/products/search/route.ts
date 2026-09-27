@@ -3,6 +3,12 @@ import { NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic";
+
+const SEARCH_CACHE_HEADERS = {
+  "Cache-Control": "private, max-age=30, stale-while-revalidate=60",
+};
+
 const searchQuerySchema = z.string().trim().min(1).max(100);
 
 export async function GET(request: Request) {
@@ -11,7 +17,7 @@ export async function GET(request: Request) {
 
   const parsed = searchQuerySchema.safeParse(rawQuery);
   if (!parsed.success) {
-    return NextResponse.json([]);
+    return NextResponse.json([], { headers: SEARCH_CACHE_HEADERS });
   }
 
   const query = parsed.data;
@@ -19,7 +25,16 @@ export async function GET(request: Request) {
   try {
     // Fuzzy matching with Postgres similarity
     // Using raw SQL because Prisma doesn't natively support trigram similarity yet.
-    const products = await prisma.$queryRaw`
+    const rawProducts = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        name: string;
+        slug: string;
+        price: number;
+        image: string | null;
+        categoryName: string | null;
+      }>
+    >`
       SELECT 
         p.id, 
         p.name, 
@@ -40,7 +55,17 @@ export async function GET(request: Request) {
       LIMIT 8
     `;
 
-    return NextResponse.json(products);
+    const products = rawProducts.map((p) => ({
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      price: p.price,
+      image: p.image,
+      categoryName: p.categoryName || null,
+      category: p.categoryName ? { name: p.categoryName } : null,
+    }));
+
+    return NextResponse.json(products, { headers: SEARCH_CACHE_HEADERS });
   } catch (error) {
     logger.warn("Product search raw trigram query failed, trying standard Prisma fallback search", { error: String(error), query });
     try {
@@ -87,7 +112,7 @@ export async function GET(request: Request) {
         category: p.category ? { name: p.category.name } : null
       }));
 
-      return NextResponse.json(formattedProducts);
+      return NextResponse.json(formattedProducts, { headers: SEARCH_CACHE_HEADERS });
     } catch (fallbackError) {
       logger.error("Fallback product search failed", fallbackError, { query });
       return NextResponse.json(

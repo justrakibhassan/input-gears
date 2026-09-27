@@ -5,8 +5,9 @@ export const profileSchema = z.object({
   image: z.string().optional(),
   phone: z
     .string()
-    .min(11, "Valid phone number is required")
-    .regex(/^\d+$/, "Phone number must contain only digits"),
+    .min(7, "Valid phone number is required")
+    .regex(/^[0-9+\-\s()]{7,20}$/, "Invalid phone number format")
+    .or(z.literal("")),
 });
 
 export type ProfileFormValues = z.infer<typeof profileSchema>;

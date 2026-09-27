@@ -69,12 +69,17 @@ const RelatedProducts = ({ products }: RelatedProductsProps) => {
                   <span className="text-sm font-extrabold text-gray-900 tabular-nums">
                     {formattedPrice}
                   </span>
-                  <div className="flex items-center text-yellow-400">
-                    <Star size={10} fill="currentColor" />
-                    <span className="text-[10px] font-bold text-gray-400 ml-0.5">
-                      4.8
-                    </span>
-                  </div>
+                  {Boolean(
+                    (product as unknown as { totalReviews?: number }).totalReviews &&
+                    (product as unknown as { totalReviews?: number }).totalReviews! > 0
+                  ) && (
+                    <div className="flex items-center text-amber-400">
+                      <Star size={10} fill="currentColor" />
+                      <span className="text-[10px] font-bold text-gray-500 ml-0.5 tabular-nums">
+                        {Number((product as unknown as { averageRating?: number }).averageRating || 0).toFixed(1)}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </Link>

@@ -64,7 +64,8 @@ interface SearchResult {
   slug: string;
   price: number;
   image: string | null;
-  category: { name: string } | null;
+  category?: { name: string } | null;
+  categoryName?: string | null;
 }
 
 export default function Navbar({ initialCategories = [] }: { initialCategories?: CategoryWithBrands[] }) {
@@ -80,6 +81,7 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const [categories] = useState<CategoryWithBrands[]>(initialCategories);
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
 
@@ -132,6 +134,7 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
     if (searchQuery.length < 2) {
       setSearchResults([]);
       setShowResults(false);
+      setActiveIndex(-1);
       return;
     }
     const controller = new AbortController();
@@ -145,6 +148,7 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
         if (!controller.signal.aborted) {
           setSearchResults(Array.isArray(data) ? data : []);
           setShowResults(true);
+          setActiveIndex(-1);
         }
       } catch (error) {
         if ((error as Error)?.name !== "AbortError") console.error("Search fetch failed:", error);
@@ -162,13 +166,16 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
     const handleClickOutside = (e: MouseEvent) => {
       if (!(e.target as HTMLElement).closest(".search-container")) {
         setShowResults(false);
+        setActiveIndex(-1);
       }
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setShowResults(false);
+        setActiveIndex(-1);
         setActiveMegaMenu(null);
+        setIsMobileMenuOpen(false);
       }
     };
 
@@ -178,12 +185,48 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [setIsMobileMenuOpen]);
 
   useScrollLock(isMobileMenuOpen);
 
   const wishlistCount = isMounted ? wishlist.items.length : 0;
   const hasWishlistItems = wishlistCount > 0;
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showResults || searchResults.length === 0) {
+      if (e.key === "ArrowDown" && searchResults.length > 0) {
+        e.preventDefault();
+        setShowResults(true);
+        setActiveIndex(0);
+      }
+      return;
+    }
+
+    const totalCount = searchResults.length + 1; // items + "View All Results"
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev + 1) % totalCount);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev <= 0 ? totalCount - 1 : prev - 1));
+    } else if (e.key === "Enter") {
+      if (activeIndex >= 0 && activeIndex < searchResults.length) {
+        e.preventDefault();
+        router.push(`/products/${searchResults[activeIndex].slug}`);
+        setShowResults(false);
+        setActiveIndex(-1);
+      } else if (activeIndex === searchResults.length) {
+        e.preventDefault();
+        router.push(`/products?q=${encodeURIComponent(searchQuery)}`);
+        setShowResults(false);
+        setActiveIndex(-1);
+      }
+    } else if (e.key === "Escape") {
+      setShowResults(false);
+      setActiveIndex(-1);
+    }
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -191,6 +234,7 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
     router.push(`/products?q=${encodeURIComponent(searchQuery)}`);
     setIsMobileMenuOpen(false);
     setShowResults(false);
+    setActiveIndex(-1);
   };
 
   return (
@@ -237,8 +281,25 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
                 >
                   <input
                     type="text"
+                    role="combobox"
+                    aria-autocomplete="list"
+                    aria-expanded={showResults && searchResults.length > 0}
+                    aria-controls="navbar-search-listbox"
+                    aria-activedescendant={
+                      activeIndex >= 0 && activeIndex < searchResults.length
+                        ? `search-item-${searchResults[activeIndex].id}`
+                        : activeIndex === searchResults.length
+                        ? "search-item-view-all"
+                        : undefined
+                    }
+                    aria-haspopup="listbox"
+                    aria-label="Search gadgets"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setActiveIndex(-1);
+                    }}
+                    onKeyDown={handleSearchKeyDown}
                     onFocus={() => searchQuery.length >= 2 && setShowResults(true)}
                     placeholder="Search gadgets (e.g. Mechanical Keyboard)..."
                     className="w-full bg-gray-50 border border-gray-100 text-gray-900 text-sm rounded-2xl pl-12 pr-4 py-2.5 focus:bg-white focus:border-indigo-200 focus:outline-none focus:ring-4 focus:ring-indigo-50/50 transition-all duration-500"
@@ -265,36 +326,68 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
                           <div className="h-4 w-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
                         )}
                       </div>
-                      <div className="max-h-[400px] overflow-y-auto p-2 no-scrollbar">
+                      <div
+                        id="navbar-search-listbox"
+                        role="listbox"
+                        aria-label="Search suggestions"
+                        className="max-h-[400px] overflow-y-auto p-2 no-scrollbar"
+                      >
                         {searchResults.length > 0 ? (
-                          searchResults.map((p) => (
-                            <Link
-                              key={p.id}
-                              href={`/products/${p.slug}`}
-                              onClick={() => setShowResults(false)}
-                              className="flex items-center gap-4 p-2.5 hover:bg-indigo-50/50 rounded-2xl transition-all group"
-                            >
-                              <div className="relative h-14 w-14 bg-gray-50 rounded-xl overflow-hidden shrink-0 border border-gray-100 p-1">
-                                {p.image ? (
-                                  <NextImage src={p.image} alt={p.name} fill className="object-contain" />
-                                ) : (
-                                  <Zap className="m-auto text-gray-300" size={20} />
+                          searchResults.map((p, idx) => {
+                            const isSelected = activeIndex === idx;
+                            return (
+                              <Link
+                                key={p.id}
+                                id={`search-item-${p.id}`}
+                                role="option"
+                                aria-selected={isSelected}
+                                href={`/products/${p.slug}`}
+                                onClick={() => {
+                                  setShowResults(false);
+                                  setActiveIndex(-1);
+                                }}
+                                className={cn(
+                                  "flex items-center gap-4 p-2.5 rounded-2xl transition-all group",
+                                  isSelected
+                                    ? "bg-indigo-50 ring-1 ring-indigo-200"
+                                    : "hover:bg-indigo-50/50"
                                 )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h4 className="text-sm font-black text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
-                                  {p.name}
-                                </h4>
-                                <div className="flex items-center gap-2 mt-0.5">
-                                  <span className="text-xs font-bold text-indigo-600">${p.price}</span>
-                                  <span className="text-[10px] font-bold text-gray-600 uppercase tracking-tighter bg-gray-50 px-2 py-0.5 rounded-full">
-                                    {p.category?.name || "Gadget"}
-                                  </span>
+                              >
+                                <div className="relative h-14 w-14 bg-gray-50 rounded-xl overflow-hidden shrink-0 border border-gray-100 p-1">
+                                  {p.image ? (
+                                    <NextImage src={p.image} alt={p.name} fill className="object-contain" />
+                                  ) : (
+                                    <Zap className="m-auto text-gray-300" size={20} />
+                                  )}
                                 </div>
-                              </div>
-                              <ChevronRight size={14} className="text-gray-300 group-hover:text-indigo-400 transition-all transform group-hover:translate-x-1" />
-                            </Link>
-                          ) )
+                                <div className="flex-1 min-w-0">
+                                  <h4
+                                    className={cn(
+                                      "text-sm font-black truncate transition-colors",
+                                      isSelected ? "text-indigo-600" : "text-gray-900 group-hover:text-indigo-600"
+                                    )}
+                                  >
+                                    {p.name}
+                                  </h4>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    <span className="text-xs font-bold text-indigo-600">${p.price}</span>
+                                    <span className="text-[10px] font-bold text-gray-600 uppercase tracking-tighter bg-gray-50 px-2 py-0.5 rounded-full">
+                                      {p.category?.name || p.categoryName || "Gadget"}
+                                    </span>
+                                  </div>
+                                </div>
+                                <ChevronRight
+                                  size={14}
+                                  className={cn(
+                                    "transition-all transform",
+                                    isSelected
+                                      ? "text-indigo-600 translate-x-1"
+                                      : "text-gray-300 group-hover:text-indigo-400 group-hover:translate-x-1"
+                                  )}
+                                />
+                              </Link>
+                            );
+                          })
                         ) : (
                           <div className="p-8 text-center">
                             <p className="text-xs font-bold text-gray-600 italic">No exact matches found...</p>
@@ -302,9 +395,18 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
                         )}
                       </div>
                       <Link
+                        id="search-item-view-all"
+                        role="option"
+                        aria-selected={activeIndex === searchResults.length}
                         href={`/products?q=${encodeURIComponent(searchQuery)}`}
-                        onClick={() => setShowResults(false)}
-                        className="block p-4 text-center text-xs font-black text-indigo-600 hover:bg-indigo-50 border-t border-gray-50 transition-colors uppercase tracking-widest"
+                        onClick={() => {
+                          setShowResults(false);
+                          setActiveIndex(-1);
+                        }}
+                        className={cn(
+                          "block p-4 text-center text-xs font-black text-indigo-600 hover:bg-indigo-50 border-t border-gray-50 transition-colors uppercase tracking-widest",
+                          activeIndex === searchResults.length && "bg-indigo-50 ring-1 ring-indigo-200"
+                        )}
                       >
                         View All Results
                       </Link>
@@ -394,8 +496,10 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
 
         {/* SECONDARY NAVBAR (Desktop Categories Mega Menu Row) */}
         <div
-          className={`hidden lg:flex w-full bg-white/95 backdrop-blur-sm border-b border-gray-150/80 transition-all duration-300 ${
-            isScrolled ? "opacity-0 invisible h-0" : "opacity-100 visible h-[42px]"
+          className={`hidden lg:flex w-full backdrop-blur-sm border-b transition-all duration-300 ${
+            isScrolled
+              ? "bg-white/95 border-gray-200/80 shadow-2xs h-[38px]"
+              : "bg-white border-gray-150/80 h-[42px]"
           }`}
         >
           <div className="max-w-[1440px] mx-auto px-4 sm:px-8 h-full flex items-center justify-start gap-7">
@@ -468,11 +572,15 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
               onClick={() => setIsMobileMenuOpen(false)}
             />
             <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation menu"
+              tabIndex={-1}
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 z-1201 w-[85%] max-w-[320px] bg-white shadow-2xl"
+              className="fixed inset-y-0 left-0 z-1201 w-[85%] max-w-[320px] bg-white shadow-2xl focus:outline-none"
             >
               <div className="flex flex-col h-full overflow-hidden">
                 <div className="p-6 flex items-center justify-between border-b border-gray-50">
@@ -488,7 +596,11 @@ export default function Navbar({ initialCategories = [] }: { initialCategories?:
                       Input<span className="text-indigo-600">Gears</span>
                     </span>
                   </Link>
-                  <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:bg-gray-100 rounded-xl">
+                  <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    aria-label="Close menu"
+                    className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
                     <X size={24} className="text-gray-900" />
                   </button>
                 </div>

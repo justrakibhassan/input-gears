@@ -32,6 +32,7 @@ interface Address {
   city: string;
   state: string | null;
   zip: string;
+  country?: string | null;
   type: string;
   isDefault: boolean;
 }
@@ -55,6 +56,7 @@ export default function AddressView({ addresses }: { addresses: Address[] }) {
         street: address.street,
         city: address.city,
         zip: address.zip,
+        country: address.country || "United States",
         isDefault: address.isDefault,
         state: address.state ?? "",
         type: (address.type as "HOME" | "WORK") || "HOME",
@@ -226,7 +228,7 @@ function AddressCard({
           {address.state && (
             <span className="text-xs text-gray-400">{address.state}, </span>
           )}{" "}
-          Bangladesh
+          {address.country || "United States"}
         </p>
       </div>
 
@@ -260,6 +262,7 @@ function AddressModal({ isOpen, onClose, initialData }: AddressModalProps) {
       city: "",
       state: "",
       zip: "",
+      country: "United States",
       type: "HOME",
       isDefault: false,
     },
@@ -322,7 +325,7 @@ function AddressModal({ isOpen, onClose, initialData }: AddressModalProps) {
               <input
                 {...form.register("phone")}
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-indigo-500 outline-none"
-                placeholder="017..."
+                placeholder="+1 (555) 234-5678"
               />
               {form.formState.errors.phone && (
                 <p className="text-red-500 text-xs ml-1">
@@ -340,7 +343,7 @@ function AddressModal({ isOpen, onClose, initialData }: AddressModalProps) {
             <textarea
               {...form.register("street")}
               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-indigo-500 outline-none resize-none h-20"
-              placeholder="House 12, Road 5, Block B"
+              placeholder="123 Market St, Apt 4B"
             />
             {form.formState.errors.street && (
               <p className="text-red-500 text-xs ml-1">
@@ -357,7 +360,7 @@ function AddressModal({ isOpen, onClose, initialData }: AddressModalProps) {
               <input
                 {...form.register("city")}
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-indigo-500 outline-none"
-                placeholder="Dhaka"
+                placeholder="San Francisco"
               />
               {form.formState.errors.city && (
                 <p className="text-red-500 text-xs ml-1">
@@ -372,7 +375,7 @@ function AddressModal({ isOpen, onClose, initialData }: AddressModalProps) {
               <input
                 {...form.register("state")}
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-indigo-500 outline-none"
-                placeholder="Mirpur"
+                placeholder="CA"
               />
             </div>
             <div className="space-y-1">
@@ -382,7 +385,7 @@ function AddressModal({ isOpen, onClose, initialData }: AddressModalProps) {
               <input
                 {...form.register("zip")}
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-indigo-500 outline-none"
-                placeholder="1216"
+                placeholder="94103"
               />
               {form.formState.errors.zip && (
                 <p className="text-red-500 text-xs ml-1">

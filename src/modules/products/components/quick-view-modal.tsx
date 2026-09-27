@@ -27,6 +27,7 @@ import { useSession } from "@/lib/auth-client";
 import { createPortal } from "react-dom";
 import { getReviewStats } from "../../reviews/actions";
 import { Product } from "@/types/product";
+import { getSwatchColorHex } from "@/lib/utils";
 
 export interface QuickViewProduct {
   id: string;
@@ -211,12 +212,19 @@ const QuickViewModalInner: React.FC<QuickViewModalInnerProps> = ({
 
   const activeVariantMeta = selectedColor && colorMap[selectedColor] ? colorMap[selectedColor] : null;
 
-  const isOutOfStock =
-    activeVariantMeta && typeof activeVariantMeta === "object" && activeVariantMeta.inStock !== undefined
-      ? !activeVariantMeta.inStock
-      : product.stock === 0;
+  const effectiveMaxStock = useMemo(() => {
+    if (activeVariantMeta && typeof activeVariantMeta === "object") {
+      if (activeVariantMeta.inStock === false) return 0;
+      if (typeof (activeVariantMeta as { stock?: number }).stock === "number") {
+        return Math.max(0, (activeVariantMeta as { stock?: number }).stock!);
+      }
+    }
+    return Math.max(0, product?.stock ?? 0);
+  }, [activeVariantMeta, product?.stock]);
 
-  const isLowStock = !isOutOfStock && product.stock > 0 && product.stock <= 5;
+  const isOutOfStock = effectiveMaxStock === 0;
+
+  const isLowStock = !isOutOfStock && effectiveMaxStock > 0 && effectiveMaxStock <= 5;
 
   const effectivePrice =
     activeVariantMeta && typeof activeVariantMeta === "object" && activeVariantMeta.price
@@ -257,8 +265,9 @@ const QuickViewModalInner: React.FC<QuickViewModalInnerProps> = ({
           slug: product.slug,
           price: effectivePrice,
           image: selectedImage || product.image || "",
-          quantity: quantity,
-          maxStock: product.stock,
+          color: selectedColor || undefined,
+          quantity: Math.min(quantity, effectiveMaxStock),
+          maxStock: effectiveMaxStock,
         },
         !!session,
       );
@@ -279,8 +288,9 @@ const QuickViewModalInner: React.FC<QuickViewModalInnerProps> = ({
         slug: product.slug,
         price: effectivePrice,
         image: selectedImage || product.image || "",
-        quantity: quantity,
-        maxStock: product.stock,
+        color: selectedColor || undefined,
+        quantity: Math.min(quantity, effectiveMaxStock),
+        maxStock: effectiveMaxStock,
       },
       !!session,
     );
@@ -563,22 +573,28 @@ const QuickViewModalInner: React.FC<QuickViewModalInnerProps> = ({
               )}
             </div>
 
-            <div className="flex items-center gap-1.5">
-              <div className="flex items-center text-amber-400">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    size={12}
-                    fill={i < Math.round(rating || 5) ? "currentColor" : "none"}
-                    className={i < Math.round(rating || 5) ? "text-amber-400" : "text-gray-300"}
-                    strokeWidth={i < Math.round(rating || 5) ? 0 : 1.5}
-                  />
-                ))}
+            {reviewCount > 0 ? (
+              <div className="flex items-center gap-1.5">
+                <div className="flex items-center text-amber-400">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      size={12}
+                      fill={i < Math.round(rating) ? "currentColor" : "none"}
+                      className={i < Math.round(rating) ? "text-amber-400" : "text-gray-300"}
+                      strokeWidth={i < Math.round(rating) ? 0 : 1.5}
+                    />
+                  ))}
+                </div>
+                <span className="text-[11px] text-gray-500 font-medium">
+                  ({reviewCount})
+                </span>
               </div>
-              <span className="text-[11px] text-gray-500 font-medium">
-                ({reviewCount > 0 ? `${reviewCount}` : "9"})
+            ) : (
+              <span className="text-xs text-gray-400 font-medium">
+                No reviews yet
               </span>
-            </div>
+            )}
           </div>
 
           {/* Color Variants (Only if valid colors are declared) */}
@@ -613,15 +629,7 @@ const QuickViewModalInner: React.FC<QuickViewModalInnerProps> = ({
                       <span
                         className="w-2.5 h-2.5 rounded-full border border-gray-300 shadow-2xs shrink-0"
                         style={{
-                          backgroundColor: color.toLowerCase().includes("white")
-                            ? "#ffffff"
-                            : color.toLowerCase().includes("blue")
-                              ? "#60a5fa"
-                              : color.toLowerCase().includes("red")
-                                ? "#ef4444"
-                                : color.toLowerCase().includes("gradient") || color.toLowerCase().includes("black")
-                                  ? "#1f2937"
-                                  : color.toLowerCase(),
+                          backgroundColor: getSwatchColorHex(color),
                         }}
                       />
                       <span>{displayName}</span>
@@ -711,9 +719,9 @@ const QuickViewModalInner: React.FC<QuickViewModalInnerProps> = ({
               </span>
               <button
                 onClick={() =>
-                  setQuantity((q) => Math.min(product.stock || 99, q + 1))
+                  setQuantity((q) => Math.min(effectiveMaxStock, q + 1))
                 }
-                disabled={quantity >= (product.stock || 99) || isOutOfStock}
+                disabled={quantity >= effectiveMaxStock || isOutOfStock}
                 aria-label="Increase quantity"
                 className="w-7 h-8.5 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition disabled:opacity-30 cursor-pointer"
               >

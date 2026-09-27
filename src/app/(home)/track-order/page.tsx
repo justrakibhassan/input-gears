@@ -115,7 +115,7 @@ export default function TrackOrderPage() {
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. 01700000000 or user@example.com"
+                  placeholder="e.g. +1 (555) 234-5678 or user@example.com"
                   value={contact}
                   onChange={(e) => setContact(e.target.value)}
                   className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold focus:bg-white focus:border-indigo-600 outline-none transition"
